@@ -2,6 +2,23 @@
 
 require_once "definitions.php";
 
+/**
+ * Funzione che recupera il path della cartella cambria_672642
+ * @return string url della cartella cambria_672642
+ */
+function setPath(){
+    $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    
+    $folder = "cambria_672642";
+    
+    
+    $position = strpos($currentPath, needle: $folder);
+
+    $output = substr($currentPath, 0, $position + strlen($folder)) . '/';
+    return $output;
+}
+
+
 
 /**
  * Ritorna un elemento Account dato un username
