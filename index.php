@@ -1,12 +1,6 @@
 <?php
     session_start();
 
-    require_once "./php/methods.php";
-
-    if(!isset($_SESSION["path"])){
-        $_SESSION["path"] = setPath();
-    }
-    echo $_SESSION["path"];
     $error = isset($_GET["error"]) ? $_GET["error"] : null;
     $isLogin = isset($_GET["isLogin"]) ? ($_GET["isLogin"] === 'true' || $_GET["isLogin"] === '1') : null;
 ?>
@@ -15,7 +9,7 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <base href="<?php echo $_SESSION["path"];?>">
+    <base href="http://localhost/cambria_672642/">
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/style.css">
     <script type="module" src="js/index.js"></script>

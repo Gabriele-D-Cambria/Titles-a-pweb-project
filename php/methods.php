@@ -2,20 +2,6 @@
 
 require_once "definitions.php";
 
-function setPath(){
-    $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-    
-    $folder = "cambria_672642/";
-    
-    $position = strpos($currentPath, needle: $folder);
-
-    $output = substr($currentPath, 0, $position + strlen($folder)) . '/';
-
-    // FIXME
-    return $output;
-}
-
-
 
 /**
  * Ritorna un elemento Account dato un username

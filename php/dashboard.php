@@ -3,10 +3,6 @@ session_start();
 //! ini_set("display_errors", "0");
 require_once "methods.php";
 
-if(!isset($_SESSION["path"])){
-    $_SESSION["path"] = setPath();
-}
-
 if(!isset($_SESSION['account'])){
     pageError("401");
 }
@@ -31,36 +27,36 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <base href="<?php echo $_SESSION["path"]?>">
+    <base href="http://localhost/cambria_672642/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/dashboard.css">
-    <link rel="stylesheet" href="../css/inventory.css">
-    <script type="module" src="../js/dashboard.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/inventory.css">
+    <script type="module" src="js/dashboard.js"></script>
     <title>Dashboard</title>
 </head>
 <body>
     <header>
         <h1><i>Titles</i></h1>
         <aside>
-            <form action="./logout.php" method="POST">
+            <form action="php/logout.php" method="POST">
                 <button type="submit">Logout</button>
             </form>
         </aside>
     </header>
     <section class="top-section">
-        <img src="../images/menu.svg" alt="menu item" class="clickable">
+        <img src="images/menu.svg" alt="menu item" class="clickable">
         <section class="user-info">
             <div class="user-pic">
-                <img src="../images/profilepic.svg" alt="Profile Pic">
+                <img src="images/profilepic.svg" alt="Profile Pic">
             </div>
             <div class="username-box">
                 <p class="Username"><strong><?php echo $user['username'];?></strong></p>
             </div>
         </section> 
         <div class="coin-display">
-            <img src="../images/coin.svg" alt="coin image">
+            <img src="images/coin.svg" alt="coin image">
             <span id="coin-count"><?php echo $user['monete']; ?></span>
         </div>
     </section>
@@ -71,11 +67,11 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
         </aside>
         <aside class="button-container">
             <div id="inventory-btn" class="button inventory-button">
-                <img src="../images/inventoryPic.svg" alt="Immagine Inventario">
+                <img src="images/inventoryPic.svg" alt="Immagine Inventario">
                 <p>Inventario</p>
             </div> 
             <div class="button shop-button">
-                <img src="../images/shopPic.svg" alt="Immagine Shop">
+                <img src="images/shopPic.svg" alt="Immagine Shop">
                 <p>Negozio</p>
             </div> 
         </aside>
