@@ -40,12 +40,13 @@ function showInventory(){
 
                 if(objCount < data.length){
                     let im = document.createElement("img");
+                    
+                    
                     im.id = "img-" + objCount;
-
-//! ----------------------------------------------------
-                    im.src = "images/coin.svg";
-                    im.alt = "Immagine dell'oggetto";
-//! ----------------------------------------------------
+                    
+                    im.src = data[objCount].PathImmagine;
+                    im.alt = data[objCount].Descrizione;
+                    
 
                     space.appendChild(im);
 
@@ -92,7 +93,6 @@ function showInventory(){
 
 }
 
-
 /**
  * Funzione che genera un aside contenente le informazioni
  * @param {*} item item da descrivere. Di default null
@@ -131,10 +131,10 @@ function generateInfo(item = null){
 
         let img = document.createElement("img");
 
-//!------------
-        img.src = "images/coin.svg";
-        img.alt = "Immagine dell'Oggetto";
-//!------------
+
+        img.src = item.PathImmagine;
+        img.alt = item.Descrizione;
+
         el.appendChild(img);
 
         p = document.createElement("figcaption");

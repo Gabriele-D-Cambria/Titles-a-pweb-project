@@ -22,7 +22,7 @@ CREATE TABLE Item (
     Nome VARCHAR(100) NOT NULL,
     Descrizione VARCHAR(60) NOT NULL,
     Elemento VARCHAR(50),
-    Immagine BLOB DEFAULT NULL,
+    PathImmagine VARCHAR(255) DEFAULT NULL,
     Tipologia VARCHAR(50) NOT NULL,
     Costo INT NOT NULL CHECK (Costo >= 0),
     Danno INT DEFAULT 0 CHECK (Danno >= 0),
