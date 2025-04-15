@@ -11,6 +11,10 @@ define('USERNAME_PATTERN', "/^[a-zA-Z][a-zA-Z0-9_.]{2,9}$/");
 define('PASSWORD_PATTERN', "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,15}$/");
 //? endsource
 
+define("MIN_COIN_COMMON", 5);
+define("MAX_COIN_COMMON", 10);
+define("MIN_COIN_RARE", 15);
+define("MAX_COIN_RARE", 20);
 
 /**
  * Informazioni sull'account con riferimento ai personaggi

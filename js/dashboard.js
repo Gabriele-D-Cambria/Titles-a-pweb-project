@@ -1,6 +1,6 @@
 "use strict";
 
-import {showModule, closeModule, openBox, showMessage } from "./methods.js";
+import {showModule, closeModule, showMessage } from "./methods.js";
 
 let moduleListener = null;
 
@@ -303,4 +303,40 @@ function sellItem(){
 function updateCoins(amount){
     let coins = document.getElementById("coin-count");
     coins.innerText = Number(coins.innerText) + amount;
+}
+
+function openBox(){
+    if(shownItem.Tipologia !== "box"){
+        showMessage("Oggetto Non apribile");
+        return;
+    }
+
+    fetch("php/API/openBox.php", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body : new URLSearchParams({
+            'boxID' : shownItem.ID,
+            'boxNome': shownItem.Nome
+        })
+    })
+    .then(response => response.json())
+    .then(data =>{
+        if(data.error){
+            showMessage("Error: " + data.error);
+        }
+        else{
+            updateCoins(data.guadagno);
+            if(data.rimosso){
+                shownItem = null;
+            }
+            showInventory();
+            showMessage(`Box Aperta! | +${data.guadagno}🪙`);
+        }
+    })
+    .catch(error => {
+        console.error("Errore durante l'apertura", error);
+        showMessage("C'è estato un errore nell'apertura");
+    });
 }

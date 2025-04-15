@@ -23,12 +23,6 @@ export function closeModule(event, id, override = false) {
     return false;
 }
 
-
-export function openBox(){
-    showMessage("Da fare");
-    //TODO: implementala
-}
-
 export function showMessage(messaggio) {
     let messageContainer = document.createElement("div");
     messageContainer.id = "messageBox";
