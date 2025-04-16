@@ -15,6 +15,7 @@ define("MIN_COIN_COMMON", 5);
 define("MAX_COIN_COMMON", 10);
 define("MIN_COIN_RARE", 15);
 define("MAX_COIN_RARE", 20);
+define("MAX_ITEMS", value: 40);
 
 /**
  * Informazioni sull'account con riferimento ai personaggi

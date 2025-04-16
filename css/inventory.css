@@ -36,8 +36,12 @@
     
     /* border: groove 2pt rgb(196, 196, 145); */
     border-radius: 15pt;
-    
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.item-slot.newItem{
+    outline: solid 3pt rgba(46, 204, 112, 1);
+    outline-offset: -3pt;
 }
 
 .item-slot img{

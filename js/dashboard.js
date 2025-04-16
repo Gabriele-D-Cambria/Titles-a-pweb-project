@@ -3,23 +3,32 @@
 import {showModule, closeModule, showMessage } from "./methods.js";
 
 let moduleListener = null;
-
 let shownItem = null;
+let openBoxSelected = false;
+let openedItems = [];
 
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("add-character").addEventListener("click", addNewCharacter);
-    document.getElementById("inventory-btn").addEventListener("click", showInventory);
+    document.getElementById("inventory-btn").addEventListener("click", () => {showInventory()});
     document.addEventListener("keypress", (e) =>{
-        if(e.code.toUpperCase() == 'KEYI')
-            (moduleListener === null)?  showInventory() : closeModuleEvent(null, "inventoryModule", true);
-    })
+        let keyCode = e.code.toUpperCase();
+        switch(keyCode){
+            case "KEYI":
+                (moduleListener === null)?  showInventory() : closeModuleEvent(null, "inventoryModule", true);
+                break;
+            case "SPACE":
+                if(openBoxSelected) openBox();
+                break;
+        }
+    });
+
 });
 
 function addNewCharacter(){
     showMessage("Eh, volevi!!");
 }
 
-function showInventory(){
+function showInventory(newItems = false){
     let module = document.getElementById("inventoryModule");
 
     fetch('php/API/getInventory.php')
@@ -39,6 +48,9 @@ function showInventory(){
                 space.classList.add("item-slot");
 
                 if(objCount < data.length){
+                    if(newItems && openedItems.includes(data[objCount].ID)){
+                        space.classList.add("newItem");
+                    }
                     let im = document.createElement("img");
                     
                     
@@ -69,9 +81,9 @@ function showInventory(){
 
                     objCount++;
                 }
-
                 container.appendChild(space);
             }
+            openedItems = [];
             page.appendChild(container);
 
             let info = generateInfo(shownItem);
@@ -101,6 +113,7 @@ function showInventory(){
  */
 function generateInfo(item = null){
     shownItem = item;
+    openBoxSelected = false;
     let container = document.createElement("aside");
     container.id = "inventory-info";
 
@@ -157,6 +170,7 @@ function generateInfo(item = null){
             open.innerText = "Apri";
 
             open.addEventListener("click", openBox);
+            openBoxSelected = true;
 
             el.appendChild(open);
         }
@@ -251,6 +265,7 @@ function closeModuleEvent(event, id, overload = false){
     if(overload || event.target === module){
         window.removeEventListener("click", moduleListener);
         moduleListener = null;
+        openBoxSelected = false;
         shownItem = null;
         closeModule(null, id, true);
     }
@@ -260,7 +275,6 @@ function closeModuleEvent(event, id, overload = false){
 function changeInfo(info){
     let module = document.getElementById("inventoryModule");
     module = module.firstChild;
-
     module.removeChild(module.lastChild);
     module.appendChild(info);
 }
@@ -326,12 +340,16 @@ function openBox(){
         if(data.error){
             showMessage("Error: " + data.error);
         }
+        else if(data.full){
+            showMessage("Non hai abbastanza slot!");
+        }
         else{
             updateCoins(data.guadagno);
+            openedItems = data.itemsID;
             if(data.rimosso){
                 shownItem = null;
             }
-            showInventory();
+            showInventory(true);
             showMessage(`Box Aperta! | +${data.guadagno}🪙`);
         }
     })

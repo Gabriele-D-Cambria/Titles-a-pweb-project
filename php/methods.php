@@ -87,7 +87,7 @@ function terminateLogin($errorType, $isLogin){
  * Recupera l'invetario di un'account dal database
  * @param int $accountID ID dell'account
  * @param mysqli $conn connessione | Default : null e la inizializza
- * @return
+ * @return array contenente gli item nell'inventario e la loro quantità
  */
 function getInventory($accountID, $conn = null){
     if(!isset($conn)){
@@ -262,86 +262,104 @@ function openBox($box, $accountId, $conn = null){
         }
     }
 
-    $conn->begin_transaction();
+    $sqlCount = "SELECT COUNT(*) AS conto FROM Inventario WHERE Proprietario = ?";
+    $stmtCount = $conn->prepare($sqlCount);
+    $stmtCount->bind_param('i', $accountId);
+    $stmtCount->execute();
+    $result = $stmtCount->get_result();
+    $count= $result->fetch_assoc();
+    $stmtCount->close();
 
-    try{
-        $sqlGetItems = "SELECT ID, Tipologia
-                        FROM Item
-                        WHERE Tipologia != 'box'
-                        ORDER BY Tipologia";
-
-        $stmtGetItems = $conn->prepare($sqlGetItems);
-        $stmtGetItems->execute();
-
-        $allItems = $stmtGetItems->get_result();
-
-        $weapons = [];
-        $armors = [];
-        $potions = [];
-
-        while($item = $allItems->fetch_assoc()){
-            switch($item["Tipologia"]){
-                case 'arma':
-                    $weapons[] = $item["ID"];
-                    break;
-                case 'armatura':
-                    $armors[] = $item["ID"];
-                    break;
-                case 'pozione':
-                    $potions[] = $item["ID"];
-                    break;
-            }
-        }
-
-        $output = [];
-        /* Box comuni:
-        * - 5-10 monete
-        * - 2 oggetti tra armi e armature
-        * - 1 pozione
-        */
-        if($box["nome"] === "Box Comune"){
-            $output["coins"] = mt_rand(MIN_COIN_COMMON, MAX_COIN_COMMON);
-            $output[] = $potions[array_rand($potions)];
-
-            $weapAndArms = array_merge($weapons, $armors);
-            $output[] = $weapAndArms[array_rand($weapAndArms)];
-            $output[] = $weapAndArms[array_rand($weapAndArms)];
-        }
-        /* Box Rare:
-        * - 15-20 monete
-        * - 2 armi
-        * - 2 armature
-        * - 2 pozioni
-        */
-        else if($box["nome"] === "Box Rara"){
-            $output["coins"] = mt_rand(MIN_COIN_RARE, MAX_COIN_RARE);
-            $output[] = $weapons[array_rand($weapons)];
-            $output[] = $weapons[array_rand($weapons)];
-            $output[] = $armors[array_rand($armors)];
-            $output[] = $armors[array_rand($armors)];
-            $output[] = $potions[array_rand($potions)];
-            $output[] = $potions[array_rand($potions)];
-        }
-
-        foreach($output as $key => $itemId){
-            if(is_numeric($key)){
-                addOneItem($itemId, $accountId, $conn);
-            }
-        }
-
-        $newBoxQuantity = removeOneItem($box["id"], $accountId, null, $conn);
-
-        $esito = ($conn->commit())?
-                ["successo" => true, "guadagno" => $output["coins"], "rimosso" => ($newBoxQuantity === 0)] :
-                ["errore" => "Fallimento nel commit"];
-    }
-    catch(Exception $e){
-        $conn->rollback();
-        $esito = ["errore" => "Fallimento" . $e->getMessage()];
-    }
-    finally{
-        $stmtGetItems->close();
+    $added = ($box["nome"] === "Box Comune")? 3 : 6;
+    if($count["conto"] + $added >= MAX_ITEMS){
         $conn->close();
+        $esito = ["full" => true];
+    }
+    else{
+
+        $conn->begin_transaction();
+
+        try{
+            $sqlGetItems = "SELECT ID, Tipologia
+                            FROM Item
+                            WHERE Tipologia != 'box'
+                            ORDER BY Tipologia";
+
+            $stmtGetItems = $conn->prepare($sqlGetItems);
+            $stmtGetItems->execute();
+
+            $allItems = $stmtGetItems->get_result();
+
+            $weapons = [];
+            $armors = [];
+            $potions = [];
+
+            while($item = $allItems->fetch_assoc()){
+                switch($item["Tipologia"]){
+                    case 'arma':
+                        $weapons[] = $item["ID"];
+                        break;
+                    case 'armatura':
+                        $armors[] = $item["ID"];
+                        break;
+                    case 'pozione':
+                        $potions[] = $item["ID"];
+                        break;
+                }
+            }
+
+            $output = [];
+            /* Box comuni:
+            * - 5-10 monete
+            * - 2 oggetti tra armi e armature
+            * - 1 pozione
+            */
+            if($box["nome"] === "Box Comune"){
+                $output["coins"] = mt_rand(MIN_COIN_COMMON, MAX_COIN_COMMON);
+                $output[] = $potions[array_rand($potions)];
+
+                $weapAndArms = array_merge($weapons, $armors);
+                $output[] = $weapAndArms[array_rand($weapAndArms)];
+                $output[] = $weapAndArms[array_rand($weapAndArms)];
+            }
+            /* Box Rare:
+            * - 15-20 monete
+            * - 2 armi
+            * - 2 armature
+            * - 2 pozioni
+            */
+            else if($box["nome"] === "Box Rara"){
+                $output["coins"] = mt_rand(MIN_COIN_RARE, MAX_COIN_RARE);
+                $output[] = $weapons[array_rand($weapons)];
+                $output[] = $weapons[array_rand($weapons)];
+                $output[] = $armors[array_rand($armors)];
+                $output[] = $armors[array_rand($armors)];
+                $output[] = $potions[array_rand($potions)];
+                $output[] = $potions[array_rand($potions)];
+            }
+
+            $itemsIDs = [];
+            foreach($output as $key => $itemId){
+                if(is_numeric($key)){
+                    if(addOneItem($itemId, $accountId, $conn))
+                        $itemsIDs[] = $itemId;
+                }
+            }
+
+            $newBoxQuantity = removeOneItem($box["id"], $accountId, null, $conn);
+
+            $esito = ($conn->commit())?
+                    ["successo" => true, "guadagno" => $output["coins"], "rimosso" => ($newBoxQuantity === 0), "itemsID" => $itemsIDs] :
+                    ["errore" => "Fallimento nel commit"];
+        }
+        catch(Exception $e){
+            $conn->rollback();
+            $esito = ["errore" => "Fallimento" . $e->getMessage()];
+        }
+        finally{
+            $stmtGetItems->close();
+            $conn->close();
+        }
     }
 
     return $esito;
