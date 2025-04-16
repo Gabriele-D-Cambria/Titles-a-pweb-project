@@ -1,6 +1,6 @@
 "use strict";
 
-import {showModule, closeModule, showMessage } from "./methods.js";
+import {showModule, closeModule, showMessage, createElement } from "./methods.js";
 
 let moduleListener = null;
 let shownItem = null;
@@ -10,38 +10,60 @@ let openedItems = [];
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("add-character").addEventListener("click", addNewCharacter);
     document.getElementById("inventory-btn").addEventListener("click", () => {showInventory()});
-    document.addEventListener("keypress", (e) =>{
-        let keyCode = e.code.toUpperCase();
-        switch(keyCode){
-            case "KEYI":
-                (moduleListener === null)?  showInventory() : closeModuleEvent(null, "inventoryModule", true);
-                break;
-            case "SPACE":
-                if(openBoxSelected) openBox();
-                break;
-        }
-    });
-
+    document.addEventListener("keypress", handleKeyPress);
 });
+
+function handleKeyPress(e){
+    const keyCode = e.code.toUpperCase();
+    switch(keyCode){
+        case "KEYI":
+            (moduleListener === null)?  showInventory() : closeModuleEvent(null, "inventoryModule", true);
+            break;
+        case "SPACE":
+            if(openBoxSelected) openBox();
+            break;
+    }
+}
 
 function addNewCharacter(){
     showMessage("Eh, volevi!!");
 }
 
 function showInventory(newItems = false){
-    let module = document.getElementById("inventoryModule");
+    const module = document.getElementById("inventoryModule");
 
     fetch('php/API/getInventory.php')
         .then(response => response.json())
-        .then(data =>{
-            let page = document.createElement("div");
+        .then(risposta =>{
+            const data = risposta["inventario"];
+            const MAX_SIZE = risposta["MAX_SIZE"];
+
+            const page = document.createElement("div");
             page.classList.add("inventory-page");
 
-            let container = document.createElement("main");
+            const container = document.createElement("main");
             container.classList.add("inventory-container");
 
-            let objCount = 0;
+            let objCount = data.length;
 
+            data.slice().forEach((item, index) => {
+                const space = createItemSlot(item, index, newItems);
+                space.addEventListener("click", (e) => {
+                    const id = String(e.target.id).replace(/^(img-|it-)/, "");
+                    const info = generateInfo(data[id]);
+                    changeInfo(info);
+                });
+                container.appendChild(space);
+            });
+
+            for(; objCount < MAX_SIZE; ++objCount){
+                const space = document.createElement("div");
+                space.classList.add("item-slot");
+                
+                container.appendChild(space);
+            }
+
+            /*
             for(let i = 0; i < 40; ++i){
 
                 let space = document.createElement("div");
@@ -84,9 +106,10 @@ function showInventory(newItems = false){
                 container.appendChild(space);
             }
             openedItems = [];
+            */
             page.appendChild(container);
 
-            let info = generateInfo(shownItem);
+            const info = generateInfo(shownItem);
 
             page.appendChild(info);
 
@@ -103,6 +126,30 @@ function showInventory(newItems = false){
             console.error('Errore: ', error);
         })
 
+}
+
+function createItemSlot(item, index, newItems) {
+    const space = document.createElement("div");
+    space.classList.add("item-slot");
+    space.id = index;
+
+    if (newItems && openedItems.includes(item.ID)) {
+        space.classList.add("newItem");
+    }
+
+    const img = createElement("img");
+    img.id = `img-${index}`;
+    img.src = item.PathImmagine;
+    img.alt = item.Descrizione;
+    space.appendChild(img);
+
+    const count = createElement("div");
+    count.classList.add("item-count");
+    count.id = `ic-${index}`;
+    count.innerText = item.Quantita;
+    space.appendChild(count);
+
+    return space;
 }
 
 /**

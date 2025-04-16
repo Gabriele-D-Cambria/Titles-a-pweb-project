@@ -109,13 +109,16 @@ function getInventory($accountID, $conn = null){
     $stmt->close();
     $conn->close();
 
+    $output = [];
+    $output["MAX_SIZE"] = MAX_ITEMS;
     $inventory = [];
-
     while($row = $result->fetch_assoc()){
         $inventory[] = $row;
     }
 
-    return $inventory;
+    $output["inventario"] = $inventory;
+
+    return $output;
 }
 
 /**

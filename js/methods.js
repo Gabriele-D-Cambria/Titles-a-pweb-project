@@ -39,3 +39,17 @@ export function showMessage(messaggio) {
         document.body.removeChild(messageContainer);
     }, 4000);
 }
+
+
+export function createElement(type, className, id, innerText){
+    const el = document.createElement(type);
+    if(className){
+        el.classList.add(className);
+    }
+    if(id)
+        el.id = id;
+    if(innerText)
+        el.innerText = innerText;
+
+    return el;
+}
