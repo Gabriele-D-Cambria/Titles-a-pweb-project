@@ -64,17 +64,34 @@ function getData($username, $conn = null){
     }
 }
 
+/**
+ * Funzione che reindirizza un errore
+ * @param string $errorCode codice di errore da passare alla 'error page.php'
+ * @return never
+ */
 function pageError($errorCode){
     header("Location: error page.php/?error_code=". $errorCode);
     exit();
 }
 
+
+/**
+ * Funzione che reindirizza un errore di un API
+ * @param string $errorCode codice di errore da passare
+ * @return never
+ */
 function apiError($errorCode){
     http_response_code($errorCode);
     echo json_encode(["errore" => $errorCode]);
     exit();
 }
 
+/**
+ * Funzione che termina la procedura di login riportando un errore tramite GET
+ * @param string $errorType indica il tipo di errore
+ * @param bool $isLogin indica se l'errore si è effettuato durante il login o il sign-up
+ * @return never
+ */
 function terminateLogin($errorType, $isLogin){
     $errorType = urlencode($errorType);
     $isLogin = urlencode($isLogin);
@@ -196,6 +213,12 @@ function addOneItem($itemId, $accountId, &$conn){
     return $newQuantity;
 }
 
+/**
+ * Funzione che aggiorna la quantità di monete nel database
+ * @param int $accountId id dell'account
+ * @param int $price quantità di monete da aggiungere o togliere
+ * @param mysqli $conn connessione da utilizzare per la connessione
+ */
 function updateCoins($accountId, $price, &$conn){
     $guadagno = $price;
     $updateCoinsSql = "UPDATE Account SET Monete = Monete + ? WHERE ID = ?";
@@ -205,13 +228,16 @@ function updateCoins($accountId, $price, &$conn){
     return $guadagno;
 }
 
-
-function sellItem($itemId, $accountId, $conn = null){
-    if(!isset($conn)){
-        $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
-        if($conn->connect_error){
-            apiError('500');
-        }
+/**
+ * Funzione API che vende un oggetto dell'account
+ * @param int $itemId id dell'oggetto
+ * @param int $accountId id dell'account
+ * @return array{errore: string|array{guadagno: int, rimosso: bool, successo: bool}} contiene informazioni sull'esito della richiesta
+ */
+function sellItem($itemId, $accountId){
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+    if($conn->connect_error){
+        apiError('500');
     }
     $conn->begin_transaction();
 
@@ -225,10 +251,8 @@ function sellItem($itemId, $accountId, $conn = null){
         $result = $stmt->get_result();
         $item = $result->fetch_assoc();
 
-        if(!$item){
+        if(!$item)
             return ["errore" => "Item not found in inventory."];
-        }
-
 
         $newQuantity = removeOneItem($itemId, $accountId,$item["Quantita"], $conn);
 

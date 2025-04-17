@@ -13,6 +13,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("keypress", handleKeyPress);
 });
 
+/**
+ * Funzione per la gestione dei comandi da tastiera
+ * @param {Event} e evento
+ */
 function handleKeyPress(e){
     const keyCode = e.code.toUpperCase();
     switch(keyCode){
@@ -29,6 +33,10 @@ function addNewCharacter(){
     showMessage("Eh, volevi!!");
 }
 
+/**
+ * Funzione che inserisce nel DOM la schermata dall'inventario
+ * @param {Boolean} newItems indica se sono da evidenziare o meno degli item nella lista globale 'openedItems'
+ */
 function showInventory(newItems = false){
     const module = document.getElementById("inventoryModule");
 
@@ -63,50 +71,6 @@ function showInventory(newItems = false){
                 container.appendChild(space);
             }
 
-            /*
-            for(let i = 0; i < 40; ++i){
-
-                let space = document.createElement("div");
-                space.classList.add("item-slot");
-
-                if(objCount < data.length){
-                    if(newItems && openedItems.includes(data[objCount].ID)){
-                        space.classList.add("newItem");
-                    }
-                    let im = document.createElement("img");
-                    
-                    
-                    im.id = "img-" + objCount;
-                    
-                    im.src = data[objCount].PathImmagine;
-                    im.alt = data[objCount].Descrizione;
-                    
-
-                    space.appendChild(im);
-
-                    im = document.createElement("div");
-                    im.classList.add("item-count");
-                    im.id = "ic-" + objCount;
-
-                    im.innerText = data[objCount].Quantita;
-
-                    space.appendChild(im);
-                    space.id = objCount;
-                    space.addEventListener("click", (e) => {
-                        let id = String(e.target.id);
-
-                        id = id.replace(/^(img-|it-)/, "");
-
-                        let info = generateInfo(data[id]);
-                        changeInfo(info);
-                    });
-
-                    objCount++;
-                }
-                container.appendChild(space);
-            }
-            openedItems = [];
-            */
             page.appendChild(container);
 
             const info = generateInfo(shownItem);
@@ -128,24 +92,31 @@ function showInventory(newItems = false){
 
 }
 
-function createItemSlot(item, index, newItems) {
+/**
+ * Funzione di supporto per creare uno degli slot inventario di un oggetto
+ * @param {Array} item oggetto da visualizzare
+ * @param {Number} id indice da dare all'oggetto
+ * @param {Boolean} newItems parametro che indica se controllare o meno che un oggetto sia stato appena recuperato
+ * @returns 
+ */
+function createItemSlot(item, id, newItems) {
     const space = document.createElement("div");
     space.classList.add("item-slot");
-    space.id = index;
-
+    space.id = id;
+    
     if (newItems && openedItems.includes(item.ID)) {
         space.classList.add("newItem");
     }
 
     const img = createElement("img");
-    img.id = `img-${index}`;
+    img.id = `img-${id}`;
     img.src = item.PathImmagine;
     img.alt = item.Descrizione;
     space.appendChild(img);
 
     const count = createElement("div");
     count.classList.add("item-count");
-    count.id = `ic-${index}`;
+    count.id = `ic-${id}`;
     count.innerText = item.Quantita;
     space.appendChild(count);
 
@@ -154,18 +125,17 @@ function createItemSlot(item, index, newItems) {
 
 /**
  * Funzione che genera un aside contenente le informazioni
- * @param {*} item item da descrivere. Di default null
- * @param {} guadagno
- * @returns aside element with the infos
+ * @param {Array} item oggetto del quale generare le informazioni. Di default è null, e indica l'assenza di un'oggetto da creare
+ * @returns un 'aside' contenente le informazioni
  */
 function generateInfo(item = null){
     shownItem = item;
     openBoxSelected = false;
-    let container = document.createElement("aside");
+    const container = document.createElement("aside");
     container.id = "inventory-info";
 
     if(item === null){
-        let div = document.createElement("div");
+        const div = document.createElement("div");
         div.innerText = "Clicca su uno degli oggetti per ulteriori informazioni"
 
         container.appendChild(document.createElement("div"));
@@ -173,13 +143,11 @@ function generateInfo(item = null){
         container.appendChild(div);
     }
     else{
-
         let el = document.createElement("header");
-
         let p = document.createElement("p");
+
         p.innerText = item.Nome;
         el.appendChild(p);
-
 
         p = document.createElement("p");
         p.innerText = item.Tipologia;
@@ -189,9 +157,7 @@ function generateInfo(item = null){
 
         el = document.createElement("figure");
 
-        let img = document.createElement("img");
-
-
+        const img = document.createElement("img");
         img.src = item.PathImmagine;
         img.alt = item.Descrizione;
 
@@ -199,7 +165,6 @@ function generateInfo(item = null){
 
         p = document.createElement("figcaption");
         p.innerText = item.Elemento;
-
         el.appendChild(p);
         container.appendChild(el);
 
@@ -212,7 +177,7 @@ function generateInfo(item = null){
         el = document.createElement("main");
 
         if(item.Tipologia === "box"){
-            let open = document.createElement("button");
+            const open = document.createElement("button");
             open.id = "open";
             open.innerText = "Apri";
 
@@ -222,9 +187,8 @@ function generateInfo(item = null){
             el.appendChild(open);
         }
         else{
-            let table = document.createElement("table");
+            const table = document.createElement("table");
             let tr = document.createElement("tr");
-
             let td = document.createElement("td");
             let modificatore;
             let txt;
@@ -269,7 +233,6 @@ function generateInfo(item = null){
             tr.appendChild(td);
 
             table.appendChild(tr);
-
             el.appendChild(table);
         }
 
@@ -279,22 +242,17 @@ function generateInfo(item = null){
 
         let btn = document.createElement("button");
         btn.id = "sell-btn";
-
         btn.innerText = "Vendi: " + Math.floor(item.Costo / 2) + "🪙";
-
         btn.addEventListener("click", sellItem);
         el.appendChild(btn);
 
         btn = document.createElement("button");
-
         btn.innerText = "Chiudi";
-
         btn.addEventListener("click", () => {
             let info = generateInfo();
             changeInfo(info);
             shownItem = null;
         });
-
         el.appendChild(btn);
 
         container.appendChild(el);
@@ -303,7 +261,12 @@ function generateInfo(item = null){
     return container;
 }
 
-
+/**
+ * Funzione che toglie dal DOM il modulo sopraelevato
+ * @param {Event} event evento generatore
+ * @param {String} id id del modulo da rimuovere
+ * @param {Boolean} overload indica se effettuare o meno il controllo sull'evento.
+ */
 function closeModuleEvent(event, id, overload = false){
     if(moduleListener === null)
         return;
@@ -319,6 +282,10 @@ function closeModuleEvent(event, id, overload = false){
 
 }
 
+/**
+ * Funzione che aggiunge al modulo inventario le informazioni
+ * @param {Element} info informazioni da appendere
+ */
 function changeInfo(info){
     let module = document.getElementById("inventoryModule");
     module = module.firstChild;
@@ -326,6 +293,9 @@ function changeInfo(info){
     module.appendChild(info);
 }
 
+/**
+ * Funzione che si occupa di fare una richiesta API per vendere un oggetto
+ */
 function sellItem(){
     if(!shownItem){
         showMessage("Nessun Oggetto da Vendere");
@@ -361,11 +331,17 @@ function sellItem(){
     });
 }
 
+/**
+ * Funzione che aggiorna il contatore di monete
+ */
 function updateCoins(amount){
     let coins = document.getElementById("coin-count");
     coins.innerText = Number(coins.innerText) + amount;
 }
 
+/**
+ * Funzione che si occupa di aprire una box effettuando una richiesta API per recuperare i nuovi oggetti
+ */
 function openBox(){
     if(shownItem.Tipologia !== "box"){
         showMessage("Oggetto Non apribile");
