@@ -29,7 +29,7 @@
     align-items: center;
     width: 100%;
     background-color: rgb(255, 255, 224);
-
+    cursor: pointer;
     border-radius: 15pt;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
 }
@@ -41,7 +41,6 @@
 
 .item-slot img{
     display: block;
-    cursor: pointer;
     aspect-ratio: 1 / 1;
     width: 80%;
 }
@@ -116,7 +115,7 @@
     flex-direction: column;
     margin: 0px;
     align-items: center;
-    justify-content: baseline;
+    justify-content: flex-end;
     width: 100%;
 }
 

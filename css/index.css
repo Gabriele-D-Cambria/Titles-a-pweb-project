@@ -82,6 +82,10 @@ h3{
     box-shadow: 0 0 5px rgba(46, 204, 113, 0.5);
 }
 
+.module p{
+    color: white;
+}
+
 .password-container {
     position: relative;
     display: flex;

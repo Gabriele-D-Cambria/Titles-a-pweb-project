@@ -7,6 +7,7 @@ CREATE TABLE Account (
     Username VARCHAR(50) NOT NULL UNIQUE,
     Password VARCHAR(255) NOT NULL,
     Monete INT NOT NULL DEFAULT 10 CHECK (Monete >= 0)
+    ShopRefresh DATETIME NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE Element(

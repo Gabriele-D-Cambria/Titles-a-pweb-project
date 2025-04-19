@@ -5,7 +5,7 @@
  * @param {String} id id del modulo da visualizzare
  * @param {Boolean} showCoins indica se portare in risalto le monete o meno. Di default è 'true'
  */
-export function showModule(id, showCoins = true){
+export function showModule(id, showCoins = false){
     let module = document.getElementById(id);
     if(showCoins){
         const coins = document.querySelector(".coin-display");
@@ -18,15 +18,18 @@ export function showModule(id, showCoins = true){
  * Funzione che permette di nascondere ed eliminare il contenuto di un modulo in sovraimpressione
  * @param {Event} event evento generatore
  * @param {String} id id del modulo da rimuovere
- * @param {Boolena} override indica se effettuare i controlli o meno
+ * @param {Boolean} override indica se effettuare i controlli o meno
+ * @param {Boolean} showCoins indica se rimuovere o meno il .coin-display
  * @returns {Boolean} se la rimozione ha avuto effetto o meno
  */
-export function closeModule(event, id, override = false) {
+export function closeModule(event, id, override = false, showCoins = false) {
     const module = document.getElementById(id);
     if (override || event.target === module) {
         module.classList.remove("show");
-        const coins = document.querySelector(".coin-display");
-        coins.style = "z-index: 0";
+        if(showCoins){
+            const coins = document.querySelector(".coin-display");
+            coins.style = "z-index: 0";
+        }
 
         while(module.childElementCount)
             module.removeChild(module.firstChild);

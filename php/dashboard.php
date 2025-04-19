@@ -46,21 +46,21 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
             </form>
         </aside>
     </header>
-    <section class="top-section">
+    <div class="top-section">
         <img src="images/menu.svg" alt="menu item" class="clickable">
-        <section class="user-info">
+        <div class="user-info">
             <div class="user-pic">
                 <img src="images/profilepic.svg" alt="Profile Pic">
             </div>
             <div class="username-box">
                 <p class="Username"><strong><?php echo $user['username'];?></strong></p>
             </div>
-        </section> 
+    </div> 
         <div class="coin-display">
             <img src="images/coin.svg" alt="coin image">
             <span id="coin-count"><?php echo $user['monete']; ?></span>
         </div>
-    </section>
+    </div>
     <main class="main-section">
         <aside class="character-list" style="grid-template-rows: repeat(<?php echo count($user["personaggi"])?>, 3em) 1fr;">
             <?php echo $characterList; ?>

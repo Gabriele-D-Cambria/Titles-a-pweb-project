@@ -65,7 +65,7 @@ function addNewCharacter(){
  * @param {Boolean} newItems indica se sono da evidenziare o meno degli item nella lista globale 'openedItems'
  */
 function showInventory(newItems = false){
-    if(currenltyOpened !== null)
+    if(currenltyOpened !== null && currenltyOpened !== "inventoryModule")
         return;
 
     const module = document.getElementById("inventoryModule");
@@ -80,7 +80,7 @@ function showInventory(newItems = false){
             const page = document.createElement("div");
             page.classList.add("inventory-page");
 
-            const container = document.createElement("main");
+            const container = document.createElement("div");
             container.classList.add("inventory-container");
 
             let objCount = data.length;
@@ -88,7 +88,7 @@ function showInventory(newItems = false){
             data.slice().forEach((item, index) => {
                 const space = createItemSlot(item, index, newItems);
                 space.addEventListener("click", (e) => {
-                    const id = String(e.target.id).replace(/^(img-|it-)/, "");
+                    const id = String(e.target.id).replace(/^(img-|ic-)/, "");
                     const info = generateInfo("inventory-info", data[id]);
                     changeInfo(info);
                 });
@@ -108,11 +108,11 @@ function showInventory(newItems = false){
 
             page.appendChild(info);
 
-            closeModule(null, module.id, true);
+            closeModule(null, module.id, true, false);
             module.appendChild(page);
             const coins = document.querySelector(".coin-display");
             coins.style = "z-index: 2";
-            showModule(module.id);
+            showModule(module.id, true);
             moduleListener = (e) => {
                 closeModuleEvent(e, "inventoryModule")
 
@@ -157,7 +157,7 @@ function createItemSlot(item, id, newItems) {
 }
 
 function showShop(){
-    if(currenltyOpened !== null)
+    if(currenltyOpened !== null && currenltyOpened !== "shopModule")
         return;
 
     const module = document.getElementById("shopModule");
@@ -169,7 +169,7 @@ function showShop(){
             const page = document.createElement("div");
             page.classList.add("shop-page");
 
-            const container = document.createElement("main");
+            const container = document.createElement("div");
             container.classList.add("shop-container");
 
             let el = document.createElement("header");
@@ -189,7 +189,7 @@ function showShop(){
 
             container.appendChild(el);
 
-            el = document.createElement("section");
+            el = document.createElement("div");
             el.classList.add("shop-slots");
             for(let i = 0; i < 10; ++i){
                 const div = document.createElement("div");
@@ -200,7 +200,7 @@ function showShop(){
                 img.alt = "Immagine dell'Oggetto";
 
                 div.appendChild(img);
-                const caption = document.createElement("figcaption");
+                const caption = document.createElement("div");
 //!-------------
                 caption.innerText = `50🪙`;
                 div.appendChild(caption);
@@ -215,9 +215,9 @@ function showShop(){
             
             page.appendChild(info);
 
-            closeModule(null, module.id, true);
+            closeModule(null, module.id, true, false);
             module.appendChild(page);
-            showModule(module.id);
+            showModule(module.id, true);
             moduleListener = (e) => {
                 closeModuleEvent(e, "shopModule");
             };
@@ -281,7 +281,7 @@ function generateInfo(id, item = null){
 
         container.appendChild(p);
 
-        el = document.createElement("main");
+        el = document.createElement("div");
 
         if(item.Tipologia === "box"){
             const open = document.createElement("button");
@@ -385,7 +385,7 @@ function closeModuleEvent(event, id, overload = false){
         openBoxSelected = false;
         shownItem = null;
         currenltyOpened = null;
-        closeModule(null, id, true);
+        closeModule(null, id, true, true);
     }
 }
 

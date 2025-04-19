@@ -10,8 +10,8 @@
 <html lang="it">
 <head>
     <base href="http://localhost/cambria_672642/">
-    <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/index.css">
     <script type="module" src="js/index.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

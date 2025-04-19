@@ -63,16 +63,16 @@
 
     border-radius: 15pt;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
 }
 
 .shop-slot img{
     display: block;
-    cursor: pointer;
     aspect-ratio: 1 / 1;
     width: 80%;
 }
 
-.shop-slot figcaption{
+.shop-slot div{
 	background-color: rgba(202, 70, 9, 0.9);
     color: #edbe10; 
     border: none; 
@@ -137,7 +137,7 @@
     flex-direction: column;
     margin: 0px;
     align-items: center;
-    justify-content: baseline;
+    justify-content: flex-end;
     width: 100%;
 }
 
