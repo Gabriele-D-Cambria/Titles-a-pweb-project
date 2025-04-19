@@ -78,6 +78,10 @@ a:hover{
     visibility: visible;
 }
 
+.module p, .module figure *, .module table *{
+    color: black;
+}
+
 
 .messaggio {
     position: fixed;

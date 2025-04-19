@@ -115,7 +115,7 @@ img.clickable {
     justify-content: center;
     background-color: rgba(216, 177, 86, 0.5);
     cursor: pointer;
-    border-top: 1px solid #845913; 
+    border-top: 1px solid #845913;
 }
 
 .button-container{
@@ -147,7 +147,7 @@ img.clickable {
 .button img{
     max-width: 100%;
     height: auto;
-    
+
 }
 .button p{
     width: 70%;
