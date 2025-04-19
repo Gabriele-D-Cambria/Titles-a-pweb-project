@@ -3,10 +3,14 @@
 /**
  * Funzione che permette di mostrare un modulo in sovraimpressione
  * @param {String} id id del modulo da visualizzare
+ * @param {Boolean} showCoins indica se portare in risalto le monete o meno. Di default è 'true'
  */
-export function showModule(id){
+export function showModule(id, showCoins = true){
     let module = document.getElementById(id);
-
+    if(showCoins){
+        const coins = document.querySelector(".coin-display");
+        coins.style = "z-index: 2";
+    }
     module.classList.add("show");
 }
 
@@ -21,10 +25,13 @@ export function closeModule(event, id, override = false) {
     const module = document.getElementById(id);
     if (override || event.target === module) {
         module.classList.remove("show");
+        const coins = document.querySelector(".coin-display");
+        coins.style = "z-index: 0";
 
         while(module.childElementCount)
             module.removeChild(module.firstChild);
 
+        
         return true;
     }
     return false;

@@ -2,14 +2,34 @@
 
 import {showModule, closeModule, showMessage, createElement } from "./methods.js";
 
+/**
+ * Indica la funzione di listener per rimuovere i moduli in sovraimpressione
+ */
 let moduleListener = null;
+/**
+ * Indica quale item è stato selezionato dall'utente per venire mostrato nel dettaglio
+ */
 let shownItem = null;
+
+/**
+ * Indica se nel dettaglio è presente una box, necessaria per poterla aprire da tastiera
+ */
 let openBoxSelected = false;
+
+/**
+ * Contiene l'id del modulo aperto in un determinato momento
+ */
+let currenltyOpened = null;
+
+/**
+ * Contiene gli item restituiti dalla box aperta
+ */
 let openedItems = [];
 
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("add-character").addEventListener("click", addNewCharacter);
     document.getElementById("inventory-btn").addEventListener("click", () => {showInventory()});
+    document.getElementById("shop-btn").addEventListener("click", () => {showShop()});
     document.addEventListener("keypress", handleKeyPress);
 });
 
@@ -21,7 +41,14 @@ function handleKeyPress(e){
     const keyCode = e.code.toUpperCase();
     switch(keyCode){
         case "KEYI":
-            (moduleListener === null)?  showInventory() : closeModuleEvent(null, "inventoryModule", true);
+            (moduleListener === null)?
+                showInventory() :
+                closeModuleEvent(null, "inventoryModule", true);
+            break;
+        case "KEYN":
+            (moduleListener === null)?
+                showShop() :
+                closeModuleEvent(null, "shopModule", true);
             break;
         case "SPACE":
             if(openBoxSelected) openBox();
@@ -38,7 +65,11 @@ function addNewCharacter(){
  * @param {Boolean} newItems indica se sono da evidenziare o meno degli item nella lista globale 'openedItems'
  */
 function showInventory(newItems = false){
+    if(currenltyOpened !== null)
+        return;
+
     const module = document.getElementById("inventoryModule");
+    currenltyOpened = module.id;
 
     fetch('php/API/getInventory.php')
         .then(response => response.json())
@@ -58,7 +89,7 @@ function showInventory(newItems = false){
                 const space = createItemSlot(item, index, newItems);
                 space.addEventListener("click", (e) => {
                     const id = String(e.target.id).replace(/^(img-|it-)/, "");
-                    const info = generateInfo(data[id]);
+                    const info = generateInfo("inventory-info", data[id]);
                     changeInfo(info);
                 });
                 container.appendChild(space);
@@ -73,12 +104,14 @@ function showInventory(newItems = false){
 
             page.appendChild(container);
 
-            const info = generateInfo(shownItem);
+            const info = generateInfo("inventory-info", shownItem);
 
             page.appendChild(info);
 
             closeModule(null, module.id, true);
             module.appendChild(page);
+            const coins = document.querySelector(".coin-display");
+            coins.style = "z-index: 2";
             showModule(module.id);
             moduleListener = (e) => {
                 closeModuleEvent(e, "inventoryModule")
@@ -123,16 +156,90 @@ function createItemSlot(item, id, newItems) {
     return space;
 }
 
+function showShop(){
+    if(currenltyOpened !== null)
+        return;
+
+    const module = document.getElementById("shopModule");
+    currenltyOpened = module.id;
+
+    // fetch('php/API/getShopItems.php')
+        // .then(response => response.json())
+        // .then(risposta => {
+            const page = document.createElement("div");
+            page.classList.add("shop-page");
+
+            const container = document.createElement("main");
+            container.classList.add("shop-container");
+
+            let el = document.createElement("header");
+            el.classList.add("timer-container");
+
+            const p = document.createElement("p");
+            p.classList.add("timer");
+            p.innerText = `Timer \u2003 - \u2003`
+
+            const span = document.createElement("span");
+            span.id = "timer";
+//!-------------
+            span.innerText = "00:00";
+
+            p.appendChild(span);
+            el.appendChild(p);
+
+            container.appendChild(el);
+
+            el = document.createElement("section");
+            el.classList.add("shop-slots");
+            for(let i = 0; i < 10; ++i){
+                const div = document.createElement("div");
+                div.classList.add("shop-slot");
+                const img = document.createElement("img");
+//!-------------
+                img.src = "images/items/weapons/acqua.svg";
+                img.alt = "Immagine dell'Oggetto";
+
+                div.appendChild(img);
+                const caption = document.createElement("figcaption");
+//!-------------
+                caption.innerText = `50🪙`;
+                div.appendChild(caption);
+
+                el.appendChild(div);
+            }
+
+            container.appendChild(el);
+            page.appendChild(container);
+
+            const info = generateInfo("shop-info");
+            
+            page.appendChild(info);
+
+            closeModule(null, module.id, true);
+            module.appendChild(page);
+            showModule(module.id);
+            moduleListener = (e) => {
+                closeModuleEvent(e, "shopModule");
+            };
+
+            window.addEventListener("click", moduleListener);
+        // })
+        // .catch(error => {
+        //     console.error("Errore: ", error);
+        // })
+}
+
 /**
  * Funzione che genera un aside contenente le informazioni
+ * @param {String} id id da dare all'aside
  * @param {Array} item oggetto del quale generare le informazioni. Di default è null, e indica l'assenza di un'oggetto da creare
  * @returns un 'aside' contenente le informazioni
  */
-function generateInfo(item = null){
+function generateInfo(id, item = null){
     shownItem = item;
     openBoxSelected = false;
     const container = document.createElement("aside");
-    container.id = "inventory-info";
+    container.id = id;
 
     if(item === null){
         const div = document.createElement("div");
@@ -249,7 +356,7 @@ function generateInfo(item = null){
         btn = document.createElement("button");
         btn.innerText = "Chiudi";
         btn.addEventListener("click", () => {
-            let info = generateInfo();
+            let info = generateInfo("inventory-info");
             changeInfo(info);
             shownItem = null;
         });
@@ -268,7 +375,7 @@ function generateInfo(item = null){
  * @param {Boolean} overload indica se effettuare o meno il controllo sull'evento.
  */
 function closeModuleEvent(event, id, overload = false){
-    if(moduleListener === null)
+    if(moduleListener === null || currenltyOpened !== id)
         return;
 
     const module = document.getElementById(id);
@@ -277,9 +384,9 @@ function closeModuleEvent(event, id, overload = false){
         moduleListener = null;
         openBoxSelected = false;
         shownItem = null;
+        currenltyOpened = null;
         closeModule(null, id, true);
     }
-
 }
 
 /**

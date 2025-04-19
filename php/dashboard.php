@@ -33,6 +33,7 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/inventory.css">
+    <link rel="stylesheet" href="css/shop.css">
     <script type="module" src="js/dashboard.js"></script>
     <title>Dashboard</title>
 </head>
@@ -70,12 +71,13 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
                 <img src="images/inventoryPic.svg" alt="Immagine Inventario">
                 <p>Inventario</p>
             </div> 
-            <div class="button shop-button">
+            <div id="shop-btn" class="button shop-button">
                 <img src="images/shopPic.svg" alt="Immagine Shop">
                 <p>Negozio</p>
             </div> 
         </aside>
     </main>
     <div id="inventoryModule" class="module"></div>
+    <div id="shopModule" class="module"></div>
 </body>
 </html>
