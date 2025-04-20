@@ -6,16 +6,16 @@ CREATE TABLE Account (
     ID INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     Username VARCHAR(50) NOT NULL UNIQUE,
     Password VARCHAR(255) NOT NULL,
-    Monete INT NOT NULL DEFAULT 10 CHECK (Monete >= 0)
-    ShopRefresh DATETIME NOT NULL DEFAULT NOW()
+    Monete INT NOT NULL DEFAULT 10 CHECK (Monete >= 0),
+    RefreshNegozio DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE Element(
-	Nome VARCHAR(50) NOT NULL PRIMARY KEY NOT NULL
+	Nome VARCHAR(50) NOT NULL PRIMARY KEY
 );
 
 CREATE TABLE ItemType(
-	Nome VARCHAR(50) NOT NULL PRIMARY KEY NOT NULL
+	Nome VARCHAR(50) NOT NULL PRIMARY KEY
 );
 
 CREATE TABLE Item (
@@ -84,3 +84,22 @@ CREATE TABLE Combattimenti (
     FOREIGN KEY (Giocatore1_Nome, Giocatore1_Proprietario) REFERENCES Personaggi(Nome, Proprietario) ON DELETE CASCADE,
     FOREIGN KEY (Giocatore2_Nome, Giocatore2_Proprietario) REFERENCES Personaggi(Nome, Proprietario) ON DELETE CASCADE
 );
+
+CREATE TABLE Negozio (
+    Proprietario INT NOT NULL,
+    Oggetto INT NOT NULL,
+    PRIMARY KEY (Proprietario, Oggetto),
+    FOREIGN KEY (Proprietario) REFERENCES Account(ID) ON DELETE CASCADE,
+    FOREIGN KEY (Oggetto) REFERENCES Item(ID) ON DELETE CASCADE
+);
+
+DELIMITER //
+CREATE TRIGGER trg_welcome_gift
+AFTER INSERT ON Account
+FOR EACH ROW
+BEGIN
+    INSERT INTO Inventario  (Proprietario, Oggetto, Quantita)
+    SELECT NEW.ID, 15, 1;
+END
+//
+DELIMITER ;

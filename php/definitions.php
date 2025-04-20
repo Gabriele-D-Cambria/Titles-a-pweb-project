@@ -16,6 +16,8 @@ define("MAX_COIN_COMMON", 10);
 define("MIN_COIN_RARE", 15);
 define("MAX_COIN_RARE", 20);
 define("MAX_ITEMS", value: 40);
+define("MAX_SHOP_ITEMS", 10);
+define('SHOP_TIMER_RESET_SECONDS', value: 3*60);
 
 /**
  * Informazioni sull'account con riferimento ai personaggi
@@ -27,11 +29,13 @@ class Account{
     private $username;
     private $monete;
     private $personaggi = [];
+    private $shopRefresh;
 
-    public function __construct($id, $username, $monete){
+    public function __construct($id, $username, $monete, $shopRefresh){
         $this->id = $id;
         $this->username = $username;
         $this->monete = $monete;
+        $this->shopRefresh = $shopRefresh;
     }
 
     public function getId() {
@@ -45,6 +49,9 @@ class Account{
     public function getMonete() {
         return $this->monete;
     }
+    public function getShopRefresh() {
+        return $this->shopRefresh;
+    }
 
     public function getPersonaggi() {
         return $this->personaggi;
@@ -55,7 +62,8 @@ class Account{
             'id' => $this->id,
             'username' => $this->username,
             'monete' => $this->monete,
-            'personaggi' => $this->personaggi
+            'personaggi' => $this->personaggi,
+            'shopRefresh' => $this->shopRefresh
         ];
     }
 
@@ -76,6 +84,14 @@ class Account{
             $this->monete += $amount;
         }
         return true;
+    }
+
+    /**
+     * Aggiorna shopRefresh
+     * @param DateTime $newTime nuovo time
+     */
+    public function updateShopTimer($newTime){
+        $this->shopRefresh = $newTime;
     }
 
     /**

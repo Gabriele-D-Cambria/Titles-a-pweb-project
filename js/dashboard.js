@@ -26,6 +26,11 @@ let currenltyOpened = null;
  */
 let openedItems = [];
 
+/**
+ * Timer del negozio
+ */
+let shopTimerInterval = null;
+
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("add-character").addEventListener("click", addNewCharacter);
     document.getElementById("inventory-btn").addEventListener("click", () => {showInventory()});
@@ -98,7 +103,7 @@ function showInventory(newItems = false){
             for(; objCount < MAX_SIZE; ++objCount){
                 const space = document.createElement("div");
                 space.classList.add("item-slot");
-                
+
                 container.appendChild(space);
             }
 
@@ -130,13 +135,13 @@ function showInventory(newItems = false){
  * @param {Array} item oggetto da visualizzare
  * @param {Number} id indice da dare all'oggetto
  * @param {Boolean} newItems parametro che indica se controllare o meno che un oggetto sia stato appena recuperato
- * @returns 
+ * @returns
  */
 function createItemSlot(item, id, newItems) {
     const space = document.createElement("div");
     space.classList.add("item-slot");
     space.id = id;
-    
+
     if (newItems && openedItems.includes(item.ID)) {
         space.classList.add("newItem");
     }
@@ -156,6 +161,25 @@ function createItemSlot(item, id, newItems) {
     return space;
 }
 
+function createShopSlot(item, id){
+    const space = document.createElement("div");
+    space.classList.add("shop-slot");
+    space.id = id;
+
+    const img = document.createElement("img");
+    img.id = `img-${id}`;
+    img.src = item.PathImmagine;
+    img.alt = item.Descrizione;
+    space.appendChild(img);
+
+    const caption = document.createElement("div");
+    caption.id = `cap-${id}`;
+    caption.innerText = `${item.Costo}🪙`;
+    space.appendChild(caption);
+
+    return space;
+}
+
 function showShop(){
     if(currenltyOpened !== null && currenltyOpened !== "shopModule")
         return;
@@ -163,9 +187,12 @@ function showShop(){
     const module = document.getElementById("shopModule");
     currenltyOpened = module.id;
 
-    // fetch('php/API/getShopItems.php')
-        // .then(response => response.json())
-        // .then(risposta => {
+    fetch('php/API/getShopItems.php')
+        .then(response => response.json())
+        .then(risposta => {
+            const data = risposta.items;
+            const remainingTime = risposta.remainingTime;
+
             const page = document.createElement("div");
             page.classList.add("shop-page");
 
@@ -181,8 +208,10 @@ function showShop(){
 
             const span = document.createElement("span");
             span.id = "timer";
-//!-------------
-            span.innerText = "00:00";
+
+            span.innerText =  `${remainingTime.minutes}:${remainingTime.seconds}`;
+
+            shopTimerInterval = setInterval(updateShopTimer, 1000);
 
             p.appendChild(span);
             el.appendChild(p);
@@ -191,28 +220,24 @@ function showShop(){
 
             el = document.createElement("div");
             el.classList.add("shop-slots");
-            for(let i = 0; i < 10; ++i){
-                const div = document.createElement("div");
-                div.classList.add("shop-slot");
-                const img = document.createElement("img");
-//!-------------
-                img.src = "images/items/weapons/acqua.svg";
-                img.alt = "Immagine dell'Oggetto";
 
-                div.appendChild(img);
-                const caption = document.createElement("div");
-//!-------------
-                caption.innerText = `50🪙`;
-                div.appendChild(caption);
+            data.slice().forEach((item, index) => {
+                const space = createShopSlot(item, index);
 
-                el.appendChild(div);
-            }
+                space.addEventListener("click", (e) => {
+                    const id = String(e.target.id).replace(/^(img-|cap-)/, "");
+                    const info = generateInfo("shop-info", data[id], false);
+                    changeInfo(info);
+                });
+
+                el.appendChild(space);
+            });
 
             container.appendChild(el);
             page.appendChild(container);
 
             const info = generateInfo("shop-info");
-            
+
             page.appendChild(info);
 
             closeModule(null, module.id, true, false);
@@ -223,19 +248,20 @@ function showShop(){
             };
 
             window.addEventListener("click", moduleListener);
-        // })
-        // .catch(error => {
-        //     console.error("Errore: ", error);
-        // })
+        })
+        .catch(error => {
+            console.error("Errore: ", error);
+        })
 }
 
 /**
  * Funzione che genera un aside contenente le informazioni
  * @param {String} id id da dare all'aside
  * @param {Array} item oggetto del quale generare le informazioni. Di default è null, e indica l'assenza di un'oggetto da creare
+ * @param {Boolean} hasIt indica se l'oggetto selezionato è già di proprietà dell'utente o è da acquistare. Default 'true'
  * @returns un 'aside' contenente le informazioni
  */
-function generateInfo(id, item = null){
+function generateInfo(id, item = null, hasIt = true){
     shownItem = item;
     openBoxSelected = false;
     const container = document.createElement("aside");
@@ -283,7 +309,7 @@ function generateInfo(id, item = null){
 
         el = document.createElement("div");
 
-        if(item.Tipologia === "box"){
+        if(hasIt && item.Tipologia === "box"){
             const open = document.createElement("button");
             open.id = "open";
             open.innerText = "Apri";
@@ -293,7 +319,7 @@ function generateInfo(id, item = null){
 
             el.appendChild(open);
         }
-        else{
+        else if(item.Tipologia !== "box"){
             const table = document.createElement("table");
             let tr = document.createElement("tr");
             let td = document.createElement("td");
@@ -342,21 +368,32 @@ function generateInfo(id, item = null){
             table.appendChild(tr);
             el.appendChild(table);
         }
+        else{
+            const div = document.createElement("div");
+            el.appendChild(div);
+        }
 
         container.appendChild(el);
 
         el = document.createElement("footer");
 
         let btn = document.createElement("button");
-        btn.id = "sell-btn";
-        btn.innerText = "Vendi: " + Math.floor(item.Costo / 2) + "🪙";
-        btn.addEventListener("click", sellItem);
-        el.appendChild(btn);
+        if(hasIt){
+            btn.id = "sell-btn";
+            btn.innerText = "Vendi: " + Math.floor(item.Costo / 2) + "🪙";
+            btn.addEventListener("click", sellItem);
+        }
+        else{
+            btn.id = "buy-btn";
+            btn.innerText = "Compra: " + item.Costo + "🪙";
+            btn.addEventListener("click", buyItem);
+        }
 
+        el.appendChild(btn);
         btn = document.createElement("button");
         btn.innerText = "Chiudi";
         btn.addEventListener("click", () => {
-            let info = generateInfo("inventory-info");
+            let info = generateInfo(id);
             changeInfo(info);
             shownItem = null;
         });
@@ -385,16 +422,22 @@ function closeModuleEvent(event, id, overload = false){
         openBoxSelected = false;
         shownItem = null;
         currenltyOpened = null;
+        if(shopTimerInterval !== null){
+            clearInterval(shopTimerInterval);
+            shopTimerInterval = null;
+        }
         closeModule(null, id, true, true);
     }
 }
 
 /**
- * Funzione che aggiunge al modulo inventario le informazioni
+ * Funzione che aggiunge al modulo attualmente aperto le informazioni
  * @param {Element} info informazioni da appendere
  */
 function changeInfo(info){
-    let module = document.getElementById("inventoryModule");
+    if(currenltyOpened === null)
+        return
+    let module = document.getElementById(currenltyOpened);
     module = module.firstChild;
     module.removeChild(module.lastChild);
     module.appendChild(info);
@@ -434,8 +477,12 @@ function sellItem(){
     })
     .catch(error => {
         console.error("Errore durante la vendita", error);
-        showMessage("C'è estato un errore nella vendita");
+        showMessage("C'è stato un errore nella vendita");
     });
+}
+
+function buyItem(){
+    showMessage("Acquisto in corso... Attendere.");
 }
 
 /**
@@ -450,10 +497,14 @@ function updateCoins(amount){
  * Funzione che si occupa di aprire una box effettuando una richiesta API per recuperare i nuovi oggetti
  */
 function openBox(){
+    if(currenltyOpened !== "inventoryModule")
+        return;
+
     if(shownItem.Tipologia !== "box"){
         showMessage("Oggetto Non apribile");
         return;
     }
+
 
     fetch("php/API/openBox.php", {
         method: "POST",
@@ -485,6 +536,25 @@ function openBox(){
     })
     .catch(error => {
         console.error("Errore durante l'apertura", error);
-        showMessage("C'è estato un errore nell'apertura");
+        showMessage("C'è stato un errore nell'apertura");
     });
+}
+
+function updateShopTimer(){
+    const span = document.getElementById("timer");
+    let [minutes, seconds] = span.innerText.split(":").map(Number);
+    if(minutes === 0 && seconds === 0){
+        clearInterval(shopTimerInterval);
+        showShop();
+    }
+    else {
+        if(seconds === 0){
+            --minutes;
+            seconds = 59;
+        }
+        else{
+            --seconds;
+        }
+        span.innerText = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
 }

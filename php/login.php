@@ -104,8 +104,7 @@ function validateInput($username, $password, $confirmPassword){
 function startSession($username){
     $account = getData($username);
     $_SESSION['account'] = serialize($account);
-    // $_SESSION['user'] = $account->getInfo();
-    // $_SESSION['personaggi'] = $account->getPersonaggi();
+    
     header("Location: dashboard.php");
     exit();
 }

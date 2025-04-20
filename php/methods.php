@@ -9,15 +9,13 @@ require_once "definitions.php";
  * @param mixed $conn : connessione da utilizzare
  * @return Account|null
  */
-function getData($username, $conn = null){
-    if(!isset($conn)){
-        $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
-        if($conn->connect_error){
-            pageError('500');
-        }
+function getData($username){
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+    if($conn->connect_error){
+        pageError('500');
     }
 
-    $stmt = $conn->prepare("SELECT ID, Username, Monete FROM Account WHERE Username = ?");
+    $stmt = $conn->prepare("SELECT ID, Username, Monete, RefreshNegozio FROM Account WHERE Username = ?");
     if ($stmt === false) {
         die('Prepare failed: ' . htmlspecialchars($conn->error));
     }
@@ -28,8 +26,10 @@ function getData($username, $conn = null){
 
     if($result->num_rows > 0){
         $row = $result->fetch_assoc();
-        $user = new Account($row['ID'], $row['Username'], $row['Monete']);
+        $dateTime = new DateTime($row['RefreshNegozio']);
 
+
+        $user = new Account($row['ID'], $row['Username'], $row['Monete'], $dateTime);
 
         $stmtPersonaggi = $conn->prepare("SELECT * FROM Personaggi WHERE Proprietario = ?;");
         $stmtPersonaggi->bind_param('i', $row["ID"]);
@@ -103,15 +103,12 @@ function terminateLogin($errorType, $isLogin){
 /**
  * Recupera l'invetario di un'account dal database
  * @param int $accountID ID dell'account
- * @param mysqli $conn connessione | Default : null e la inizializza
  * @return array contenente gli item nell'inventario e la loro quantità
  */
-function getInventory($accountID, $conn = null){
-    if(!isset($conn)){
-        $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
-        if($conn->connect_error){
-            pageError('500');
-        }
+function getInventory($accountID){
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+    if($conn->connect_error){
+        pageError('500');
     }
 
     $sql = "SELECT Item.*, Inventario.Quantita
@@ -392,4 +389,129 @@ function openBox($box, $accountId, $conn = null){
     return $esito;
 }
 
-?>
+/**
+ * Funzione che restituisce il negozio di un account, aggiornandolo qual'ora sia passato sufficente tempo
+ * @param int $accountId id dell'account
+ * @param DateTime $lastRefresh contiene informazioni relative all'ultimo refresh
+ * @return mixed contiene gli item contenuti nel negozio nel momento della chiamata della funzione
+ */
+function getShop($accountId, $lastRefresh){
+    $currentTime = new DateTime("now");
+    $tempoTrascorso = $currentTime->getTimestamp() - $lastRefresh->getTimestamp();
+
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+    if($conn->connect_error){
+        pageError('500');
+    }
+    $output = [];
+    $remainingTime = [];
+
+    $sql = "SELECT Item.*
+            FROM Negozio
+                JOIN Item ON Negozio.Oggetto = Item.ID
+            WHERE Proprietario = ?";
+
+    $stmtRecupero = $conn->prepare($sql);
+    $stmtRecupero->bind_param('i', $accountId);
+    $stmtRecupero->execute();
+    $result = $stmtRecupero->get_result();
+    $stmtRecupero->close();
+
+    if($result->num_rows <  MAX_SHOP_ITEMS || $tempoTrascorso >= SHOP_TIMER_RESET_SECONDS){
+        $output = refreshShop($accountId, $currentTime, $conn);
+    }
+    else{
+        while($row = $result->fetch_assoc())
+            $output[] = $row;
+    }
+
+    $remainingTime = getRemainingTime($currentTime, $lastRefresh);
+
+    return [
+        "output" => $output,
+        "remainingTime" => $remainingTime
+    ];
+}
+
+/**
+  * Ricarica gli oggetti del negozio
+ * @param int $id id dell'account
+ * @param DateTime $currentTime TimeStamp dell'aggiornamento
+ * @param mysqli $conn connessione passata per riferimento
+ * @return array{items: array, updateTime: DateTime} array contenente gli item adesso nel negozio e il Timestamp dell'aggiornamento
+ */
+function refreshShop($id, $currentTime, &$conn) {
+    if($conn->connect_error){
+        apiError(401);
+        exit();
+    }
+    $conn->begin_transaction();
+
+    try{
+        // Aggiornamento del RefreshNegozio
+        $sqlUpdate = "UPDATE Account SET RefreshNegozio = ? WHERE ID = ?";
+        $stmtUpdate = $conn->prepare($sqlUpdate);
+        $formattedTime = $currentTime->format('Y-m-d H:i:s');
+        $stmtUpdate->bind_param('si', $formattedTime, $id);
+        $stmtUpdate->execute();
+        $stmtUpdate->close();
+
+        // Elimino il negozio attuale
+        $sqlDelete = "DELETE FROM Negozio WHERE Proprietario = ?";
+        $stmtDelete = $conn->prepare($sqlDelete);
+        $stmtDelete->bind_param('i', $id);
+        $stmtDelete->execute();
+        $stmtDelete->close();
+
+        // Recupero di 10 item casuali
+        $sqlItems = "SELECT * FROM Item ORDER BY RAND() LIMIT ?";
+        $stmtItems = $conn->prepare($sqlItems);
+        $maxItems = MAX_SHOP_ITEMS;
+        $stmtItems->bind_param('i', $maxItems);
+        $stmtItems->execute();
+        $result = $stmtItems->get_result();
+        $stmtItems->close();
+
+        $newShopItems = [];
+        while ($row = $result->fetch_assoc()) {
+            $newShopItems[] = $row;
+        }
+
+        // Inserimento degli Item nel Negozio
+        $sqlInsert = "INSERT INTO Negozio (Proprietario, Oggetto) VALUES (?, ?)";
+        $stmtInsert = $conn->prepare($sqlInsert);
+        foreach ($newShopItems as $item) {
+            $stmtInsert->bind_param('ii', $id, $item['ID']);
+            $stmtInsert->execute();
+        }
+        $stmtInsert->close();
+
+        $conn->commit();
+
+        return ["updateTime" => $currentTime, "items" => $newShopItems];
+    } catch(Exception $e){
+        $conn->rollback();
+        apiError(500);
+        exit();
+    }
+}
+
+/**
+ * Calcola il tempo rimanente al refresh del negozio
+ * @param DateTime $currentTime Timestamp di riferimento
+ * @param DateTime $shopRefresh Timestamp dell'ultimo refresh
+ * @return array Tempo rimanente in minuti e secondi
+ */
+function getRemainingTime($currentTime, $shopRefresh) {
+    $passedSeconds = ($currentTime->getTimestamp() - $shopRefresh->getTimestamp()) % SHOP_TIMER_RESET_SECONDS;
+    
+    $remainingSeconds = SHOP_TIMER_RESET_SECONDS - $passedSeconds;
+    
+    $minutes = floor($remainingSeconds / 60);
+    $seconds = $remainingSeconds % 60;
+
+    return [
+        'minutes' => str_pad($minutes, 2, "0", STR_PAD_LEFT),
+        'seconds' => str_pad($seconds, 2, "0", STR_PAD_LEFT)
+    ];
+}

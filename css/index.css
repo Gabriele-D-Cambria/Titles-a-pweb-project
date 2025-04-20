@@ -117,7 +117,7 @@ h3{
     color: #3498db;
 }
 
-.error-message {
+p.error-message {
     color: red;
     text-align: center;
     margin-top: 10px;
