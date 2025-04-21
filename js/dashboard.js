@@ -19,7 +19,7 @@ let openBoxSelected = false;
 /**
  * Contiene l'id del modulo aperto in un determinato momento
  */
-let currenltyOpened = null;
+let currentlyOpened = null;
 
 /**
  * Contiene gli item restituiti dalla box aperta
@@ -70,11 +70,11 @@ function addNewCharacter(){
  * @param {Boolean} newItems indica se sono da evidenziare o meno degli item nella lista globale 'openedItems'
  */
 function showInventory(newItems = false){
-    if(currenltyOpened !== null && currenltyOpened !== "inventoryModule")
+    if(currentlyOpened !== null && currentlyOpened !== "inventoryModule")
         return;
 
     const module = document.getElementById("inventoryModule");
-    currenltyOpened = module.id;
+    currentlyOpened = module.id;
 
     fetch('php/API/getInventory.php')
         .then(response => response.json())
@@ -181,11 +181,13 @@ function createShopSlot(item, id){
 }
 
 function showShop(){
-    if(currenltyOpened !== null && currenltyOpened !== "shopModule")
+    if(currentlyOpened !== null && currentlyOpened !== "shopModule")
         return;
-
     const module = document.getElementById("shopModule");
-    currenltyOpened = module.id;
+    currentlyOpened = module.id;
+
+    clearInterval(shopTimerInterval);
+    shopTimerInterval = null;
 
     fetch('php/API/getShopItems.php')
         .then(response => response.json())
@@ -236,7 +238,7 @@ function showShop(){
             container.appendChild(el);
             page.appendChild(container);
 
-            const info = generateInfo("shop-info");
+            const info = generateInfo("shop-info", shownItem, false);
 
             page.appendChild(info);
 
@@ -412,7 +414,7 @@ function generateInfo(id, item = null, hasIt = true){
  * @param {Boolean} overload indica se effettuare o meno il controllo sull'evento.
  */
 function closeModuleEvent(event, id, overload = false){
-    if(moduleListener === null || currenltyOpened !== id)
+    if(moduleListener === null || currentlyOpened !== id)
         return;
 
     const module = document.getElementById(id);
@@ -421,7 +423,7 @@ function closeModuleEvent(event, id, overload = false){
         moduleListener = null;
         openBoxSelected = false;
         shownItem = null;
-        currenltyOpened = null;
+        currentlyOpened = null;
         if(shopTimerInterval !== null){
             clearInterval(shopTimerInterval);
             shopTimerInterval = null;
@@ -435,9 +437,9 @@ function closeModuleEvent(event, id, overload = false){
  * @param {Element} info informazioni da appendere
  */
 function changeInfo(info){
-    if(currenltyOpened === null)
+    if(currentlyOpened === null)
         return
-    let module = document.getElementById(currenltyOpened);
+    let module = document.getElementById(currentlyOpened);
     module = module.firstChild;
     module.removeChild(module.lastChild);
     module.appendChild(info);
@@ -447,6 +449,10 @@ function changeInfo(info){
  * Funzione che si occupa di fare una richiesta API per vendere un oggetto
  */
 function sellItem(){
+    if(currentlyOpened !== "inventoryModule"){
+        showMessage("Impossibile vendere un oggetto da questa interfaccia");
+        return;
+    }
     if(!shownItem){
         showMessage("Nessun Oggetto da Vendere");
         return;
@@ -458,7 +464,7 @@ function sellItem(){
             'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
-            'itemId': shownItem.ID
+            "itemId": shownItem.ID
         })
     })
     .then(response => response.json())
@@ -481,8 +487,43 @@ function sellItem(){
     });
 }
 
+/**
+ * Funzione che prova ad acquistare un Item dal negozio verificando che si abbia un saldo sufficente
+ */
 function buyItem(){
-    showMessage("Acquisto in corso... Attendere.");
+    if(currentlyOpened !== "shopModule"){
+        showMessage("Impossibile acquistare un oggetto da questa interfaccia");
+        return;
+    }
+    if(!shownItem){
+        showMessage("Nessun Oggetto da Acquistare");
+        return;
+    }
+
+    fetch('php/API/buyItem.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            'itemId': shownItem.ID
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.errore){
+            showMessage("Errore: " + data.errore);
+        }
+        else{
+            updateCoins(data.spesa);
+            showShop();
+            showMessage(`Acquisto effettuato | ${data.spesa}🪙`);
+        }
+    })
+    .catch(error => {
+        console.error("Errore durante la vendita", error);
+        showMessage("C'è stato un errore nella vendita");
+    });
 }
 
 /**
@@ -497,7 +538,7 @@ function updateCoins(amount){
  * Funzione che si occupa di aprire una box effettuando una richiesta API per recuperare i nuovi oggetti
  */
 function openBox(){
-    if(currenltyOpened !== "inventoryModule")
+    if(currentlyOpened !== "inventoryModule")
         return;
 
     if(shownItem.Tipologia !== "box"){
@@ -540,8 +581,16 @@ function openBox(){
     });
 }
 
+/**
+ * Aggiorno il timer del negozio se presente
+ */
 function updateShopTimer(){
     const span = document.getElementById("timer");
+    if(span === null){
+        clearInterval(shopTimerInterval);
+        shopTimerInterval = null;
+        return;
+    }
     let [minutes, seconds] = span.innerText.split(":").map(Number);
     if(minutes === 0 && seconds === 0){
         clearInterval(shopTimerInterval);

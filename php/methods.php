@@ -15,8 +15,11 @@ function getData($username){
         pageError('500');
     }
 
-    $stmt = $conn->prepare("SELECT ID, Username, Monete, RefreshNegozio FROM Account WHERE Username = ?");
-    if ($stmt === false) {
+    $sql = "SELECT ID, Username, Monete, RefreshNegozio 
+            FROM Account 
+            WHERE Username = ?";
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
         die('Prepare failed: ' . htmlspecialchars($conn->error));
     }
     $stmt->bind_param('s', $username);
@@ -172,15 +175,28 @@ function removeOneItem($itemId, $accountId, $currentQuantity, &$conn){
 
     return $newQuantity;
 }
+
 /**
- * Agguinge uno o più item all'account
+ * Agguinge uno o più item all'account se è disponibile spazio
  * @param int $itemId id dell'item da aggiungere
  * @param int $accountId id dell'account
  * @param int $quantity quantità da aggiungere
  * @param mysqli $conn riferimento alla connessione al server da usare
- * @return int nuova quantità
+ * @return int 0 se non effettua l'inserimento, la quantità attuale dell'oggetto se l'inserimento viene effettuato
  */
-function addOneItem($itemId, $accountId, &$conn){
+function addOneItem($itemId, $accountId, &$conn): int{
+    $sqlCount = "SELECT COUNT(*) AS dimensione FROM Inventario WHERE Proprietario = ?";
+    $stmtCount = $conn->prepare($sqlCount);
+    $stmtCount->bind_param('i', $accountId);
+    $stmtCount->execute();
+    $result = $stmtCount->get_result();
+    $count= $result->fetch_assoc();
+    $stmtCount->close();
+
+    if($count['dimensione'] + 1 == MAX_ITEMS){
+        return 0;
+    }
+
     $sqlQuantita = "SELECT Quantita FROM Inventario WHERE Proprietario = ? AND Oggetto = ?";
     $stmtQuantita = $conn->prepare($sqlQuantita);
     $stmtQuantita->bind_param('ii', $accountId, $itemId);
@@ -191,8 +207,10 @@ function addOneItem($itemId, $accountId, &$conn){
     $currentQuantity = ($currentQuantityArr === null)? 0 : $currentQuantityArr["Quantita"];
 
     $newQuantity = $currentQuantity + 1;
-
-    if($newQuantity > 1){
+    if($newQuantity < 0){
+        return 0;
+    }
+    else if($newQuantity > 1){
         $updateSql = "UPDATE Inventario SET Quantita = Quantita + 1 WHERE Oggetto = ? AND Proprietario = ?;";
         $updateStmt = $conn->prepare($updateSql);
         $updateStmt->bind_param("ii", $itemId, $accountId);
@@ -213,16 +231,24 @@ function addOneItem($itemId, $accountId, &$conn){
 /**
  * Funzione che aggiorna la quantità di monete nel database
  * @param int $accountId id dell'account
- * @param int $price quantità di monete da aggiungere o togliere
+ * @param int $amount quantità di monete da aggiungere o togliere
  * @param mysqli $conn connessione da utilizzare per la connessione
+ * @return int se l'aggiornamento non è possibile restituisce -1, altrimenti il numero di monete attualmente nell'account
  */
-function updateCoins($accountId, $price, &$conn){
-    $guadagno = $price;
+function updateCoins($accountId, $amount, &$conn){
     $updateCoinsSql = "UPDATE Account SET Monete = Monete + ? WHERE ID = ?";
     $coinsStmt = $conn->prepare($updateCoinsSql);
-    $coinsStmt->bind_param("ii", $guadagno, $accountId);
-    $coinsStmt->execute();
-    return $guadagno;
+    $coinsStmt->bind_param("ii", $amount, $accountId);
+    // $output = ($coinsStmt->execute())? $amount: -1;
+    if(!$coinsStmt->execute()){
+        $output = -1;
+        error_log("Error updating coins: " . $conn->error);
+    }
+    else{
+        $output = $amount;
+    }
+    $coinsStmt->close();
+    return $output;
 }
 
 /**
@@ -248,16 +274,19 @@ function sellItem($itemId, $accountId){
         $result = $stmt->get_result();
         $item = $result->fetch_assoc();
 
-        if(!$item)
-            return ["errore" => "Item not found in inventory."];
+        if(!$item){
+            $esito = ["errore" => "Item non presente nell'Inventario!"];
+        }
+        else{
+            $newQuantity = removeOneItem($itemId, $accountId,$item["Quantita"], $conn);
 
-        $newQuantity = removeOneItem($itemId, $accountId,$item["Quantita"], $conn);
+            // Aggiorno le monete ottenute
+            $guadagno = updateCoins($accountId, floor($item['Costo'] / 2), $conn);
 
-        // Aggiorno le monete ottenute
-        $guadagno = updateCoins($accountId, floor($item['Costo'] / 2), $conn);
+            $conn->commit();
+            $esito =  ["successo" => true, "guadagno" => $guadagno, "rimosso" => ($newQuantity === 0)];
+        }
 
-        $conn->commit();
-        $esito =  ["successo" => true, "guadagno" => $guadagno, "rimosso" => ($newQuantity === 0)];
     }
     catch(Exception $e){
         $conn->rollback();
@@ -265,6 +294,63 @@ function sellItem($itemId, $accountId){
     }
     finally{
         $stmt->close();
+        $conn->close();
+    }
+
+    return $esito;
+}
+
+function buyItem($itemId, $accountId){
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+
+    if($conn->connect_error){
+        apiError('500');
+    }
+
+    $conn->begin_transaction();
+
+    try {
+        $sqlInShop = "SELECT N.Oggetto
+                FROM Negozio N
+                WHERE N.Proprietario = ? AND N.Oggetto = ?";
+        $stmtInShop = $conn->prepare($sqlInShop);
+        $stmtInShop->bind_param("ii", $accountId, $itemId);
+        $stmtInShop->execute();
+        $result = $stmtInShop->get_result();
+        $stmtInShop->close();
+
+        $item = $result->fetch_assoc();
+
+        if(!$item){
+            $esito = ["errore" => "Item non presente nel Negozio!"];
+        }
+        else{
+            $sqlGetPrice = "SELECT Costo 
+                            FROM Item
+                            WHERE ID = ?";
+            $stmtSpesa = $conn->prepare($sqlGetPrice);
+            $stmtSpesa->bind_param('i', $itemId);
+            $stmtSpesa->execute();
+            $result = $stmtSpesa->get_result();
+            $stmtSpesa->close();
+            $costo = $result->fetch_assoc();
+            $spesa = -$costo["Costo"];
+            if(updateCoins($accountId, $spesa, $conn) === -1){
+                $esito = ["errore" => "Fondi Insufficenti!"];
+            }
+            else if(!addOneItem($itemId, $accountId, $conn)){
+                $esito = ["errore" => "Spazio insufficente nell'Inventario"];
+            }
+            else{
+                $conn->commit();
+                $esito = ["successo" => true, "spesa" => $spesa];
+            }
+        }
+    } catch (Exception $e) {
+        $conn->rollback();
+        $esito = ["errore" => "Fallimento: " . $e->getMessage()];
+    }
+    finally{
         $conn->close();
     }
 
@@ -362,6 +448,8 @@ function openBox($box, $accountId, $conn = null){
                 $output[] = $potions[array_rand($potions)];
             }
 
+            updateCoins($accountId, $output["coins"], $conn);
+
             $itemsIDs = [];
             foreach($output as $key => $itemId){
                 if(is_numeric($key)){
@@ -426,7 +514,8 @@ function getShop($accountId, $lastRefresh){
     }
 
     $remainingTime = getRemainingTime($currentTime, $lastRefresh);
-
+    
+    $conn->close();
     return [
         "output" => $output,
         "remainingTime" => $remainingTime
@@ -498,15 +587,22 @@ function refreshShop($id, $currentTime, &$conn) {
 
 /**
  * Calcola il tempo rimanente al refresh del negozio
- * @param DateTime $currentTime Timestamp di riferimento
+ * @param DateTime $currentTime Timestamp di riferimento passato come riferimento
  * @param DateTime $shopRefresh Timestamp dell'ultimo refresh
  * @return array Tempo rimanente in minuti e secondi
  */
-function getRemainingTime($currentTime, $shopRefresh) {
+function getRemainingTime(&$currentTime, $shopRefresh) {
     $passedSeconds = ($currentTime->getTimestamp() - $shopRefresh->getTimestamp()) % SHOP_TIMER_RESET_SECONDS;
-    
+
     $remainingSeconds = SHOP_TIMER_RESET_SECONDS - $passedSeconds;
-    
+
+    /*
+    * Aggiorno il currentTime in modo "fittizio" per simulare il momento esatto
+    * in cui sarebbe avvenuto l'aggiornamento del negozio, nel caso in cui non ci fossimo mai scollegati.
+    * Risolvo anche il problema dei secondi persi durante la comunicazione con il server.
+    */
+    $currentTime->modify("-".$passedSeconds." seconds");
+
     $minutes = floor($remainingSeconds / 60);
     $seconds = $remainingSeconds % 60;
 

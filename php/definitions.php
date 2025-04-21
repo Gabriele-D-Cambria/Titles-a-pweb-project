@@ -11,13 +11,41 @@ define('USERNAME_PATTERN', "/^[a-zA-Z][a-zA-Z0-9_.]{2,9}$/");
 define('PASSWORD_PATTERN', "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,15}$/");
 //? endsource
 
+/**
+ * Quantità minima di monete delle box comuni
+ */
 define("MIN_COIN_COMMON", 5);
+
+/**
+ * Quantità massima di monete delle box comuni
+ */
 define("MAX_COIN_COMMON", 10);
+
+/**
+ * Quantità minima di monete delle box rare
+ */
 define("MIN_COIN_RARE", 15);
+
+/**
+ * Quantità massima di monete delle box rare
+ */
 define("MAX_COIN_RARE", 20);
+
+/**
+ * Numero massimo di Item diversi in un inventario
+ */
 define("MAX_ITEMS", value: 40);
+
+/**
+ * Numero massimo di Item diversi in un negozio
+ */
 define("MAX_SHOP_ITEMS", 10);
+
+/**
+ * Intervallo temporale del refresh del negozio
+ */
 define('SHOP_TIMER_RESET_SECONDS', value: 3*60);
+
 
 /**
  * Informazioni sull'account con riferimento ai personaggi
@@ -69,15 +97,16 @@ class Account{
 
     /**
      * Modifica la quantità di monete del personaggio
-     * @param bool $spending se true indica che si sta spendendo, altrimenti che si stà guadagnando
-     * @param int $amount indica il quantitativo di monete utilizzate
-     * @return bool Se true la funzione ha avuto effetto correttamente; false indica che la quantità di monete è inferiore a quella necessaria per comprare l'oggetto.
+     * @param bool $spending se true indica che si sta spendendo, altrimenti che si sta guadagnando
+     * @param int $amount indica il quantitativo di monete
+     * @return bool Se true la funzione ha avuto effetto correttamente; false indica che '$amount' inteso come spesa è maggiore delle monete attualmente presenti nell'account
      */
     public function modifyCoins($spending, $amount){
+        if($amount < 0)
+            $amount = -$amount;
         if($spending){
-            if($this->monete < $amount){
+            if($this->monete < $amount)
                 return false;
-            }
             $this->monete -= $amount;
         }
         else{
