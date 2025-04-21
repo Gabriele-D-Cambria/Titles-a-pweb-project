@@ -111,6 +111,7 @@ h3{
     cursor: pointer;
     font-size: 14px;
     line-height: 1;
+    box-shadow: none;
 }
 
 .password-container .toggle-password:hover {
