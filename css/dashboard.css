@@ -155,11 +155,22 @@ img.clickable {
     text-align: center;
 }
 .inventory-button{
-    background-color: #d2b48c;
+    background-color: rgb(210, 180, 140);
     border-color: #d7a057;
     color: #121212;
 }
+.inventory-button:hover{
+    background-color: rgb(185, 160, 125);
+    transform: scale(1.05);
+}
+
 .shop-button{
-    background-color: #3498db;
+    background-color: rgb(52, 152, 219);
     border-color: #2475ab;
+}
+
+
+.shop-button:hover{
+    background-color: rgb(38, 127, 186);
+    transform: scale(1.05);
 }

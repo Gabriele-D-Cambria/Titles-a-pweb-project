@@ -75,10 +75,15 @@ function showInventory(newItems = false){
 
     const module = document.getElementById("inventoryModule");
     currentlyOpened = module.id;
-
+    
+    document.body.classList.add("caricamento");
     fetch('php/API/getInventory.php')
         .then(response => response.json())
         .then(risposta =>{
+            document.body.classList.remove("caricamento");
+            if(risposta.ServerError !== undefined){
+                throw risposta.ServerError;
+            }
             const data = risposta["inventario"];
             const MAX_SIZE = risposta["MAX_SIZE"];
 
@@ -125,6 +130,7 @@ function showInventory(newItems = false){
             window.addEventListener("click", moduleListener);
         })
         .catch(error => {
+            showMessage("Il server non è al momento raggiungibile, riprovare dopo");
             console.error('Errore: ', error);
         })
 
@@ -188,10 +194,15 @@ function showShop(){
 
     clearInterval(shopTimerInterval);
     shopTimerInterval = null;
-
+    
+    document.body.classList.add("caricamento");
     fetch('php/API/getShopItems.php')
         .then(response => response.json())
         .then(risposta => {
+            document.body.classList.remove("caricamento");
+            if(risposta.ServerError !== undefined){
+                throw risposta.ServerError;
+            }
             const data = risposta.items;
             const remainingTime = risposta.remainingTime;
 
@@ -206,7 +217,7 @@ function showShop(){
 
             const p = document.createElement("p");
             p.classList.add("timer");
-            p.innerText = `Timer \u2003 - \u2003`
+            p.innerText = `Prossimo Refresh \u2003 - \u2003`
 
             const span = document.createElement("span");
             span.id = "timer";
@@ -252,6 +263,7 @@ function showShop(){
             window.addEventListener("click", moduleListener);
         })
         .catch(error => {
+            showMessage("Il server non è al momento raggiungibile, riprovare dopo");
             console.error("Errore: ", error);
         })
 }
@@ -457,7 +469,7 @@ function sellItem(){
         showMessage("Nessun Oggetto da Vendere");
         return;
     }
-
+    document.body.classList.add("caricamento");
     fetch('php/API/sellItem.php', {
         method: 'POST',
         headers: {
@@ -469,6 +481,10 @@ function sellItem(){
     })
     .then(response => response.json())
     .then(data => {
+        document.body.classList.remove("caricamento");
+        if(data.ServerError !== undefined){
+            throw data.ServerError;
+        }
         if(data.error){
             showMessage("Error: " + data.error);
         }
@@ -499,7 +515,7 @@ function buyItem(){
         showMessage("Nessun Oggetto da Acquistare");
         return;
     }
-
+    document.body.classList.add("caricamento");
     fetch('php/API/buyItem.php', {
         method: 'POST',
         headers: {
@@ -511,6 +527,10 @@ function buyItem(){
     })
     .then(response => response.json())
     .then(data => {
+        document.body.classList.remove("caricamento");
+        if(data.ServerError !== undefined){
+            throw data.ServerError;
+        }
         if(data.errore){
             showMessage("Errore: " + data.errore);
         }
@@ -546,7 +566,7 @@ function openBox(){
         return;
     }
 
-
+    document.body.classList.add("caricamento");
     fetch("php/API/openBox.php", {
         method: "POST",
         headers: {
@@ -559,6 +579,10 @@ function openBox(){
     })
     .then(response => response.json())
     .then(data =>{
+        document.body.classList.remove("caricamento");
+        if(data.ServerError !== undefined){
+            throw data.ServerError;
+        }
         if(data.error){
             showMessage("Error: " + data.error);
         }

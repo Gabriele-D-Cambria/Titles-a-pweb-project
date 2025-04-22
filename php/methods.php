@@ -1,5 +1,5 @@
 <?php
-
+ini_set("display_errors", "0");
 require_once "definitions.php";
 
 
@@ -12,7 +12,7 @@ require_once "definitions.php";
 function getData($username){
     $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
     if($conn->connect_error){
-        pageError('500');
+        apiError('500');
     }
 
     $sql = "SELECT ID, Username, Monete, RefreshNegozio 
@@ -85,7 +85,7 @@ function pageError($errorCode){
  */
 function apiError($errorCode){
     http_response_code($errorCode);
-    echo json_encode(["errore" => $errorCode]);
+    echo json_encode(["ServerError" => $errorCode]);
     exit();
 }
 
@@ -111,7 +111,7 @@ function terminateLogin($errorType, $isLogin){
 function getInventory($accountID){
     $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
     if($conn->connect_error){
-        pageError('500');
+        apiError('500');
     }
 
     $sql = "SELECT Item.*, Inventario.Quantita
@@ -489,7 +489,7 @@ function getShop($accountId, $lastRefresh){
 
     $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
     if($conn->connect_error){
-        pageError('500');
+        apiError('500');
     }
     $output = [];
     $remainingTime = [];
