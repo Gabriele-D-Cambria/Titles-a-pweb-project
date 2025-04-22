@@ -55,7 +55,8 @@ Le _monete_ possono essere guadagnate nei seguenti modi:
 Ogni account ha un suo inventario di oggetti non assegnati contenente fino ad un massimo di `40` oggetti non assegnati che possono essere assegnati ai vari _PG_.
 Quando un oggetto viene assegnato ad un _PG_ viene rimosso dall'inventario dell'account.
 L'assegnamento al _PG_ non è definitivo, infatti è possibile rimuovere un'oggetto da un _PG_ per riportarlo all'inventario dell'_account_.
-Gli oggetti possono essere scartati per ottenere in monete la metà del loro valore.
+Gli oggetti possono essere scartati per ottenere in monete la metà del loro valore. 
+Tutti gli oggetti possono essere acquistati nel **_Negozio_**. Il _negozio_ si aggiorna con nuovi oggetti ogni `3 minuti` dalla creazione dell'account.
 
 Gli oggetti si categorizzano in:
 - _Armi_
@@ -63,22 +64,20 @@ Gli oggetti si categorizzano in:
 - _Pozioni_
 - _Box_
 
-Le _box_ possono essere acquistate dal negozio o si ottengono vincendo partite.
-Nelle `box comuni` si trova:
-- `5`-`10` monete 
-- `2` oggetti tra armi e armature
-- `1` pozione
+Le _box_, oltre a poter essere acquistate nel _negozio_ quando vi si trovano, si ottengono vincendo partite, e si differenziano in `box comuni` e `box rare`:
+- Nelle `box comuni` si trova:
+  - `5`-`10` monete 
+  - `2` oggetti tra armi e armature
+  - `1` pozione
+- Nelle `box rare` si trova:
+  - `15`-`20` monete
+  - `2` armi
+  - `2` armature
+  - `2` pozioni
 
+Di seguito le statistiche delgi _oggetti_ nel gioco.
 
-Nelle `box rare` si trova:
-- `15`-`20` monete
-- `2` armi
-- `2` armature
-- `2` pozioni
-
-
-
-Informazioni sulle armi:
+Informazioni sulle `armi`:
 | Nome               | Descrizione                        | Elemento | Tipologia | Costo | Danno | ModificatoreFor  | ModificatoreDex  |
 |--------------------|------------------------------------|----------|-----------|-------|-------|------------------|------------------|
 | Spada d'Acqua      | Una spada affilata e leggera.      | Acqua    | arma      | 20    | 6     | 2                | 1                |
@@ -87,7 +86,7 @@ Informazioni sulle armi:
 | Bastone Elettrico  | Un bastone che emette elettricità. | Elettro  | arma      | 25    | 7     | 1                | 1                |
 | Pugnale d'Aria     | Un pugnale leggero e veloce.       | Aria     | arma      | 20    | 6     | 1                | 2                |
 
-Informazioni sull'armatura:
+Informazioni sulle `armature`:
 | Nome               | Descrizione             | Elemento | Tipologia | Costo | Armatura |  ModificatoreFor  | ModificatoreDex  |
 |--------------------|-------------------------|----------|-----------|-------|----------|-------------------|------------------|
 | Armatura d'Acqua   | Leggera e impermeabile. | Acqua    | armatura  | 40    | 4        | -1                |  0               |
@@ -97,7 +96,7 @@ Informazioni sull'armatura:
 | Armatura d'Aria    | Leggera e flessibile.   | Aria     | armatura  | 35    | 3        |  0                |  0               |
 
 
-Informazioni sulle pozioni:
+Informazioni sulle `pozioni`:
 | Nome                 | Descrizione                                       | Elemento | Tipologia | Costo | RecuperoVita  | ModificatoreFor | ModificatoreDex |
 |----------------------|---------------------------------------------------|----------|-----------|-------|---------------|-----------------|-----------------|
 | Pozione di Vita      | Ripristina 20 PF.                                 | NULL     | pozione   | 15    | 20            | 0               | 0               |
@@ -105,7 +104,7 @@ Informazioni sulle pozioni:
 | Pozione di Forza     | Aumenta la forza temporaneamente di 3 punti.      | NULL     | pozione   |  8    | 0             | 3               | 0               |
 | Pozione di Destrezza | Aumenta la destrezza temporaneamente di 3 punti.  | NULL     | pozione   |  8    | 0             | 0               | 3               |
 
-Informazioni sulle box:
+Informazioni sulle `box`:
 | Nome               | Descrizione                     | Elemento | Tipologia | Costo | Danno | Armatura | RecuperoVita | ModificatoreFor | ModificatoreDex |
 |--------------------|---------------------------------|----------|-----------|-------|-------|----------|---------------|------------------|------------------|
 | Box Comune         | Contiene monete, pozione, 2 oggetti (armi e/o armature). | NULL     | box       | 50    | 0     | 0        | 0             | 0                | 0                |
