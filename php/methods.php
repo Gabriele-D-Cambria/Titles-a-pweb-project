@@ -638,7 +638,8 @@ function getShop($accountId, $lastRefresh){
         $sql = "SELECT Item.*
                 FROM Negozio
                     JOIN Item ON Negozio.Oggetto = Item.ID
-                WHERE Proprietario = ?";
+                WHERE Proprietario = ?
+                ORDER BY Item.ID";
 
         $stmtRecupero = $conn->prepare($sql);
         $stmtRecupero->bind_param('i', $accountId);
@@ -720,7 +721,12 @@ function refreshShop($id, $currentTime, &$conn) {
         while ($row = $result->fetch_assoc()) {
             $newShopItems[] = $row;
         }
-
+        
+        // Ordino gli item secondo l'ID, così da avere sempre lo stesso output quando le recupero
+        usort($newShopItems, function($a, $b){
+            return $a['ID'] <=> $b['ID'];
+        });
+        
         // Inserimento degli Item nel Negozio
         $sqlInsert = "INSERT INTO Negozio (Proprietario, Oggetto) VALUES (?, ?)";
         $stmtInsert = $conn->prepare($sqlInsert);

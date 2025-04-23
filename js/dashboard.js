@@ -192,8 +192,10 @@ function showShop(){
     const module = document.getElementById("shopModule");
     currentlyOpened = module.id;
 
-    clearInterval(shopTimerInterval);
-    shopTimerInterval = null;
+    if(shopTimerInterval !== null){
+        clearInterval(shopTimerInterval);
+        shopTimerInterval = null;
+    }
     
     document.body.classList.add("caricamento");
     fetch('php/API/getShopItems.php')
@@ -536,7 +538,6 @@ function buyItem(){
         }
         else{
             updateCoins(data.spesa);
-            showShop();
             showMessage(`Acquisto effettuato | ${data.spesa}🪙`);
         }
     })
@@ -619,6 +620,7 @@ function updateShopTimer(){
     if(minutes === 0 && seconds === 0){
         clearInterval(shopTimerInterval);
         showShop();
+        return;
     }
     else {
         if(seconds === 0){
