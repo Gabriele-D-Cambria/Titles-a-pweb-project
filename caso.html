@@ -26,8 +26,8 @@
             </div>
             <div class="menu-space">
                 <form class="username" action="php/API/fammi.php" method="POST">
-                    <label>Nuovo Username</label>
-                    <input type="text" pattern="^[a-zA-Z][a-zA-Z0-9_.]{2,9}$" required class="invalid">
+                    <label>Nuovo Username:</label>
+                    <input type="text" name="username" id="username" required="" pattern="^[a-zA-Z][a-zA-Z0-9_.]{2,9}$" title="Deve iniziare con una lettera e avere tra 3 e 10 caratteri (lettere, punti o underscore)." placeholder="User.0_" autocomplete="off">
                     <button>Conferma</button>
                     <button>Annulla</button>
                 </form>

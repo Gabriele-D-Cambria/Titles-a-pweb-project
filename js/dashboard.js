@@ -75,6 +75,7 @@ function showMenu(){
 
     for(let i = 0; i < 3; ++i){
         const div = document.createElement("div");
+        div.classList.add("menu-space");
         const p = document.createElement("p");
         switch(i){
             case 0:
@@ -96,7 +97,7 @@ function showMenu(){
         page.appendChild(div);
     }
     module.appendChild(page);
-    showModule(module.id, true);
+    showModule(module.id);
     moduleListener = (e) => {
         closeModuleEvent(e, "menuModule")
     };
