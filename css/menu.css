@@ -74,7 +74,7 @@
     justify-content: center;
 }
 
-.username-page form, .password-page form{
+/* .username-page form, .password-page form{
     width: 100%;
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -82,6 +82,25 @@
     justify-content: center;
     gap: 15px;
     row-gap: 20px;
+} */
+
+.username-page form, .password-page form{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    margin: 0;
+    gap: 15px;
+    align-content: space-around;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.username-page form>*, .password-page form>*{
+    flex: 0 0 45%;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
 }
 
 .menu-space form input[type="text"],
