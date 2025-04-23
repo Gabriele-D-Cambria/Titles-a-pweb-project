@@ -168,8 +168,6 @@ img.clickable {
     background-color: rgb(52, 152, 219);
     border-color: #2475ab;
 }
-
-
 .shop-button:hover{
     background-color: rgb(38, 127, 186);
     transform: scale(1.05);

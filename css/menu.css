@@ -1,0 +1,106 @@
+.menu-page, .username-page, .password-page{
+    aspect-ratio: 1/1;
+    height: 50%;
+
+    display: grid;
+    grid-template-columns: 1fr;
+
+    align-items: center;
+    justify-items: center;
+
+    background-color: #1e1e1e;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+.menu-page *, .username-page *, .password-page *{
+    margin: 0;
+}
+
+.menu-page p, .username-page p, .password-page p{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.menu-space{
+    margin: 0px;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    position: relative;
+    width: 80%;
+    height: 100%;
+    border-bottom: 1px solid rgb(80, 80, 80);
+}
+
+.menu-space:last-child{
+    border-bottom: none;
+}
+
+.menu-page #changeUsr, .menu-page #changePwd{
+    color: #e0e0e0;
+    transition: transform ease-in-out;
+}
+.menu-page #deleteAccount{
+    color: red;
+    transition: transform ease-in-out;
+}
+.menu-page #changeUsr:hover, .menu-page #changePwd:hover, .menu-page #deleteAccount:hover{
+    transform: scale(1.25);
+    cursor: pointer;
+}
+
+.username-page{
+    grid-template-rows: 1fr 2fr;
+}
+
+.username-page .header{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    color: #e0e0e0;
+}
+
+.username-page .header *{
+    color: #e0e0e0;
+    margin: 0;
+}
+
+.header h2{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.username-page form, .password-page form{
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    row-gap: 20px;
+}
+
+.menu-space form input[type="text"],
+.menu-space form input[type="password"],
+.menu-space form .password-container{
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.menu-space .password-container .toggle-password{
+    opacity: 0.25;
+    transition: all ease-in-out;
+}
+
+.menu-space .password-container .toggle-password:hover{
+    opacity: 1;
+    text-shadow:
+    -1px -1px 0 #1e1e1e,
+     1px -1px 0 #1e1e1e,
+    -1px  1px 0 #1e1e1e,
+     1px  1px 0 #1e1e1e;
+}

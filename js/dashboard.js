@@ -1,6 +1,6 @@
 "use strict";
 
-import {showModule, closeModule, showMessage, createElement } from "./methods.js";
+import {showModule, closeModule, showMessage, createElement, patterns, changePassword, deleteAccount } from "./methods.js";
 
 /**
  * Indica la funzione di listener per rimuovere i moduli in sovraimpressione
@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("add-character").addEventListener("click", addNewCharacter);
     document.getElementById("inventory-btn").addEventListener("click", () => {showInventory()});
     document.getElementById("shop-btn").addEventListener("click", () => {showShop()});
+    document.getElementById("menu").addEventListener("click", () => {showMenu()});
     document.addEventListener("keypress", handleKeyPress);
 });
 
@@ -59,6 +60,47 @@ function handleKeyPress(e){
             if(openBoxSelected) openBox();
             break;
     }
+}
+
+function showMenu(){
+    if(currentlyOpened !== null && currentlyOpened !== "menuModule"){
+        return;
+    }
+
+    const module = document.getElementById("menuModule");
+    currentlyOpened = module.id;
+
+    const page = document.createElement("div");
+    page.classList.add("menu-page");
+
+    for(let i = 0; i < 3; ++i){
+        const div = document.createElement("div");
+        const p = document.createElement("p");
+        switch(i){
+            case 0:
+                p.id = "changeUsr";
+                p.innerText = "Cambia Username";
+                p.addEventListener("click", changeUsername);
+                break;
+            case 1:
+                p.id = "changePwd";
+                p.innerText = "Cambia Password";
+                p.addEventListener("click", changePassword);
+                break;
+            default:
+                p.id = "deleteAccount";
+                p.innerText = "Elimina Account";
+                p.addEventListener("click", deleteAccount);
+        }
+        div.appendChild(p);
+        page.appendChild(div);
+    }
+    module.appendChild(page);
+    showModule(module.id, true);
+    moduleListener = (e) => {
+        closeModuleEvent(e, "menuModule")
+    };
+    window.addEventListener("click", moduleListener);
 }
 
 function addNewCharacter(){
@@ -100,7 +142,7 @@ function showInventory(newItems = false){
                 space.addEventListener("click", (e) => {
                     const id = String(e.target.id).replace(/^(img-|ic-)/, "");
                     const info = generateInfo("inventory-info", data[id]);
-                    changeInfo(info);
+                    changeModuleInfo(info);
                 });
                 container.appendChild(space);
             });
@@ -242,7 +284,7 @@ function showShop(){
                 space.addEventListener("click", (e) => {
                     const id = String(e.target.id).replace(/^(img-|cap-)/, "");
                     const info = generateInfo("shop-info", data[id], false);
-                    changeInfo(info);
+                    changeModuleInfo(info);
                 });
 
                 el.appendChild(space);
@@ -410,7 +452,7 @@ function generateInfo(id, item = null, hasIt = true){
         btn.innerText = "Chiudi";
         btn.addEventListener("click", () => {
             let info = generateInfo(id);
-            changeInfo(info);
+            changeModuleInfo(info);
             shownItem = null;
         });
         el.appendChild(btn);
@@ -450,7 +492,7 @@ function closeModuleEvent(event, id, overload = false){
  * Funzione che aggiunge al modulo attualmente aperto le informazioni
  * @param {Element} info informazioni da appendere
  */
-function changeInfo(info){
+function changeModuleInfo(info){
     if(currentlyOpened === null)
         return
     let module = document.getElementById(currentlyOpened);
@@ -632,4 +674,8 @@ function updateShopTimer(){
         }
         span.innerText = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
     }
+}
+
+function changeUsername(){
+    
 }

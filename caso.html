@@ -5,91 +5,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/shop.css">
+    <link rel="stylesheet" href="css/menu.css">
     <title>Document</title>
-
 </head>
 <body>
     <div class="module" style="visibility: visible; opacity: 1;">
-        <div class="shop-page">
-            <main class="shop-container">
-                <header class="timer-container">
-                    <p class="timer">Timer &emsp; - &emsp; <span id="timer">00:00</span></p>
-                </header>
-                <div class="shop-slots">
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
+        <!--? Default Page -->        
+        <!-- <div class="menu-page">
+            <div class="menu-space"><p id="changeUsr">Cambia Username</p></div>
+            <div class="menu-space"><p id="changePwd">Cambia Password</p></div>
+            <div class="menu-space"><p id="deleteAccount">Elimina Account</p></div>
+        </div>
+        -->
+        <!--? Cambio Username  -->
+        
+        <!-- <div class="username-page">
+            <div class="menu-space header">
+                <h2>Username Attuale:</h2>
+                <p>Ciccio</p>
+            </div>
+            <div class="menu-space">
+                <form class="username" action="php/API/fammi.php" method="POST">
+                    <label>Nuovo Username</label>
+                    <input type="text" pattern="^[a-zA-Z][a-zA-Z0-9_.]{2,9}$" required class="invalid">
+                    <button>Conferma</button>
+                    <button>Annulla</button>
+                </form>
+            </div>
+        </div> -->
+
+        <!--? Cambio Password -->
+        <div class="password-page">
+            <div class="menu-space header">
+                <h2>Cambio Password</h2>
+            </div>
+            <div class="menu-space">
+                <form class="password" action="php/API/fammi.php" method="POST">
+                    <label>Nuova Password:</label>
+                    <div class="password-container">
+                        <input type="password" name="password" id="password" required="" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&amp;])[A-Za-z\d@$!%*?&amp;]{8,15}$" title="Deve contenere almeno 8 caratteri, una lettera maiuscola, una minuscola, un numero e un carattere speciale." placeholder="Password">
+                        <button type="button" class="toggle-password">Mostra</button>
                     </div>
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
+                    <label>Conferma Password:</label>
+                    <div class="password-container">
+                        <input type="text" name="confirmPassword" id="confirmPassword" required="" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&amp;])[A-Za-z\d@$!%*?&amp;]{8,15}$" title="Deve essere uguale alla password." placeholder="Conferma" class="invalid">
+                        <button type="button" class="toggle-password">Mostra</button>
                     </div>
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
-                    </div>
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
-                    </div>
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
-                    </div>
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
-                    </div>
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
-                    </div>
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
-                    </div>
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
-                    </div>
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
-                    </div>
-                </div>
-            </main>
-            <aside id="shop-info">
-                <header>
-                    <p>Armatura di Fuoco</p>
-                    <p>armatura</p>
-                </header>
-                <figure>
-                    <img src="images/items/armors/fuoco.svg" alt="Resistente al calore.">
-                    <figcaption>Fuoco</figcaption>
-                </figure>
-                <p class="description">Resistente al calore.</p>
-                <main>
-                    <table>
-                    <tr>
-                        <td>Bonus Armatura </td>
-                        <td>4</td>
-                    </tr>
-                    <tr>
-                        <td>Modificatore FOR</td>
-                        <td>0</td>
-                    </tr>
-                    <tr>
-                        <td>Modificatore DEX</td>
-                        <td>-1</td>
-                    </tr>
-                    </table>
-                </main>
-                <footer>
-                    <button id="buy-btn">Compra: 20🪙</button>
-                    <button>Chiudi</button>
-                </footer>
-            </aside>
+                    <button>Conferma</button>
+                    <button>Annulla</button>
+                </form>
+            </div>
         </div>
     </div>
 </body>
