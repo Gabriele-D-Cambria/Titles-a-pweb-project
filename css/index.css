@@ -60,71 +60,9 @@ h3{
     row-gap: 20px;
 }
 
-.module label {
-    display: block;
-    color: #e0e0e0;
-}
-
-.module input[type="text"],
-.module input[type="password"] {
-    width: fit-content;
-    padding: 10px;
-    border-radius: 5px;
-    color: #e0e0e0;
-}
-
-.module input#username:invalid,
-.module input#password:invalid,
-.module input.invalid {
-    border: 1px solid #e74c3c;
-    background-color: rgba(231, 76, 60, 0.1);
-    box-shadow: 0 0 5px rgba(231, 76, 60, 0.5);
-}
-
-.module input#username:valid,
-.module input#password:valid,
-.module input.valid{
-    border: 1px solid #2ecc71;
-    background-color: rgba(46, 204, 113, 0.1);
-    box-shadow: 0 0 5px rgba(46, 204, 113, 0.5);
-}
-
 .module p{
     color: white;
 }
-
-.password-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.password-container input[type="password"],
-.password-container input[type="text"]{
-    flex: 1;
-    margin: 0;
-    line-height: 1;
-}
-
-.password-container .toggle-password {
-    position: absolute;
-    right: 10px;
-    padding: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: #2980b9;
-    cursor: pointer;
-    font-size: 14px;
-    line-height: 1;
-    box-shadow: none;
-}
-
-.password-container .toggle-password:hover {
-    color: #3498db;
-}
-
 #errorMessages{
     opacity: 0;
     visibility: hidden;
