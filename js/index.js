@@ -29,10 +29,11 @@ document.addEventListener("DOMContentLoaded", () => {
 function createModule(login) {
     let module = document.getElementById("loginModule");
 
-    let main = document.createElement("main");
+    let container = document.createElement("div");
+    container.classList.add("module-container");
     let title = document.createElement("h2");
     title.innerText = (login)? "Login" : "Sign Up";
-    main.appendChild(title);
+    container.appendChild(title);
 
     let form = document.createElement("form");
 
@@ -48,9 +49,6 @@ function createModule(login) {
     input.type = "text";
     input.id = input.name = "username";
     input.toggleAttribute("required", true);
-    // ! ------------------------
-    // input.value = "User0";
-    // ! ------------------------
 
     input.pattern = USERNAME_PATTERN;
     input.title = "Deve iniziare con una lettera e avere tra 3 e 10 caratteri (lettere, punti o underscore).";
@@ -81,10 +79,6 @@ function createModule(login) {
     input.placeholder = "Password";
     input.addEventListener("input", validateForm);
 
-
-    // ! ------------------------
-    // input.value = "Passsword0!";
-    // ! ------------------------
     passwordContainer.appendChild(input);
     
     let toggleBtn = document.createElement("button");
@@ -118,10 +112,6 @@ function createModule(login) {
 
         input.placeholder = "Conferma";
         input.addEventListener("input", validateForm);
-
-        // ! ------------------------
-        // input.value = "Passsword0!";
-        // ! ------------------------
         
         passwordContainer.appendChild(input);
         
@@ -141,7 +131,7 @@ function createModule(login) {
     }
 
     
-    main.appendChild(form);
+    container.appendChild(form);
     let btn = document.createElement("button");
 
     btn.type = "submit";
@@ -180,14 +170,9 @@ function createModule(login) {
     });
 
     p.appendChild(a);
-    main.appendChild(p);
+    container.appendChild(p);
     
-    let div = document.createElement("div");
-    div.id = "errorMessages";
-
-    main.appendChild(div);
-    
-    module.appendChild(main);
+    module.appendChild(container);
     
     showModule(module.id);
 
@@ -273,10 +258,10 @@ function handleError(error, isLogin){
     }
 
     createModule(isLogin);
-    const errorMessageDiv = document.getElementById("errorMessages");
-    let errorP = document.createElement("p");
+    const module = document.getElementById("loginModule").firstElementChild;
+    const errorP = document.createElement("p");
     errorP.innerText = errorMessage;
     errorP.classList.add("error-message");
-    errorMessageDiv.appendChild(errorP);
+    module.appendChild(errorP);
 
 }
