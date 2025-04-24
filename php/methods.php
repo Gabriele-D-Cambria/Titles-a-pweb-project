@@ -626,6 +626,9 @@ function openBox($box, $accountId){
 function getShop($accountId, $lastRefresh){
     $currentTime = new DateTime("now");
     $tempoTrascorso = $currentTime->getTimestamp() - $lastRefresh->getTimestamp();
+    if($tempoTrascorso < 0){
+        apiError(400, "Tempo negativo rilevato (". $tempoTrascorso ."): il tempo trascorso non può essere negativo.");
+    }
 
     $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
     if($conn->connect_error){
