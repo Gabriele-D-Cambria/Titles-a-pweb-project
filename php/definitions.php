@@ -5,11 +5,26 @@ define("DATABASE", "cambria_672642");
 define("DB_HOST", "localhost");
 define("DB_USER", "root");
 define("DB_PWD", "");
+
 define('USERNAME_PATTERN', "/^[a-zA-Z][a-zA-Z0-9_.]{2,9}$/");
+define("VALID_USERNAME", "User.0_");
 
 //? source: https://stackoverflow.com/questions/19605150/regex-for-password-must-contain-at-least-eight-characters-at-least-one-number-a
 define('PASSWORD_PATTERN', "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,15}$/");
 //? endsource
+define("VALID_PASSWORD", "Password1!");
+
+define('ERROR_TYPES', [
+    'invalid_username'      => "Username non valido. Deve iniziare con una lettera e avere tra 3 e 10 caratteri.",
+    'username_taken'        => "Username già esistente.",
+    'username_already_used' => "Stai già utilizzando questo username",
+    'username_not_found'    => "L'username non esiste",
+    'invalid_password'      => "Password non valida. Deve contenere almeno 8 caratteri e non più di 15, una lettera maiuscola, una minuscola, un numero e un carattere speciale.",
+    'password_mismatch'     => "Le password non corrispondevano.",
+    'wrong_password'        => "Password errata. Ritenta",
+    'registration_failed'   => "Registrazione fallita. Riprova.",
+    'connection_failed'     => "Il server non è al momento disponibile. \n Riprovare tra un po'."
+]);
 
 /**
  * Quantità minima di monete delle box comuni

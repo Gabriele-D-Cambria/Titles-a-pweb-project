@@ -7,18 +7,6 @@ export const patterns = {
     //? endsource
 };
 
-export const ERROR_MESSAGES = {
-    username_taken: "Username già esistente.",
-    invalid_username: "Username non valido. Deve iniziare con una lettera e avere tra 3 e 10 caratteri.",
-    invalid_password: "Password non valida. Deve contenere almeno 8 caratteri e non più di 15, una lettera maiuscola, una minuscola, un numero e un carattere speciale.",
-    password_mismatch: "Le password non corrispondevano.",
-    registration_failed: "Registrazione fallita. Riprova.",
-    connection_failed: "Il server non è al momento disponibile. \n Riprovare tra un po'.",
-    username_not_found: "L'username non esiste",
-    wrong_password: "Password errata. Ritenta",
-    default: "Errore generico, riprovare"
-};
-
 /**
  * Crea un input per l'username con le relative proprietà e validazioni.
  * @param {String} id - L'id da assegnare all'input.ù

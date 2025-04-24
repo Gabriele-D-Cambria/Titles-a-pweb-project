@@ -42,6 +42,31 @@ function apiError($errorCode = 500, $message = null) {
     exit();
 }
 
+/**
+ * Valida gli input dell'utente per i campi username, password e confermaPassword
+ * @param string|null $username Username da validare.
+ * @param string|null $password Password da Validare.
+ * @param string|null $confirmPassword Conferma Password da Validare.
+ * 
+ * @return string Restituisce una stringa se la validazione fallisce:
+ *      - "invalid_username" se $username non corrisponde all'USERNAME_PATTERN
+ *      - "invalid_password" se $password non corrisponde al PASSWORD_PATTERN
+ *      - "password_mismatch" se $confirmPassword non corrisponde a $password.
+ * Se tutti gli input sono validi restituisce una stringa vuota.
+ */
+function validateInputs($username, $password, $confirmPassword){
+    if(is_null($username) || !preg_match(USERNAME_PATTERN, $username))
+        return "invalid_username";
+
+    if(is_null($username) || !preg_match(PASSWORD_PATTERN, $password))
+        return "invalid_password";
+
+    if(!empty($confirmPassword) && $confirmPassword !== $password)
+            return "password_mismatch";
+
+    return '';
+}
+
 
 /**
  * Ritorna un elemento Account dato un username
@@ -118,10 +143,10 @@ function getData($username){
  * @param bool $isLogin indica se l'errore si è effettuato durante il login o il sign-up
  */
 function terminateLogin($errorType, $isLogin){
-    $errorType = urlencode($errorType);
+    $error = urlencode(ERROR_TYPES[$errorType] ?? $errorType);
     $isLogin = urlencode($isLogin);
 
-    header("Location: ../index.php?error=" . $errorType . "&isLogin=". $isLogin);
+    header("Location: ../index.php?error=" . $error . "&isLogin=". $isLogin);
     exit();
 }
 

@@ -1,7 +1,6 @@
 <?php
 session_start();
 session_unset();
-require_once "definitions.php";
 require_once "methods.php";
 
 if(!isset($_SERVER['REQUEST_METHOD'])){
@@ -20,7 +19,7 @@ elseif($_SERVER["REQUEST_METHOD"] == "POST"){
         terminateLogin("connection_failed", $isLogin);
     }
 
-    $errorType = validateInput($username, $password, $confirmPassword);
+    $errorType = validateInputs($username, $password, $confirmPassword);
 
     if(!empty($errorType)){
         $conn->close();
@@ -86,19 +85,6 @@ elseif($_SERVER["REQUEST_METHOD"] == "POST"){
 }
 else{
     pageError("403");
-}
-
-function validateInput($username, $password, $confirmPassword){
-    if(!preg_match(USERNAME_PATTERN, $username))
-        return "invalid_username";
-
-    if(!preg_match(PASSWORD_PATTERN, $password))
-        return "invalid_password";
-
-    if(!empty($confirmPassword) && $confirmPassword !== $password)
-            return "password_mismatch";
-
-    return '';
 }
 
 function startSession($username){

@@ -97,7 +97,7 @@ function createModule(login) {
 
 
 function handleError(error, isLogin){
-    const errorMessage = ERROR_MESSAGES[error] || ERROR_MESSAGES.default;
+    const errorMessage = error;
 
     let module = document.getElementById("loginModule");
     if(!module.firstElementChild){
