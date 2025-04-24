@@ -34,18 +34,18 @@ function createModule(login) {
     form.action = LOGIN_PAGE;
 
     // Username
-    let tag = createUsernameInput("username");
+    let tag = createUsernameInput("Username:");
     form.appendChild(tag.label);
     form.appendChild(tag.input);
 
     // Password
-    tag = createPasswordInput("password", "Password:", "Deve contenere almeno 8 caratteri, una lettera maiuscola, una minuscola, un numero e un carattere speciale.");
+    tag = createPasswordInput("Password:", false);
     form.appendChild(tag.label);
     form.appendChild(tag.passwordContainer);
 
     // Conferma Password
     if(!login){
-        tag = createPasswordInput("confirmPassword", "Conferma Password:", "Deve essere uguale alla password.", true);
+        tag = createPasswordInput("Conferma Password:", true);
         form.appendChild(tag.label);
         form.appendChild(tag.passwordContainer);
     }

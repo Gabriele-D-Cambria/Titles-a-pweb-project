@@ -1,6 +1,6 @@
 "use strict";
 
-import {showModule, closeModule, showMessage, createElement, changePassword, deleteAccount } from "./methods.js";
+import {showModule, closeModule, showMessage, createElement, createUsernameInput, createButton, createPasswordInput } from "./methods.js";
 
 /**
  * Indica la funzione di listener per rimuovere i moduli in sovraimpressione
@@ -76,42 +76,205 @@ function showMenu(){
     const page = document.createElement("div");
     page.classList.add("menu-page");
 
-    for(let i = 0; i < 3; ++i){
+    const menuOptions = [
+        { id: "changeUsr", text: "Cambia Username", action: changeUsername },
+        { id: "changePwd", text: "Cambia Password", action: changePassword },
+        { id: "deleteAccount", text: "Elimina Account", action: deleteAccount }
+    ];
+
+    menuOptions.forEach((option) => {
         const div = document.createElement("div");
         div.classList.add("menu-space");
+        
         const p = document.createElement("p");
-        switch(i){
-            case 0:
-                p.id = "changeUsr";
-                p.innerText = "Cambia Username";
-                p.addEventListener("click", changeUsername);
-                break;
-            case 1:
-                p.id = "changePwd";
-                p.innerText = "Cambia Password";
-                p.addEventListener("click", changePassword);
-                break;
-            default:
-                p.id = "deleteAccount";
-                p.innerText = "Elimina Account";
-                p.addEventListener("click", deleteAccount);
-        }
+        p.id = option.id;
+        p.innerText = option.text;
+        p.addEventListener("click", option.action);
         div.appendChild(p);
         page.appendChild(div);
-    }
+    });
+
+    closeModule(null, "menuModule", true);
     module.appendChild(page);
     showModule(module.id);
     moduleListener = (e) => {
-        closeModuleEvent(e, "menuModule")
+        closeModuleEvent(e, "menuModule");
     };
     window.addEventListener("click", moduleListener);
 }
 
-/**
- * Mostra un messaggio di placeholder per l'aggiunta di un nuovo personaggio
- */
-function addNewCharacter(){
-    showMessage("Eh, volevi!!");
+function changeUsername(){
+    if(currentlyOpened !== "menuModule"){
+        return;
+    }
+    
+    const module = document.getElementById("menuModule");
+
+    const page = document.createElement("div");
+    page.classList.add("username-page");
+
+    let space = document.createElement("div");
+    space.classList.add("menu-space");
+    space.classList.add("header");
+
+    let el = document.createElement("h2");
+    el.innerText = "Username Attuale:";
+    space.appendChild(el);
+
+    el = document.createElement("p");
+    el.innerText = USERNAME;
+
+    space.appendChild(el);
+    page.appendChild(space);
+
+    space = document.createElement("div");
+    space.classList.add("menu-space");
+
+    const form = document.createElement("form");
+    form.classList.add("username");
+    form.action = "php/API/changeCredentials.php";
+    form.method = "POST";
+
+    el = createUsernameInput("Nuovo Username:");
+    form.appendChild(el.label);
+    form.appendChild(el.input);
+
+    el = createButton("submit", "submit", "Conferma");
+    el.toggleAttribute("disabled", true);
+    form.appendChild(el);
+
+    el = createButton("button", "backToMenu", "Annulla", showMenu);
+    form.appendChild(el);
+
+    space.appendChild(form);
+    page.appendChild(space);
+
+    while(module.childElementCount){
+        module.removeChild(module.lastChild);
+    }
+
+    module.appendChild(page);
+}
+
+
+function changePassword(){
+    if(currentlyOpened !== "menuModule"){
+        return;
+    }
+    
+    const module = document.getElementById("menuModule");
+
+    const page = document.createElement("div");
+    page.classList.add("password-page");
+
+    let space = document.createElement("div");
+    space.classList.add("menu-space");
+    space.classList.add("header");
+
+    let el = document.createElement("h2");
+    el.innerText = "Cambio Password";
+    space.appendChild(el);
+
+    page.appendChild(space);
+
+    space = document.createElement("div");
+    space.classList.add("menu-space");
+
+    const form = document.createElement("form");
+    form.classList.add("password");
+    form.action = "php/API/changeCredentials.php";
+    form.method = "POST";
+
+    el = createPasswordInput("Nuova Password:", false);
+    form.appendChild(el.label);
+    form.appendChild(el.passwordContainer);
+
+    el = createPasswordInput("Conferma Password:", true);
+    form.appendChild(el.label);
+    form.appendChild(el.passwordContainer);
+
+    el = createButton("submit", "submit", "Conferma");
+    el.toggleAttribute("disabled", true);
+    form.appendChild(el);
+
+    el = createButton("button", "backToMenu", "Annulla", showMenu);
+    form.appendChild(el);
+
+    space.appendChild(form);
+    page.appendChild(space);
+
+    while(module.childElementCount){
+        module.removeChild(module.lastChild);
+    }
+
+    module.appendChild(page);
+}
+
+function deleteAccount(){
+    if(currentlyOpened !== "menuModule"){
+        return;
+    }
+    
+    const module = document.getElementById("menuModule");
+
+    const page = document.createElement("div");
+    page.classList.add("delete-page");
+
+    let space = document.createElement("div");
+    space.classList.add("menu-space");
+    space.classList.add("header");
+
+    let el = document.createElement("h2");
+    el.innerText = "Stai per Eliminare l'account";
+    space.appendChild(el);
+
+    el = document.createElement("p");
+    el.innerText = "Sei sicuro?";
+
+    space.appendChild(el);
+    page.appendChild(space);
+
+    space = document.createElement("div");
+    space.classList.add("menu-space");
+
+    const form = document.createElement("form");
+    form.action = "php/API/changeCredentials.php";
+    form.method = "POST";
+
+    const phantomCheck = document.createElement("input");
+
+    phantomCheck.type = "checkbox";
+    phantomCheck.name = phantomCheck.id = "deleteCheck";
+    phantomCheck.value = "1";
+    phantomCheck.toggleAttribute("checked", true);
+    phantomCheck.toggleAttribute("hidden", true);
+    
+    form.appendChild(phantomCheck);
+    
+    el = document.createElement("p");
+    el.innerText = "Eliminando l'account ";
+    const boldText = document.createElement("b");
+    boldText.innerText = "perderai in maniera definitiva tutti i tuoi progressi";
+    el.appendChild(boldText);
+    el.appendChild(document.createTextNode(", sei sicuro di volerlo fare?"));
+    form.appendChild(el);
+
+    const aside = document.createElement("aside");
+    el = createButton("submit", "submit", "Elimina");
+    aside.appendChild(el);
+
+    el = createButton("button", "backToMenu", "Annulla", showMenu);
+    aside.appendChild(el);
+    form.appendChild(aside);
+
+    space.appendChild(form);
+    page.appendChild(space);
+
+    while(module.childElementCount){
+        module.removeChild(module.lastChild);
+    }
+
+    module.appendChild(page);
 }
 
 /**
@@ -694,8 +857,8 @@ function updateShopTimer(){
 }
 
 /**
- * TODO
+ * Mostra un messaggio di placeholder per l'aggiunta di un nuovo personaggio
  */
-function changeUsername(){
-    
+function addNewCharacter(){
+    showMessage("Eh, volevi!!");
 }

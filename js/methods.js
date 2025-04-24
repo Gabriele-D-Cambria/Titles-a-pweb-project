@@ -21,17 +21,18 @@ export const ERROR_MESSAGES = {
 
 /**
  * Crea un input per l'username con le relative proprietà e validazioni.
- * @param {String} id - L'id da assegnare all'input.
+ * @param {String} id - L'id da assegnare all'input.ù
+ * @param {String} labelTxt - Il testo del label associato.
  * @returns {Object} Un oggetto contenente il label e l'input creati.
  */
-export function createUsernameInput(id){
+export function createUsernameInput(labelTxt){
     const label = document.createElement("label");
     const input = document.createElement("input");
     
-    label.for = id;
-    label.innerText = "Username:";
+    label.for = "username";
+    label.innerText = labelTxt;
     input.type = "text";
-    input.id = input.name = id;
+    input.id = input.name = "username";
     input.toggleAttribute("required", true);
 
     input.pattern = patterns.USERNAME;
@@ -48,29 +49,27 @@ export function createUsernameInput(id){
 
 /**
  * Crea un input per la password con un pulsante per mostrare/nascondere il contenuto.
- * @param {String} id - L'id da assegnare all'input.
  * @param {String} labelTxt - Il testo del label associato.
- * @param {String} title - Il titolo da mostrare come tooltip.
  * @param {Boolean} [isConfirm=false] - Indica se si tratta di un campo di conferma password.
  * @returns {Object} Un oggetto contenente il label e il contenitore della password.
  */
-export function createPasswordInput(id, labelTxt, title, isConfirm = false) {
+export function createPasswordInput(labelTxt, isConfirm = false) {
     const label = document.createElement("label");
     const passwordContainer = document.createElement("div");
     const input = document.createElement("input");
     const toggleBtn = document.createElement("button");
 
-    label.for = id;
+    label.for = (isConfirm)? "confirmPassword" : "password";
     label.innerText = labelTxt;
 
     passwordContainer.classList.add("password-container");
 
     input.type = "password";
-    input.id = input.name = id;
+    input.id = input.name = (isConfirm)? "confirmPassword" : "password";
     input.toggleAttribute("required", true);
     input.pattern = patterns.PASSWORD;
 
-    input.title = title;
+    input.title = (isConfirm)? "Deve essere uguale alla password." : "Deve contenere almeno 8 caratteri, una lettera maiuscola, una minuscola, un numero e un carattere speciale.";
 
     input.placeholder = isConfirm ? "Conferma" : "Password";
     input.addEventListener("input", validateForm);
@@ -243,18 +242,4 @@ export function createElement(type, className, id, innerText){
         el.innerText = innerText;
 
     return el;
-}
-
-/**
- *  TODO: Da fare
- */
-export function changePassword(){
-    showMessage("12");
-}
-
-/**
- * TODO: Da fare
- */
-export function deleteAccount(){
-    showMessage("123");
 }

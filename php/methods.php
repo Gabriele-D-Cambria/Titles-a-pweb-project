@@ -4,11 +4,12 @@ require_once "definitions.php";
 
 /**
  * Funzione che reindirizza un errore
- * @param string $errorCode codice di errore da passare alla 'error page.php'
+ * @param string $errorCode codice di errore da passare alla "errorPage.php"
+ * @param string $prefix path che porta alla "errorPage.php"
  * @return never
  */
-function pageError($errorCode){
-    header("Location: error page.php/?error_code=". $errorCode);
+function pageError($errorCode, $prefix = ""){
+    header("Location: ". $prefix ."errorPage.php/?error_code=". $errorCode);
     exit();
 }
 

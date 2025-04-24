@@ -1,6 +1,6 @@
-.menu-page, .username-page, .password-page{
+.menu-page, .username-page, .password-page, .delete-page{
     aspect-ratio: 1/1;
-    height: 50%;
+    height: 60%;
 
     display: grid;
     grid-template-columns: 1fr;
@@ -13,11 +13,11 @@
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
-.menu-page *, .username-page *, .password-page *{
+.menu-page *, .username-page *, .password-page *, .delete-page *{
     margin: 0;
 }
 
-.menu-page p, .username-page p, .password-page p{
+.menu-page p, .username-page p, .password-page p, .delete-page p{
     display: flex;
     justify-content: center;
     align-items: center;
@@ -55,7 +55,7 @@
     grid-template-rows: 1fr 2fr;
 }
 
-.username-page .header{
+.username-page .header, .delete-page .header{
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -63,28 +63,24 @@
     color: #e0e0e0;
 }
 
-.username-page .header *{
+.username-page .header *, .delete-page p{
     color: #e0e0e0;
     margin: 0;
+    text-align: center;
+}
+
+.delete-page .header h2{
+    color: red;
 }
 
 .header h2{
     display: flex;
     align-items: center;
     justify-content: center;
+    text-align: center;
 }
 
-/* .username-page form, .password-page form{
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    row-gap: 20px;
-} */
-
-.username-page form, .password-page form{
+.menu-space form{
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -96,7 +92,7 @@
     align-items: center;
 }
 
-.username-page form>*, .password-page form>*{
+.menu-space form>*{
     flex: 0 0 45%;
     box-sizing: border-box;
     align-items: center;
@@ -122,4 +118,36 @@
      1px -1px 0 #1e1e1e,
     -1px  1px 0 #1e1e1e,
      1px  1px 0 #1e1e1e;
+}
+
+.menu-space form aside{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    height: 100%;
+}
+
+.delete-page b{
+    display: contents;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.delete-page #submit{
+    background-color: red;
+    transition: all ease-in-out;
+}
+
+.delete-page #submit:hover{
+    background-color: rgb(140, 0, 0);
+    animation: delete-shake 1.5s ease-in-out infinite;
+}
+
+@keyframes delete-shake {
+    0%   { transform: translateX( 0px); }
+    25%  { transform: translateX(-5px); }
+    50%  { transform: translateX( 5px); }
+    75%  { transform: translateX(-5px); }
+    100% { transform: translateX( 0px); }
 }

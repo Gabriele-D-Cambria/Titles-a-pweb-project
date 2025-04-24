@@ -36,6 +36,9 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
     <link rel="stylesheet" href="css/shop.css">
     <link rel="stylesheet" href="css/menu.css">
     <script type="module" src="js/dashboard.js"></script>
+    <script>
+        const USERNAME = "<?php echo $user["username"]?>";
+    </script>
     <title>Dashboard</title>
 </head>
 <body>
@@ -54,7 +57,7 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
                 <img src="images/profilepic.svg" alt="Profile Pic">
             </div>
             <div class="username-box">
-                <p class="Username"><strong><?php echo $user['username'];?></strong></p>
+                <p><?php echo $user['username'];?></p>
             </div>
     </div> 
         <div class="coin-display">
