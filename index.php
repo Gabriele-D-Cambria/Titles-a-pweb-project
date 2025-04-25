@@ -1,8 +1,15 @@
 <?php
-    session_start();
 
-    $error = isset($_GET["error"]) ? $_GET["error"] : null;
-    $isLogin = isset($_GET["isLogin"]) ? ($_GET["isLogin"] === 'true' || $_GET["isLogin"] === '1') : null;
+session_start();
+
+$error = isset($_GET["error"]) ? $_GET["error"] : null;
+$isLogin = isset($_GET["isLogin"]) ? ($_GET["isLogin"] === 'true' || $_GET["isLogin"] === '1') : null;
+
+$message = null;
+if(isset($_SESSION["message"])){
+    $message = $_SESSION["message"];
+    unset($_SESSION["message"]);
+}
 ?>
 
 
@@ -18,6 +25,7 @@
     <script>
         const error = "<?php echo $error; ?>";
         const isLogin = <?php echo json_encode($isLogin); ?>;
+        const message = <?php echo json_encode($message)?>;
     </script>
     <title>Titles</title>
 </head>

@@ -1,6 +1,6 @@
 "use strict";
 
-import {showModule, closeModule, showMessage, createElement, createUsernameInput, createButton, createPasswordInput } from "./methods.js";
+import {showModule, closeModule, showMessage, createElement, createUsernameInput, createButton, createPasswordInput, IMPORTANT_MESSAGE } from "./methods.js";
 
 /**
  * Indica la funzione di listener per rimuovere i moduli in sovraimpressione
@@ -37,6 +37,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("shop-btn").addEventListener("click", () => {showShop()});
     document.getElementById("menu").addEventListener("click", () => {showMenu()});
     document.addEventListener("keypress", handleKeyPress);
+
+    if(message){
+        showMessage(message, IMPORTANT_MESSAGE);
+    }
 });
 
 /**
@@ -77,9 +81,21 @@ function showMenu(){
     page.classList.add("menu-page");
 
     const menuOptions = [
-        { id: "changeUsr", text: "Cambia Username", action: changeUsername },
-        { id: "changePwd", text: "Cambia Password", action: changePassword },
-        { id: "deleteAccount", text: "Elimina Account", action: deleteAccount }
+        { 
+            id: "changeUsr",
+            text: "Cambia Username",
+            action: changeUsername
+        },
+        { 
+            id: "changePwd",
+            text: "Cambia Password",
+            action: changePassword
+        },
+        { 
+            id: "deleteAccount",
+            text: "Elimina Account",
+            action: deleteAccount
+        }
     ];
 
     menuOptions.forEach((option) => {
@@ -132,7 +148,7 @@ function changeUsername(){
 
     const form = document.createElement("form");
     form.classList.add("username");
-    form.action = "php/API/changeCredentials.php";
+    form.action = "php/changeCredentials.php";
     form.method = "POST";
 
     el = createUsernameInput("Nuovo Username:");
@@ -182,7 +198,7 @@ function changePassword(){
 
     const form = document.createElement("form");
     form.classList.add("password");
-    form.action = "php/API/changeCredentials.php";
+    form.action = "php/changeCredentials.php";
     form.method = "POST";
 
     el = createPasswordInput("Nuova Password:", false);
@@ -238,9 +254,10 @@ function deleteAccount(){
     space.classList.add("menu-space");
 
     const form = document.createElement("form");
-    form.action = "php/API/changeCredentials.php";
+    form.action = "php/changeCredentials.php";
     form.method = "POST";
 
+    // Lo sfrutto per capire se la richiesta è o meno di elimina account
     const phantomCheck = document.createElement("input");
 
     phantomCheck.type = "checkbox";
@@ -260,7 +277,14 @@ function deleteAccount(){
     form.appendChild(el);
 
     const aside = document.createElement("aside");
+    aside.classList.add("button-holder");
+
+    el = createPasswordInput("Conferma con Password:");
+    aside.appendChild(el.label);
+    aside.appendChild(el.passwordContainer);
+
     el = createButton("submit", "submit", "Elimina");
+    el.toggleAttribute("disabled", true);
     aside.appendChild(el);
 
     el = createButton("button", "backToMenu", "Annulla", showMenu);

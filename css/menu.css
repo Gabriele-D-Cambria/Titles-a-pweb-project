@@ -120,7 +120,11 @@
      1px  1px 0 #1e1e1e;
 }
 
-.menu-space form aside{
+.menu-space form label{
+    text-align: center;
+}
+
+.menu-space form .button-holder{
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -134,12 +138,12 @@
     font-style: italic;
 }
 
-.delete-page #submit{
+.delete-page #submit:not(:disabled){
     background-color: red;
     transition: all ease-in-out;
 }
 
-.delete-page #submit:hover{
+.delete-page #submit:hover:not(:disabled){
     background-color: rgb(140, 0, 0);
     animation: delete-shake 1.5s ease-in-out infinite;
 }

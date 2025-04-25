@@ -67,7 +67,12 @@
                 <form action="" method="post">
                     <input type="checkbox" name="deleteCheck" id="deleteCheck" value="true" checked hidden>
                     <p>Eliminando l'account <b>perderai in maniera definitiva tutti i tuoi progressi</b>, sei sicuro di volerlo fare?</p>
-                    <aside>
+                    <aside class="button-holder">
+                        <label>Conferma con Password:</label>
+                        <div class="password-container">
+                            <input type="password" name="password" id="password" required="" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&amp;])[A-Za-z\d@$!%*?&amp;]{8,15}$" title="Deve contenere almeno 8 caratteri, una lettera maiuscola, una minuscola, un numero e un carattere speciale." placeholder="Password">
+                            <button type="button" class="toggle-password">Mostra</button>
+                        </div>
                         <button id="submit" type="submit">Elimina</button>
                         <button id="backToMenu">Annulla</button>
                     </aside>

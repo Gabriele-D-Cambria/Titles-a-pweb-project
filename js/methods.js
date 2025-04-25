@@ -7,6 +7,8 @@ export const patterns = {
     //? endsource
 };
 
+export const IMPORTANT_MESSAGE = 4000;
+
 /**
  * Crea un input per l'username con le relative proprietà e validazioni.
  * @param {String} id - L'id da assegnare all'input.ù
@@ -194,8 +196,9 @@ export function closeModule(event, id, override = false, showCoins = false) {
 /**
  * Mostra un messaggio temporaneo sullo schermo che si rimuove automaticamente dopo 5 secondi.
  * @param {String} messaggio - Il testo del messaggio da visualizzare.
+ * @param {Number} showTime - Per quanto tempo il messaggio rimane visibile
  */
-export function showMessage(messaggio) {
+export function showMessage(messaggio, showTime = 1000) {
     let messageContainer = document.createElement("div");
     messageContainer.id = "messageBox";
     messageContainer.classList.add("messaggio");
@@ -205,11 +208,11 @@ export function showMessage(messaggio) {
     setTimeout(() => {
         messageContainer.style.opacity = 0;
         messageContainer.style.transform = "translateY(-20px)";
-    }, 1000);
+    }, showTime);
 
     setTimeout(() => {
         document.body.removeChild(messageContainer);
-    }, 4000);
+    }, showTime + 3000);
 }
 
 /**

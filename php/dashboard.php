@@ -7,6 +7,13 @@ if(!isset($_SESSION['account'])){
     pageError("401");
 }
 
+
+$message = null;
+if(isset($_SESSION["message"])){
+    $message = $_SESSION["message"];
+    unset($_SESSION["message"]);
+}
+
 $account = unserialize($_SESSION['account']);
 $user = $account->getAll();
 
@@ -38,6 +45,7 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
     <script type="module" src="js/dashboard.js"></script>
     <script>
         const USERNAME = "<?php echo $user["username"]?>";
+        const message = <?php echo json_encode($message)?>;
     </script>
     <title>Dashboard</title>
 </head>

@@ -1,9 +1,18 @@
 <?php
 
 session_start();
-session_unset();
 
+$message = null;
+if(isset($_SESSION["message"]))
+	$message = $_SESSION["message"];
+
+session_unset();
 session_destroy();
+
+session_start();
+if($message)
+	$_SESSION["message"] = $message;
+
 header("Location: ../index.php");
 exit();
 
