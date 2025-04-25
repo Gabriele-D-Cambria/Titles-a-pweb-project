@@ -5,8 +5,8 @@ USE cambria_672642;
 
 CREATE TABLE Account (
     ID INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    Username VARCHAR(50) NOT NULL UNIQUE,
-    Password VARCHAR(255) NOT NULL,
+    Username VARCHAR(50) COLLATE utf8_bin NOT NULL UNIQUE,
+    Password VARCHAR(255) COLLATE utf8_bin NOT NULL,
     Monete INT NOT NULL DEFAULT 10,
     RefreshNegozio DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -21,10 +21,10 @@ CREATE TABLE ItemType(
 
 CREATE TABLE Item (
     ID INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    Nome VARCHAR(100) NOT NULL,
-    Descrizione VARCHAR(60) NOT NULL,
+    Nome VARCHAR(100) COLLATE utf8_bin NOT NULL,
+    Descrizione VARCHAR(60) COLLATE utf8_bin NOT NULL,
     Elemento VARCHAR(50),
-    PathImmagine VARCHAR(255) DEFAULT NULL,
+    PathImmagine VARCHAR(255) COLLATE utf8_bin DEFAULT NULL,
     Tipologia VARCHAR(50) NOT NULL,
     Costo INT NOT NULL,
     Danno INT DEFAULT 0,
@@ -46,7 +46,7 @@ CREATE TABLE Inventario (
 );
 
 CREATE TABLE Personaggi (
-    Nome VARCHAR(100) NOT NULL,
+    Nome VARCHAR(100) COLLATE utf8_bin NOT NULL,
     Proprietario INT NOT NULL,
     Forza INT NOT NULL,
     Destrezza INT NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE Personaggi (
 );
 
 CREATE TABLE Zaino (
-    Personaggio VARCHAR(100) NOT NULL,
+    Personaggio VARCHAR(100) COLLATE utf8_bin NOT NULL,
     Proprietario INT NOT NULL,
     Oggetto INT NOT NULL,
     Quantita INT NOT NULL DEFAULT 1,
@@ -75,9 +75,9 @@ CREATE TABLE Zaino (
 );
 
 CREATE TABLE Combattimenti (
-    Giocatore1_Nome VARCHAR(100) NOT NULL,
+    Giocatore1_Nome VARCHAR(100) COLLATE utf8_bin NOT NULL,
     Giocatore1_Proprietario INT NOT NULL,
-    Giocatore2_Nome VARCHAR(100) NOT NULL,
+    Giocatore2_Nome VARCHAR(100) COLLATE utf8_bin NOT NULL,
     Giocatore2_Proprietario INT NOT NULL,
     Vittoria_Giocatore1 BOOLEAN NOT NULL,	    -- Riferito a Giocatore1
     Data DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
