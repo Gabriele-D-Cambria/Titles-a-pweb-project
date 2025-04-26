@@ -1,0 +1,42 @@
+<svg
+	xmlns="http://www.w3.org/2000/svg"
+	width="128"
+	height="192"
+	viewBox="0 0 128 192"
+	fill="none"
+	stroke="#1f1f1f"
+	stroke-width="2"
+	stroke-linecap="round"
+	stroke-linejoin="round">
+
+	<!-- Testa -->
+	<ellipse rx="20.8" ry="24" cx="64" cy="48"/>
+
+	<!-- Corpo -->
+	<line x1="64" x2="64" y1="72" y2="136"/>
+
+	<!-- Collo -->
+	<line x1="64" x2="64" y1="72" y2="94.4"/>
+	
+	<!-- Spalle -->
+	<line x1="41.6" x2="80" y1="94.4" y2="94.4" />
+	
+	<!-- Braccio dx -->
+	<line x1="80" x2="102.4" y1="94.4" y2="78.4" />
+
+	<!-- Braccio sx -->
+	<line x1="41.6" x2="19.2" y1="94.4" y2="110.4" />
+
+	<!-- Gamba dx -->
+	<line x1="64" x2="80" y1="136" y2="152" />
+	
+	<!-- Piede dx -->
+	<line x1="80" x2="96" y1="152" y2="158.4" />
+
+	<!-- Gamba sx -->
+	<line x1="64" x2="48" y1="136" y2="148.4" />
+
+	<!-- Piede sx -->
+	<line x1="48" x2="32" y1="148.4" y2="154.8" />
+
+</svg>

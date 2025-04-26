@@ -50,7 +50,7 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
         <img src="images/menu.svg" alt="menu item" class="clickable">
         <div class="user-info">
             <div class="user-pic">
-                <img src="images/profilepic.svg" alt="Profile Pic">
+                <img src="images/pics/profilepic.svg" alt="Profile Pic">
             </div>
             <div class="username-box">
                 <p class="Username"><strong><?php echo $user['username'];?></strong></p>
