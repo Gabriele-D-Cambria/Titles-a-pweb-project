@@ -1,96 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <base href="http://localhost/cambria_672642/">
+    <!-- <base href="http://localhost/cambria_672642/"> -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/shop.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/shop.css">
     <title>Document</title>
+    <style>
+        body{
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0;
+        }
+        img{
+            width: 200px;
+            min-height: 300px;
+            margin: 0;
+            animation: ani 1.5s ease-in-out;
+            
+        }
 
+        @keyframes ani {
+            0% {
+            width: 200px;
+            height: 300px;
+            transform: translate(0, 0);
+            }
+            25% {
+            width: 150px;
+            height: 300px;
+            object-fit: fill;
+            transform: translate(-20px, 0);
+            }
+            50% {
+            /* width: 200px; */
+            height: 300px;
+            transform: translate(20px, 0);
+            }
+            75% {
+            /* width: 180px; */
+            height: 300px;
+            transform: translate(-20px, 0);
+            }
+            100% {
+            /* width: 200px; */
+            height: 300px;
+            transform: translate(0, 0);
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="module" style="visibility: visible; opacity: 1;">
-        <div class="shop-page">
-            <main class="shop-container">
-                <header class="timer-container">
-                    <p class="timer">Timer &emsp; - &emsp; <span id="timer">00:00</span></p>
-                </header>
-                <div class="shop-slots">
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
-                    </div>
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
-                    </div>
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
-                    </div>
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
-                    </div>
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
-                    </div>
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
-                    </div>
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
-                    </div>
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
-                    </div>
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
-                    </div>
-                    <div class="shop-slot">
-                        <img src="images/items/weapons/acqua.svg">
-                        <figcaption>50🪙</figcaption>
-                    </div>
-                </div>
-            </main>
-            <aside id="shop-info">
-                <header>
-                    <p>Armatura di Fuoco</p>
-                    <p>armatura</p>
-                </header>
-                <figure>
-                    <img src="images/items/armors/fuoco.svg" alt="Resistente al calore.">
-                    <figcaption>Fuoco</figcaption>
-                </figure>
-                <p class="description">Resistente al calore.</p>
-                <main>
-                    <table>
-                    <tr>
-                        <td>Bonus Armatura </td>
-                        <td>4</td>
-                    </tr>
-                    <tr>
-                        <td>Modificatore FOR</td>
-                        <td>0</td>
-                    </tr>
-                    <tr>
-                        <td>Modificatore DEX</td>
-                        <td>-1</td>
-                    </tr>
-                    </table>
-                </main>
-                <footer>
-                    <button id="buy-btn">Compra: 20🪙</button>
-                    <button>Chiudi</button>
-                </footer>
-            </aside>
-        </div>
-    </div>
+    <img src="./images/characters/acqua.svg" alt="pg">
 </body>
 </html>

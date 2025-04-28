@@ -1,5 +1,10 @@
 -- Inserimento Elementi
-INSERT INTO Element (Nome) VALUES ('Acqua'), ('Fuoco'), ('Terra'), ('Elettro'), ('Aria');
+INSERT INTO Element (Nome, PrevaleSu, PrevalsaDa) VALUES
+('Acqua', 'Fuoco', 'Elettro'),
+('Fuoco', 'Aria', 'Acqua'),
+('Terra', 'Elettro', 'Aria'),
+('Elettro', 'Acqua', 'Terra'),
+('Aria', 'Terra', 'Fuoco');
 
 -- Inserimento Tipologie
 INSERT INTO ItemType (Nome) VALUES ('arma'), ('armatura'), ('box'), ('pozione');
