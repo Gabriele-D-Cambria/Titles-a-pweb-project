@@ -1,6 +1,6 @@
 "use strict";
 
-import {closeModule, showModule, createUsernameInput, createPasswordInput, createButton, showMessage, IMPORTANT_MESSAGE} from './methods.js'
+import {closeModule, showModule, createUsernameInput, createPasswordInput, createButton, showMessage, IMPORTANT_MESSAGE, errorHandler} from './methods.js'
 
 let moduleListener = null;
 const LOGIN_PAGE = "php/login.php";
@@ -16,8 +16,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if(message){
         showMessage(message, IMPORTANT_MESSAGE);
     }
-    else if(error){
-        handleError(error, isLogin);
+    
+    if(loginError){
+        handleFormError(loginError);
     }
 
 });
@@ -99,18 +100,18 @@ function createModule(login) {
 }
 
 
-function handleError(error, isLogin){
-    const errorMessage = error;
+function handleFormError(loginError){
 
     let module = document.getElementById("loginModule");
     if(!module.firstElementChild){
-        createModule(isLogin);
+        createModule(loginError.isLogin);
     }
 
-    module = module.firstElementChild;
-    const errorP = document.createElement("p");
-    errorP.innerText = errorMessage;
-    errorP.classList.add("error-message");
-    module.appendChild(errorP);
+    errorHandler(loginError);
 
+    // module = module.firstElementChild;
+    // const errorP = document.createElement("p");
+    // errorP.innerText = errorMessage;
+    // errorP.classList.add("error-message");
+    // module.appendChild(errorP);
 }

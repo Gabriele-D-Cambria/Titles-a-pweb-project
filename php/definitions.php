@@ -1,4 +1,7 @@
 <?php
+if (basename($_SERVER['PHP_SELF']) === 'definitions.php') {
+    pageError(403);
+}
 
 define("CONN_STRING", "mysql:host=localhost;dbname=lista_iscritti");
 define("DATABASE", "cambria_672642");
@@ -17,17 +20,17 @@ define("VALID_PASSWORD", "Password1!");
 define('ERROR_TYPES', [
     'invalid_username'          => "Username non valido. Deve iniziare con una lettera e avere tra 3 e 10 caratteri.",
     'username_taken'            => "Username già esistente.",
-    'username_same_as_current'   => "Stai già utilizzando questo username",
-    'username_not_found'        => "L'username non esiste",
+    'username_same_as_current'  => "Stai già utilizzando questo username.",
+    'username_not_found'        => "L'username non esiste.",
     'invalid_password'          => "Password non valida. Deve contenere almeno 8 caratteri e non più di 15, una lettera maiuscola, una minuscola, un numero e un carattere speciale.",
-    'password_mismatch'         => "Le password non corrispondevano.",
-    'wrong_password'            => "Password errata. Ritenta",
-    'wrong_password_on_delete'  => "Password errata.\nAccount non eliminato ",
+    'password_mismatch'         => "Le password non corrispondono.",
+    'wrong_password'            => "Password errata, ritenta.",
+    'wrong_password_on_delete'  => "Password errata.\nAccount non eliminato.",
     'password_same_as_current'  => "La nuova password non deve essere uguale a quella attuale.",
     'registration_failed'       => "Registrazione fallita. Riprova.",
     'connection_failed'         => "Il server non è al momento disponibile.\nRiprovare tra un po'.",
-    'invalid_param'             => "I parametri forniti non sono corretti",
-    'update_failed'             => "C'è stato un problema durante l'aggiornamento"
+    'invalid_param'             => "I parametri forniti non sono corretti.",
+    'update_failed'             => "C'è stato un problema durante l'aggiornamento.\nRiprova tra un po'."
 ]);
 
 /**

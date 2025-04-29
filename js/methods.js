@@ -11,7 +11,7 @@ export const IMPORTANT_MESSAGE = 4000;
 
 /**
  * Crea un input per l'username con le relative proprietà e validazioni.
- * @param {String} id - L'id da assegnare all'input.ù
+ * @param {String} id - L'id da assegnare all'input.
  * @param {String} labelTxt - Il testo del label associato.
  * @returns {Object} Un oggetto contenente il label e l'input creati.
  */
@@ -202,6 +202,9 @@ export function showMessage(messaggio, showTime = 1000) {
     let messageContainer = document.createElement("div");
     messageContainer.id = "messageBox";
     messageContainer.classList.add("messaggio");
+    if(showTime === IMPORTANT_MESSAGE){
+        messageContainer.classList.add("errore");
+    }
     messageContainer.innerText = messaggio;
     document.body.appendChild(messageContainer);
 
@@ -216,11 +219,13 @@ export function showMessage(messaggio, showTime = 1000) {
 }
 
 /**
- * Funzione che si occupa di visualizzare un messaggio a video, e fornire ulteriori informazioni nella console
- * @param {Object} error 
+ * Gestisce un errore mostrando un messaggio all'utente e registrando l'errore nella console.
+ * @param {Object} error - Oggetto JSON che rappresenta l'errore da gestire, deve necessariamente avere i due campi sotto, può averne altri opzionali che non verranno valutati
+ * @param {string} error[].message - Il messaggio descrittivo dell'errore.
+ * @param {string|number} error[].errorcode - Il codice identificativo dell'errore.
  */
 export function errorHandler(error){
-    showMessage(error.message);
+    showMessage(error.message, IMPORTANT_MESSAGE);
     console.error(`Errore: ${error.errorcode}: ${error.message}`);
 }
 

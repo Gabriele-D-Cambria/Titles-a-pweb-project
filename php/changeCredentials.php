@@ -1,4 +1,8 @@
 <?php
+if (basename($_SERVER['PHP_SELF']) === 'changeCredentials.php') {
+    pageError(403);
+}
+
 session_start();
 require_once "methods.php";
 

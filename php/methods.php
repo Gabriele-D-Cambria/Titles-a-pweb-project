@@ -1,4 +1,8 @@
 <?php
+if (basename($_SERVER['PHP_SELF']) === 'methods.php') {
+    pageError(403);
+}
+
 ini_set("display_errors", "0");
 require_once "definitions.php";
 
@@ -137,18 +141,6 @@ function getData($username){
     }
 }
 
-/**
- * Funzione che termina la procedura di login riportando un errore tramite GET
- * @param string $errorType indica il tipo di errore
- * @param bool $isLogin indica se l'errore si è effettuato durante il login o il sign-up
- */
-function terminateLogin($errorType, $isLogin){
-    $error = urlencode(ERROR_TYPES[$errorType] ?? $errorType);
-    $isLogin = urlencode($isLogin);
-
-    header("Location: ../index.php?error=" . $error . "&isLogin=". $isLogin);
-    exit();
-}
 
 /**
  * Recupera l'invetario di un'account dal database

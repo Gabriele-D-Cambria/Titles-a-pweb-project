@@ -1,96 +1,117 @@
 <?php
+if (basename($_SERVER['PHP_SELF']) === 'login.php') {
+    pageError(403);
+}
+
 session_start();
 session_unset();
 require_once "methods.php";
 
-if(!isset($_SERVER['REQUEST_METHOD'])){
+if(!isset($_SERVER['REQUEST_METHOD']) || $_SERVER["REQUEST_METHOD"] !== "POST"){
     pageError("403");
     exit;
 }
-elseif($_SERVER["REQUEST_METHOD"] == "POST"){
-    $username = $_POST["username"] ?? '';
-    $password = $_POST["password"] ?? '';
-    $confirmPassword = $_POST["confirmPassword"] ?? '';
 
-    $isLogin = empty($confirmPassword);
+$username = $_POST["username"] ?? '';
+$password = $_POST["password"] ?? '';
+$confirmPassword = $_POST["confirmPassword"] ?? '';
 
+$isLogin = empty($confirmPassword);
+
+$stmtSearch = null;
+$stmtInsert = null;
+
+try{
     $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
     if($conn->connect_error){
-        terminateLogin("connection_failed", $isLogin);
+        throw new Exception("connection_failed", 500);
     }
 
     $errorType = validateInputs($username, $password, $confirmPassword);
-
     if(!empty($errorType)){
-        $conn->close();
-        terminateLogin($errorType, $isLogin);
+        throw new Exception($errorType, 400);
     }
 
     if(empty($confirmPassword)){
-        $stmt = $conn->prepare("SELECT * FROM Account WHERE Username = ?");
-        $stmt->bind_param("s", $username);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $stmt->close();
+        // Login
+        $sql = "SELECT *
+                FROM Account
+                WHERE Username = ?";
+        $stmtSearch = $conn->prepare($sql);
+        $stmtSearch->bind_param("s", $username);
+        $stmtSearch->execute();
+        $result = $stmtSearch->get_result();
 
         if($result->num_rows === 0){
-            $conn->close();
-            terminateLogin("username_not_found", $isLogin);
+            throw new Exception("username_not_found", 404);
         }
-        else{
-            $data = $result->fetch_assoc();
-            $hashedPassword = $data['Password'];
 
-            if(password_verify($password, $hashedPassword)){
-                $conn->close();
-                startSession($username);
-            }
-            else{
-                $conn->close();
-                terminateLogin("wrong_password", $isLogin);
-            }
+        $data = $result->fetch_assoc();
+        $hashedPassword = $data['Password'];
+
+        if(!password_verify($password, $hashedPassword)){
+            throw new Exception("wrong_password", 401);
         }
+
+        startSession($username);
     }
     else{
-        $stmt = $conn->prepare("SELECT ID FROM Account WHERE Username = ?");
-        $stmt->bind_param("s", $username);
-        $stmt->execute();
-        $stmt->store_result();
+        // Sign Up
+        $sql = "SELECT ID
+                FROM Account
+                WHERE Username = ?";
 
-        if($stmt->num_rows() > 0){
-            $stmt->close();
-            $conn->close();
-            terminateLogin("username_taken", $isLogin);
+        $stmtSearch = $conn->prepare($sql);
+        $stmtSearch->bind_param("s", $username);
+        $stmtSearch->execute();
+        $result = $stmtSearch->get_result();
+
+        if($result->num_rows !== 0){
+            throw new Exception("username_taken", 409);
         }
-        else{
-            $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-            $stmt = $conn->prepare("INSERT INTO Account (Username, Password) VALUES (?, ?)");
-            $stmt->bind_param("ss", $username, $hashedPassword);
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-            if($stmt->execute()){
-                $stmt->close();
-                $conn->close();
-                startSession($username);
-            }
-            else{
-                $stmt->close();
-                $conn->close();
-                terminateLogin("registration_failed", $isLogin);
-            }
+        $sqlInsert = "INSERT INTO Account (Username, Password) VALUES (?, ?)";
+
+        $stmtInsert = $conn->prepare($sqlInsert);
+
+        $stmtInsert->bind_param("ss", $username, $hashedPassword);
+
+        if(!$stmtSearch->execute()){
+            throw new Exception("registration_failed", 500);
         }
+        
+        startSession($username);
     }
-    
-    
 }
-else{
-    pageError("403");
+catch(Exception $e){
+    $errorType = $e->getMessage();
+    $login = [
+        'message' => ERROR_TYPES[$errorType] ?? $errorType,
+        'errorcode' => $e->getCode(),
+        'isLogin' => $isLogin
+    ];
+
+    $_SESSION['loginError'] = $login;
+
+    error_log("Errore login [" .$login['code'] ."]: " . $login['message']);
+
+    http_response_code($login['code']);
+    header("Location: ../index.php");
+    exit;
 }
+finally{
+    if($stmtSearch)   $stmtSearch->close();
+    if($stmtInsert)   $stmtInsert->close();
+    $conn->close();
+}
+
 
 function startSession($username){
-    $account = getData($username);
-    $_SESSION['account'] = serialize($account);
-    
-    header("Location: dashboard.php");
-    exit();
+$account = getData($username);
+$_SESSION['account'] = serialize($account);
+
+header("Location: dashboard.php");
+exit;
 }

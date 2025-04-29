@@ -1,6 +1,5 @@
 <?php
 session_start();
-//! ini_set("display_errors", "0");
 require_once "methods.php";
 
 if(!isset($_SESSION['account'])){

@@ -317,7 +317,7 @@ function showInventory(newItems = false){
         .then(response => response.json())
         .then(risposta =>{
             document.body.classList.remove("caricamento");
-            if(risposta.error !== undefined){
+            if(risposta.error !== undefined && risposta.error){
                 throw risposta.error;
             }
             const data = risposta["inventario"];
@@ -436,6 +436,7 @@ function showShop(){
     const module = document.getElementById("shopModule");
     currentlyOpened = module.id;
 
+    shownItem = null;
     if(shopTimerInterval !== null){
         clearInterval(shopTimerInterval);
         shopTimerInterval = null;
@@ -446,7 +447,7 @@ function showShop(){
         .then(response => response.json())
         .then(risposta => {
             document.body.classList.remove("caricamento");
-            if(risposta.error !== undefined){
+            if(risposta.error !== undefined && risposta.error){
                 throw risposta.error;
             }
             const data = risposta.items;
@@ -727,7 +728,7 @@ function sellItem(){
     .then(response => response.json())
     .then(data => {
         document.body.classList.remove("caricamento");
-        if(data.error !== undefined){
+        if(data.error !== undefined && data.error){
             throw data.error;
         }
         else{
@@ -769,7 +770,7 @@ function buyItem(){
     .then(response => response.json())
     .then(data => {
         document.body.classList.remove("caricamento");
-        if(data.error !== undefined){
+        if(data.error !== undefined && data.error){
             throw data.error;
         }
         if(data.errore){
@@ -820,7 +821,7 @@ function openBox(){
     .then(response => response.json())
     .then(data =>{
         document.body.classList.remove("caricamento");
-        if(data.error !== undefined){
+        if(data.error !== undefined && data.error){
             throw data.error;
         }
         if(data.error){
