@@ -1,6 +1,6 @@
 "use strict";
 
-import {showModule, closeModule, showMessage, createElement, createUsernameInput, createButton, createPasswordInput, IMPORTANT_MESSAGE } from "./methods.js";
+import {showModule, closeModule, showMessage, createElement, createUsernameInput, createButton, createPasswordInput, IMPORTANT_MESSAGE, errorHandler } from "./methods.js";
 
 /**
  * Indica la funzione di listener per rimuovere i moduli in sovraimpressione
@@ -317,8 +317,8 @@ function showInventory(newItems = false){
         .then(response => response.json())
         .then(risposta =>{
             document.body.classList.remove("caricamento");
-            if(risposta.ServerError !== undefined){
-                throw risposta.ServerError;
+            if(risposta.error !== undefined){
+                throw risposta.error;
             }
             const data = risposta["inventario"];
             const MAX_SIZE = risposta["MAX_SIZE"];
@@ -366,8 +366,7 @@ function showInventory(newItems = false){
             window.addEventListener("click", moduleListener);
         })
         .catch(error => {
-            showMessage("Il server non è al momento raggiungibile, riprovare dopo");
-            console.error('Errore: ', error);
+            errorHandler(error);
         })
 
 }
@@ -447,8 +446,8 @@ function showShop(){
         .then(response => response.json())
         .then(risposta => {
             document.body.classList.remove("caricamento");
-            if(risposta.ServerError !== undefined){
-                throw risposta.ServerError;
+            if(risposta.error !== undefined){
+                throw risposta.error;
             }
             const data = risposta.items;
             const remainingTime = risposta.remainingTime;
@@ -510,8 +509,7 @@ function showShop(){
             window.addEventListener("click", moduleListener);
         })
         .catch(error => {
-            showMessage("Il server non è al momento raggiungibile, riprovare dopo");
-            console.error("Errore: ", error);
+            errorHandler(error);
         })
 }
 
@@ -729,11 +727,8 @@ function sellItem(){
     .then(response => response.json())
     .then(data => {
         document.body.classList.remove("caricamento");
-        if(data.ServerError !== undefined){
-            throw data.ServerError;
-        }
-        if(data.error){
-            showMessage("Error: " + data.error);
+        if(data.error !== undefined){
+            throw data.error;
         }
         else{
             updateCoins(data.guadagno);
@@ -745,8 +740,7 @@ function sellItem(){
         }
     })
     .catch(error => {
-        console.error("Errore durante la vendita", error);
-        showMessage("C'è stato un errore nella vendita");
+        errorHandler(error);
     });
 }
 
@@ -775,8 +769,8 @@ function buyItem(){
     .then(response => response.json())
     .then(data => {
         document.body.classList.remove("caricamento");
-        if(data.ServerError !== undefined){
-            throw data.ServerError;
+        if(data.error !== undefined){
+            throw data.error;
         }
         if(data.errore){
             showMessage("Errore: " + data.errore);
@@ -787,8 +781,7 @@ function buyItem(){
         }
     })
     .catch(error => {
-        console.error("Errore durante la vendita", error);
-        showMessage("C'è stato un errore nella vendita");
+        errorHandler(error);
     });
 }
 
@@ -827,8 +820,8 @@ function openBox(){
     .then(response => response.json())
     .then(data =>{
         document.body.classList.remove("caricamento");
-        if(data.ServerError !== undefined){
-            throw data.ServerError;
+        if(data.error !== undefined){
+            throw data.error;
         }
         if(data.error){
             showMessage("Error: " + data.error);
@@ -847,8 +840,7 @@ function openBox(){
         }
     })
     .catch(error => {
-        console.error("Errore durante l'apertura", error);
-        showMessage("C'è stato un errore nell'apertura");
+        errorHandler(error);
     });
 }
 

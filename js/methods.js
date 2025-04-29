@@ -216,6 +216,15 @@ export function showMessage(messaggio, showTime = 1000) {
 }
 
 /**
+ * Funzione che si occupa di visualizzare un messaggio a video, e fornire ulteriori informazioni nella console
+ * @param {Object} error 
+ */
+export function errorHandler(error){
+    showMessage(error.message);
+    console.error(`Errore: ${error.errorcode}: ${error.message}`);
+}
+
+/**
  * Crea un elemento HTML con le proprietà specificate.
  * @param {String} type - Il tipo dell'elemento (es. "div", "span").
  * @param {String} [className] - La classe CSS da assegnare all'elemento.
