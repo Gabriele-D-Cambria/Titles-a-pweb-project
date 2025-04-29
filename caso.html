@@ -20,11 +20,12 @@
             width: 200px;
             min-height: 300px;
             margin: 0;
-            animation: ani 1.5s ease-in-out;
+            /* animation: attacco 1.3s ease-in-out; */
+            animation: schivata 1.5s ease-in-out;
             
         }
 
-        @keyframes ani {
+        @keyframes schivata {
             0% {
             width: 200px;
             height: 300px;
@@ -45,6 +46,25 @@
             /* width: 180px; */
             height: 300px;
             transform: translate(-20px, 0);
+            }
+            100% {
+            /* width: 200px; */
+            height: 300px;
+            transform: translate(0, 0);
+            }
+        }
+
+        @keyframes attacco {
+            0% {
+            width: 200px;
+            height: 300px;
+            transform: translate(0, 0);
+            }
+            50% {
+            width: 250px;
+            height: 350px;
+            object-fit: fill;
+            transform: translate(+20px, -20px);
             }
             100% {
             /* width: 200px; */
