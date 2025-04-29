@@ -6,23 +6,28 @@ let moduleListener = null;
 const LOGIN_PAGE = "php/login.php";
 
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("loginBtn").addEventListener("click", () => {
+        document.getElementById("loginBtn").addEventListener("click", () => {
        createModule(true);
     });
     document.getElementById("registerBtn").addEventListener("click", () => {
         createModule(false);
     });
 
+    // Mostra un messaggio importante se presente
     if(message){
         showMessage(message, IMPORTANT_MESSAGE);
     }
     
+    // Gestisce eventuali errori di login
     if(loginError){
         handleFormError(loginError);
     }
-
 });
 
+/**
+ * Crea un modulo di login o registrazione.
+ * @param {boolean} login - Indica se creare il modulo di login (true) o registrazione (false).
+ */
 function createModule(login) {
     let module = document.getElementById("loginModule");
 
@@ -37,17 +42,17 @@ function createModule(login) {
     form.method = "POST";
     form.action = LOGIN_PAGE;
 
-    // Username
+    // Crea il campo per il nome utente
     let tag = createUsernameInput("Username:");
     form.appendChild(tag.label);
     form.appendChild(tag.input);
 
-    // Password
+    // Crea il campo per la password
     tag = createPasswordInput("Password:", false);
     form.appendChild(tag.label);
     form.appendChild(tag.passwordContainer);
 
-    // Conferma Password
+    // Crea il campo per confermare la password (solo per registrazione)
     if(!login){
         tag = createPasswordInput("Conferma Password:", true);
         form.appendChild(tag.label);
@@ -55,11 +60,12 @@ function createModule(login) {
     }
     container.appendChild(form);
 
+    // Crea il pulsante di invio
     let btn = createButton("submit", "submit", login? "Accedi" : "Registrati");
     btn.toggleAttribute("disabled", true);
     form.appendChild(btn);
 
-
+    // Crea il pulsante per chiudere il modulo
     btn = createButton("button", "closeModule", "Chiudi", (e) =>{
         if(moduleListener === null)
             return;
@@ -71,6 +77,7 @@ function createModule(login) {
     
     form.appendChild(btn);
 
+    // Crea un link per passare tra login e registrazione
     let p = document.createElement("p");
     p.innerText = (login)? "Non hai un'account? " : "Hai già un'account? ";
 
@@ -89,9 +96,10 @@ function createModule(login) {
     
     module.appendChild(container);
     
+    // Mostra il modulo
     showModule(module.id);
 
-    
+    // Aggiunge un listener per chiudere il modulo cliccando fuori
     moduleListener = (e) => {
         closeModule(e, "loginModule");
         moduleListener = null;
@@ -99,19 +107,15 @@ function createModule(login) {
     window.addEventListener("click", moduleListener);
 }
 
-
+/**
+ * Gestisce gli errori del modulo di login o registrazione.
+ * @param {Object} loginError - Oggetto che contiene informazioni sull'errore.
+ */
 function handleFormError(loginError){
-
     let module = document.getElementById("loginModule");
     if(!module.firstElementChild){
         createModule(loginError.isLogin);
     }
 
     errorHandler(loginError);
-
-    // module = module.firstElementChild;
-    // const errorP = document.createElement("p");
-    // errorP.innerText = errorMessage;
-    // errorP.classList.add("error-message");
-    // module.appendChild(errorP);
 }

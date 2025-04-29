@@ -44,7 +44,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /**
- * Funzione per la gestione dei comandi da tastiera
+ * Funzione per la gestione dei comandi da tastiera.
+ * Permette di aprire o chiudere moduli specifici o interagire con una box.
  * @param {Event} e Evento generato dalla pressione di un tasto
  */
 function handleKeyPress(e){
@@ -67,7 +68,7 @@ function handleKeyPress(e){
 }
 
 /**
- * Mostra il menu principale con le opzioni per cambiare username, cambiare password o eliminare l'account
+ * Mostra il menu principale con le opzioni per cambiare username, cambiare password o eliminare l'account.
  */
 function showMenu(){
     if(currentlyOpened !== null && currentlyOpened !== "menuModule"){
@@ -119,6 +120,9 @@ function showMenu(){
     window.addEventListener("click", moduleListener);
 }
 
+/**
+ * Mostra il modulo per cambiare l'username dell'utente.
+ */
 function changeUsername(){
     if(currentlyOpened !== "menuModule"){
         return;
@@ -172,7 +176,9 @@ function changeUsername(){
     module.appendChild(page);
 }
 
-
+/**
+ * Mostra il modulo per cambiare la password dell'utente.
+ */
 function changePassword(){
     if(currentlyOpened !== "menuModule"){
         return;
@@ -226,6 +232,9 @@ function changePassword(){
     module.appendChild(page);
 }
 
+/**
+ * Mostra il modulo per eliminare l'account dell'utente.
+ */
 function deleteAccount(){
     if(currentlyOpened !== "menuModule"){
         return;
@@ -302,7 +311,7 @@ function deleteAccount(){
 }
 
 /**
- * Mostra l'inventario dell'utente, recuperandolo tramite una richiesta API
+ * Mostra l'inventario dell'utente, recuperandolo tramite una richiesta API.
  * @param {Boolean} newItems Indica se evidenziare gli oggetti appena ottenuti
  */
 function showInventory(newItems = false){
@@ -372,7 +381,7 @@ function showInventory(newItems = false){
 }
 
 /**
- * Funzione di supporto per creare uno slot inventario per un oggetto
+ * Funzione di supporto per creare uno slot inventario per un oggetto.
  * @param {Array} item Oggetto da visualizzare
  * @param {Number} id Indice da assegnare all'oggetto
  * @param {Boolean} newItems Indica se l'oggetto è stato appena recuperato
@@ -403,7 +412,7 @@ function createItemSlot(item, id, newItems) {
 }
 
 /**
- * Funzione di supporto per creare uno slot negozio per un oggetto
+ * Funzione di supporto per creare uno slot negozio per un oggetto.
  * @param {Array} item Oggetto da visualizzare
  * @param {Number} id Indice da assegnare all'oggetto
  * @returns {HTMLElement} Elemento HTML rappresentante lo slot dell'oggetto nel negozio
@@ -428,7 +437,7 @@ function createShopSlot(item, id){
 }
 
 /**
- * Mostra il negozio dell'utente, recuperandolo tramite una richiesta API
+ * Mostra il negozio dell'utente, recuperandolo tramite una richiesta API.
  */
 function showShop(){
     if(currentlyOpened !== null && currentlyOpened !== "shopModule")
@@ -515,7 +524,7 @@ function showShop(){
 }
 
 /**
- * Genera un elemento HTML aside contenente le informazioni di un oggetto
+ * Genera un elemento HTML aside contenente le informazioni di un oggetto.
  * @param {String} id ID da assegnare all'aside
  * @param {Array} item Oggetto per il quale generare le informazioni (null se assente)
  * @param {Boolean} hasIt Indica se l'oggetto è già di proprietà dell'utente
@@ -666,7 +675,7 @@ function generateInfo(id, item = null, hasIt = true){
 }
 
 /**
- * Chiude un modulo sopraelevato (overlay) dal DOM
+ * Chiude un modulo sopraelevato (overlay) dal DOM.
  * @param {Event} event Evento generatore
  * @param {String} id ID del modulo da rimuovere
  * @param {Boolean} overload Indica se effettuare il controllo sull'evento
@@ -691,7 +700,7 @@ function closeModuleEvent(event, id, overload = false){
 }
 
 /**
- * Aggiorna la sezione dettagli del modulo attualmente aperto con i dettagli di un oggetto selezionato
+ * Aggiorna la sezione dettagli del modulo attualmente aperto con i dettagli di un oggetto selezionato.
  * @param {HTMLElement} info Elemento HTML contenente le nuove informazioni dell'oggetto
  */
 function changeItemInfo(info){
@@ -704,7 +713,7 @@ function changeItemInfo(info){
 }
 
 /**
- * Effettua una richiesta API per vendere un oggetto selezionato
+ * Effettua una richiesta API per vendere un oggetto selezionato.
  */
 function sellItem(){
     if(currentlyOpened !== "inventoryModule"){
@@ -746,7 +755,7 @@ function sellItem(){
 }
 
 /**
- * Effettua una richiesta API per acquistare un oggetto selezionato dal negozio
+ * Effettua una richiesta API per acquistare un oggetto selezionato dal negozio.
  */
 function buyItem(){
     if(currentlyOpened !== "shopModule"){
@@ -787,7 +796,7 @@ function buyItem(){
 }
 
 /**
- * Aggiorna il contatore delle monete dell'utente
+ * Aggiorna il contatore delle monete dell'utente.
  * @param {Number} amount Quantità di monete da aggiungere o sottrarre
  */
 function updateCoins(amount){
@@ -796,7 +805,7 @@ function updateCoins(amount){
 }
 
 /**
- * Effettua una richiesta API per aprire una box e recuperare i nuovi oggetti
+ * Effettua una richiesta API per aprire una box e recuperare i nuovi oggetti.
  */
 function openBox(){
     if(currentlyOpened !== "inventoryModule")
@@ -846,7 +855,7 @@ function openBox(){
 }
 
 /**
- * Aggiorna il timer del negozio, mostrando il tempo rimanente al prossimo refresh
+ * Aggiorna il timer del negozio, mostrando il tempo rimanente al prossimo refresh.
  */
 function updateShopTimer(){
     const span = document.getElementById("timer");
@@ -874,7 +883,7 @@ function updateShopTimer(){
 }
 
 /**
- * Mostra un messaggio di placeholder per l'aggiunta di un nuovo personaggio
+ * Mostra un messaggio di placeholder per l'aggiunta di un nuovo personaggio.
  */
 function addNewCharacter(){
     showMessage("Eh, volevi!!");

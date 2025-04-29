@@ -198,7 +198,7 @@ export function closeModule(event, id, override = false, showCoins = false) {
  * @param {String} messaggio - Il testo del messaggio da visualizzare.
  * @param {Number} showTime - Per quanto tempo il messaggio rimane visibile
  */
-export function showMessage(messaggio, showTime = 1000) {
+export function showMessage(messaggio, showTime = 1500) {
     let messageContainer = document.createElement("div");
     messageContainer.id = "messageBox";
     messageContainer.classList.add("messaggio");
