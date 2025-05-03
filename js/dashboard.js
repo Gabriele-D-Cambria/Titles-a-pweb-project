@@ -37,7 +37,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("shop-btn").addEventListener("click", () => {showShop()});
     document.getElementById("menu").addEventListener("click", () => {showMenu()});
     document.addEventListener("keypress", handleKeyPress);
-
+    let addBtn = document.getElementById("add-character");
+    if(addBtn !== null){
+        addBtn.addEventListener("click", ()=>{
+            window.location.href = "./php/personaggio.php";
+        });
+    }
     if(message){
         showMessage(message, IMPORTANT_MESSAGE);
     }
