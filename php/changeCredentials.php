@@ -1,10 +1,7 @@
 <?php
-if (basename($_SERVER['PHP_SELF']) === 'changeCredentials.php') {
-    pageError(403);
-}
+require_once "methods.php";
 
 session_start();
-require_once "methods.php";
 
 if(!isset($_SERVER['REQUEST_METHOD']) || basename($_SERVER['HTTP_REFERER']) !== 'dashboard.php'){
 	pageError("403");
