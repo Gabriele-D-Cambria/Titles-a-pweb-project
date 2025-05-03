@@ -1,6 +1,9 @@
 <?php
     session_start();
-    require_once('methods.php');
+    session_unset();
+    session_destroy();
+
+    require_once 'methods.php';
 
     if(!isset($_GET['error_code'])){
         pageError("403");

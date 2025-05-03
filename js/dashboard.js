@@ -1,6 +1,6 @@
 "use strict";
 
-import {showModule, closeModule, showMessage, createElement } from "./methods.js";
+import {showModule, closeModule, showMessage, createElement, createUsernameInput, createButton, createPasswordInput, IMPORTANT_MESSAGE, errorHandler } from "./methods.js";
 
 /**
  * Indica la funzione di listener per rimuovere i moduli in sovraimpressione
@@ -35,12 +35,18 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("add-character").addEventListener("click", addNewCharacter);
     document.getElementById("inventory-btn").addEventListener("click", () => {showInventory()});
     document.getElementById("shop-btn").addEventListener("click", () => {showShop()});
+    document.getElementById("menu").addEventListener("click", () => {showMenu()});
     document.addEventListener("keypress", handleKeyPress);
+
+    if(message){
+        showMessage(message, IMPORTANT_MESSAGE);
+    }
 });
 
 /**
- * Funzione per la gestione dei comandi da tastiera
- * @param {Event} e evento
+ * Funzione per la gestione dei comandi da tastiera.
+ * Permette di aprire o chiudere moduli specifici o interagire con una box.
+ * @param {Event} e Evento generato dalla pressione di un tasto
  */
 function handleKeyPress(e){
     const keyCode = e.code.toUpperCase();
@@ -61,13 +67,252 @@ function handleKeyPress(e){
     }
 }
 
-function addNewCharacter(){
-    showMessage("Eh, volevi!!");
+/**
+ * Mostra il menu principale con le opzioni per cambiare username, cambiare password o eliminare l'account.
+ */
+function showMenu(){
+    if(currentlyOpened !== null && currentlyOpened !== "menuModule"){
+        return;
+    }
+
+    const module = document.getElementById("menuModule");
+    currentlyOpened = module.id;
+
+    const page = document.createElement("div");
+    page.classList.add("menu-page");
+
+    const menuOptions = [
+        { 
+            id: "changeUsr",
+            text: "Cambia Username",
+            action: changeUsername
+        },
+        { 
+            id: "changePwd",
+            text: "Cambia Password",
+            action: changePassword
+        },
+        { 
+            id: "deleteAccount",
+            text: "Elimina Account",
+            action: deleteAccount
+        }
+    ];
+
+    menuOptions.forEach((option) => {
+        const div = document.createElement("div");
+        div.classList.add("menu-space");
+        
+        const p = document.createElement("p");
+        p.id = option.id;
+        p.innerText = option.text;
+        p.addEventListener("click", option.action);
+        div.appendChild(p);
+        page.appendChild(div);
+    });
+
+    closeModule(null, "menuModule", true);
+    module.appendChild(page);
+    showModule(module.id);
+    moduleListener = (e) => {
+        closeModuleEvent(e, "menuModule");
+    };
+    window.addEventListener("click", moduleListener);
 }
 
 /**
- * Funzione che inserisce nel DOM la schermata dall'inventario
- * @param {Boolean} newItems indica se sono da evidenziare o meno degli item nella lista globale 'openedItems'
+ * Mostra il modulo per cambiare l'username dell'utente.
+ */
+function changeUsername(){
+    if(currentlyOpened !== "menuModule"){
+        return;
+    }
+    
+    const module = document.getElementById("menuModule");
+
+    const page = document.createElement("div");
+    page.classList.add("username-page");
+
+    let space = document.createElement("div");
+    space.classList.add("menu-space");
+    space.classList.add("header");
+
+    let el = document.createElement("h2");
+    el.innerText = "Username Attuale:";
+    space.appendChild(el);
+
+    el = document.createElement("p");
+    el.innerText = USERNAME;
+
+    space.appendChild(el);
+    page.appendChild(space);
+
+    space = document.createElement("div");
+    space.classList.add("menu-space");
+
+    const form = document.createElement("form");
+    form.classList.add("username");
+    form.action = "php/changeCredentials.php";
+    form.method = "POST";
+
+    el = createUsernameInput("Nuovo Username:");
+    form.appendChild(el.label);
+    form.appendChild(el.input);
+
+    el = createButton("submit", "submit", "Conferma");
+    el.toggleAttribute("disabled", true);
+    form.appendChild(el);
+
+    el = createButton("button", "backToMenu", "Annulla", showMenu);
+    form.appendChild(el);
+
+    space.appendChild(form);
+    page.appendChild(space);
+
+    while(module.childElementCount){
+        module.removeChild(module.lastChild);
+    }
+
+    module.appendChild(page);
+}
+
+/**
+ * Mostra il modulo per cambiare la password dell'utente.
+ */
+function changePassword(){
+    if(currentlyOpened !== "menuModule"){
+        return;
+    }
+    
+    const module = document.getElementById("menuModule");
+
+    const page = document.createElement("div");
+    page.classList.add("password-page");
+
+    let space = document.createElement("div");
+    space.classList.add("menu-space");
+    space.classList.add("header");
+
+    let el = document.createElement("h2");
+    el.innerText = "Cambio Password";
+    space.appendChild(el);
+
+    page.appendChild(space);
+
+    space = document.createElement("div");
+    space.classList.add("menu-space");
+
+    const form = document.createElement("form");
+    form.classList.add("password");
+    form.action = "php/changeCredentials.php";
+    form.method = "POST";
+
+    el = createPasswordInput("Nuova Password:", false);
+    form.appendChild(el.label);
+    form.appendChild(el.passwordContainer);
+
+    el = createPasswordInput("Conferma Password:", true);
+    form.appendChild(el.label);
+    form.appendChild(el.passwordContainer);
+
+    el = createButton("submit", "submit", "Conferma");
+    el.toggleAttribute("disabled", true);
+    form.appendChild(el);
+
+    el = createButton("button", "backToMenu", "Annulla", showMenu);
+    form.appendChild(el);
+
+    space.appendChild(form);
+    page.appendChild(space);
+
+    while(module.childElementCount){
+        module.removeChild(module.lastChild);
+    }
+
+    module.appendChild(page);
+}
+
+/**
+ * Mostra il modulo per eliminare l'account dell'utente.
+ */
+function deleteAccount(){
+    if(currentlyOpened !== "menuModule"){
+        return;
+    }
+    
+    const module = document.getElementById("menuModule");
+
+    const page = document.createElement("div");
+    page.classList.add("delete-page");
+
+    let space = document.createElement("div");
+    space.classList.add("menu-space");
+    space.classList.add("header");
+
+    let el = document.createElement("h2");
+    el.innerText = "Stai per Eliminare l'account";
+    space.appendChild(el);
+
+    el = document.createElement("p");
+    el.innerText = "Sei sicuro?";
+
+    space.appendChild(el);
+    page.appendChild(space);
+
+    space = document.createElement("div");
+    space.classList.add("menu-space");
+
+    const form = document.createElement("form");
+    form.action = "php/changeCredentials.php";
+    form.method = "POST";
+
+    // Lo sfrutto per capire se la richiesta è o meno di elimina account
+    const phantomCheck = document.createElement("input");
+
+    phantomCheck.type = "checkbox";
+    phantomCheck.name = phantomCheck.id = "deleteCheck";
+    phantomCheck.value = "1";
+    phantomCheck.toggleAttribute("checked", true);
+    phantomCheck.toggleAttribute("hidden", true);
+    
+    form.appendChild(phantomCheck);
+    
+    el = document.createElement("p");
+    el.innerText = "Eliminando l'account ";
+    const boldText = document.createElement("b");
+    boldText.innerText = "perderai in maniera definitiva tutti i tuoi progressi";
+    el.appendChild(boldText);
+    el.appendChild(document.createTextNode(", sei sicuro di volerlo fare?"));
+    form.appendChild(el);
+
+    const aside = document.createElement("aside");
+    aside.classList.add("button-holder");
+
+    el = createPasswordInput("Conferma con Password:");
+    aside.appendChild(el.label);
+    aside.appendChild(el.passwordContainer);
+
+    el = createButton("submit", "submit", "Elimina");
+    el.toggleAttribute("disabled", true);
+    aside.appendChild(el);
+
+    el = createButton("button", "backToMenu", "Annulla", showMenu);
+    aside.appendChild(el);
+    form.appendChild(aside);
+
+    space.appendChild(form);
+    page.appendChild(space);
+
+    while(module.childElementCount){
+        module.removeChild(module.lastChild);
+    }
+
+    module.appendChild(page);
+}
+
+/**
+ * Mostra l'inventario dell'utente, recuperandolo tramite una richiesta API.
+ * @param {Boolean} newItems Indica se evidenziare gli oggetti appena ottenuti
  */
 function showInventory(newItems = false){
     if(currentlyOpened !== null && currentlyOpened !== "inventoryModule")
@@ -81,8 +326,8 @@ function showInventory(newItems = false){
         .then(response => response.json())
         .then(risposta =>{
             document.body.classList.remove("caricamento");
-            if(risposta.ServerError !== undefined){
-                throw risposta.ServerError;
+            if(risposta.error !== undefined && risposta.error){
+                throw risposta.error;
             }
             const data = risposta["inventario"];
             const MAX_SIZE = risposta["MAX_SIZE"];
@@ -100,7 +345,7 @@ function showInventory(newItems = false){
                 space.addEventListener("click", (e) => {
                     const id = String(e.target.id).replace(/^(img-|ic-)/, "");
                     const info = generateInfo("inventory-info", data[id]);
-                    changeInfo(info);
+                    changeItemInfo(info);
                 });
                 container.appendChild(space);
             });
@@ -130,18 +375,17 @@ function showInventory(newItems = false){
             window.addEventListener("click", moduleListener);
         })
         .catch(error => {
-            showMessage("Il server non è al momento raggiungibile, riprovare dopo");
-            console.error('Errore: ', error);
+            errorHandler(error);
         })
 
 }
 
 /**
- * Funzione di supporto per creare uno degli slot inventario di un oggetto
- * @param {Array} item oggetto da visualizzare
- * @param {Number} id indice da dare all'oggetto
- * @param {Boolean} newItems parametro che indica se controllare o meno che un oggetto sia stato appena recuperato
- * @returns
+ * Funzione di supporto per creare uno slot inventario per un oggetto.
+ * @param {Array} item Oggetto da visualizzare
+ * @param {Number} id Indice da assegnare all'oggetto
+ * @param {Boolean} newItems Indica se l'oggetto è stato appena recuperato
+ * @returns {HTMLElement} Elemento HTML rappresentante lo slot dell'oggetto
  */
 function createItemSlot(item, id, newItems) {
     const space = document.createElement("div");
@@ -167,6 +411,12 @@ function createItemSlot(item, id, newItems) {
     return space;
 }
 
+/**
+ * Funzione di supporto per creare uno slot negozio per un oggetto.
+ * @param {Array} item Oggetto da visualizzare
+ * @param {Number} id Indice da assegnare all'oggetto
+ * @returns {HTMLElement} Elemento HTML rappresentante lo slot dell'oggetto nel negozio
+ */
 function createShopSlot(item, id){
     const space = document.createElement("div");
     space.classList.add("shop-slot");
@@ -186,12 +436,16 @@ function createShopSlot(item, id){
     return space;
 }
 
+/**
+ * Mostra il negozio dell'utente, recuperandolo tramite una richiesta API.
+ */
 function showShop(){
     if(currentlyOpened !== null && currentlyOpened !== "shopModule")
         return;
     const module = document.getElementById("shopModule");
     currentlyOpened = module.id;
 
+    shownItem = null;
     if(shopTimerInterval !== null){
         clearInterval(shopTimerInterval);
         shopTimerInterval = null;
@@ -202,8 +456,8 @@ function showShop(){
         .then(response => response.json())
         .then(risposta => {
             document.body.classList.remove("caricamento");
-            if(risposta.ServerError !== undefined){
-                throw risposta.ServerError;
+            if(risposta.error !== undefined && risposta.error){
+                throw risposta.error;
             }
             const data = risposta.items;
             const remainingTime = risposta.remainingTime;
@@ -242,7 +496,7 @@ function showShop(){
                 space.addEventListener("click", (e) => {
                     const id = String(e.target.id).replace(/^(img-|cap-)/, "");
                     const info = generateInfo("shop-info", data[id], false);
-                    changeInfo(info);
+                    changeItemInfo(info);
                 });
 
                 el.appendChild(space);
@@ -265,17 +519,16 @@ function showShop(){
             window.addEventListener("click", moduleListener);
         })
         .catch(error => {
-            showMessage("Il server non è al momento raggiungibile, riprovare dopo");
-            console.error("Errore: ", error);
+            errorHandler(error);
         })
 }
 
 /**
- * Funzione che genera un aside contenente le informazioni
- * @param {String} id id da dare all'aside
- * @param {Array} item oggetto del quale generare le informazioni. Di default è null, e indica l'assenza di un'oggetto da creare
- * @param {Boolean} hasIt indica se l'oggetto selezionato è già di proprietà dell'utente o è da acquistare. Default 'true'
- * @returns un 'aside' contenente le informazioni
+ * Genera un elemento HTML aside contenente le informazioni di un oggetto.
+ * @param {String} id ID da assegnare all'aside
+ * @param {Array} item Oggetto per il quale generare le informazioni (null se assente)
+ * @param {Boolean} hasIt Indica se l'oggetto è già di proprietà dell'utente
+ * @returns {HTMLElement} Elemento HTML aside contenente le informazioni
  */
 function generateInfo(id, item = null, hasIt = true){
     shownItem = item;
@@ -410,7 +663,7 @@ function generateInfo(id, item = null, hasIt = true){
         btn.innerText = "Chiudi";
         btn.addEventListener("click", () => {
             let info = generateInfo(id);
-            changeInfo(info);
+            changeItemInfo(info);
             shownItem = null;
         });
         el.appendChild(btn);
@@ -422,10 +675,10 @@ function generateInfo(id, item = null, hasIt = true){
 }
 
 /**
- * Funzione che toglie dal DOM il modulo sopraelevato
- * @param {Event} event evento generatore
- * @param {String} id id del modulo da rimuovere
- * @param {Boolean} overload indica se effettuare o meno il controllo sull'evento.
+ * Chiude un modulo sopraelevato (overlay) dal DOM.
+ * @param {Event} event Evento generatore
+ * @param {String} id ID del modulo da rimuovere
+ * @param {Boolean} overload Indica se effettuare il controllo sull'evento
  */
 function closeModuleEvent(event, id, overload = false){
     if(moduleListener === null || currentlyOpened !== id)
@@ -447,10 +700,10 @@ function closeModuleEvent(event, id, overload = false){
 }
 
 /**
- * Funzione che aggiunge al modulo attualmente aperto le informazioni
- * @param {Element} info informazioni da appendere
+ * Aggiorna la sezione dettagli del modulo attualmente aperto con i dettagli di un oggetto selezionato.
+ * @param {HTMLElement} info Elemento HTML contenente le nuove informazioni dell'oggetto
  */
-function changeInfo(info){
+function changeItemInfo(info){
     if(currentlyOpened === null)
         return
     let module = document.getElementById(currentlyOpened);
@@ -460,7 +713,7 @@ function changeInfo(info){
 }
 
 /**
- * Funzione che si occupa di fare una richiesta API per vendere un oggetto
+ * Effettua una richiesta API per vendere un oggetto selezionato.
  */
 function sellItem(){
     if(currentlyOpened !== "inventoryModule"){
@@ -484,11 +737,8 @@ function sellItem(){
     .then(response => response.json())
     .then(data => {
         document.body.classList.remove("caricamento");
-        if(data.ServerError !== undefined){
-            throw data.ServerError;
-        }
-        if(data.error){
-            showMessage("Error: " + data.error);
+        if(data.error !== undefined && data.error){
+            throw data.error;
         }
         else{
             updateCoins(data.guadagno);
@@ -500,13 +750,12 @@ function sellItem(){
         }
     })
     .catch(error => {
-        console.error("Errore durante la vendita", error);
-        showMessage("C'è stato un errore nella vendita");
+        errorHandler(error);
     });
 }
 
 /**
- * Funzione che prova ad acquistare un Item dal negozio verificando che si abbia un saldo sufficente
+ * Effettua una richiesta API per acquistare un oggetto selezionato dal negozio.
  */
 function buyItem(){
     if(currentlyOpened !== "shopModule"){
@@ -530,8 +779,8 @@ function buyItem(){
     .then(response => response.json())
     .then(data => {
         document.body.classList.remove("caricamento");
-        if(data.ServerError !== undefined){
-            throw data.ServerError;
+        if(data.error !== undefined && data.error){
+            throw data.error;
         }
         if(data.errore){
             showMessage("Errore: " + data.errore);
@@ -542,13 +791,13 @@ function buyItem(){
         }
     })
     .catch(error => {
-        console.error("Errore durante la vendita", error);
-        showMessage("C'è stato un errore nella vendita");
+        errorHandler(error);
     });
 }
 
 /**
- * Funzione che aggiorna il contatore di monete
+ * Aggiorna il contatore delle monete dell'utente.
+ * @param {Number} amount Quantità di monete da aggiungere o sottrarre
  */
 function updateCoins(amount){
     let coins = document.getElementById("coin-count");
@@ -556,7 +805,7 @@ function updateCoins(amount){
 }
 
 /**
- * Funzione che si occupa di aprire una box effettuando una richiesta API per recuperare i nuovi oggetti
+ * Effettua una richiesta API per aprire una box e recuperare i nuovi oggetti.
  */
 function openBox(){
     if(currentlyOpened !== "inventoryModule")
@@ -581,8 +830,8 @@ function openBox(){
     .then(response => response.json())
     .then(data =>{
         document.body.classList.remove("caricamento");
-        if(data.ServerError !== undefined){
-            throw data.ServerError;
+        if(data.error !== undefined && data.error){
+            throw data.error;
         }
         if(data.error){
             showMessage("Error: " + data.error);
@@ -601,13 +850,12 @@ function openBox(){
         }
     })
     .catch(error => {
-        console.error("Errore durante l'apertura", error);
-        showMessage("C'è stato un errore nell'apertura");
+        errorHandler(error);
     });
 }
 
 /**
- * Aggiorno il timer del negozio se presente
+ * Aggiorna il timer del negozio, mostrando il tempo rimanente al prossimo refresh.
  */
 function updateShopTimer(){
     const span = document.getElementById("timer");
@@ -632,4 +880,11 @@ function updateShopTimer(){
         }
         span.innerText = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
     }
+}
+
+/**
+ * Mostra un messaggio di placeholder per l'aggiunta di un nuovo personaggio.
+ */
+function addNewCharacter(){
+    showMessage("Eh, volevi!!");
 }

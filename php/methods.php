@@ -1,14 +1,19 @@
 <?php
+if (basename($_SERVER['PHP_SELF']) === 'methods.php') {
+    pageError(403);
+}
+
 ini_set("display_errors", "0");
 require_once "definitions.php";
 
 /**
  * Funzione che reindirizza un errore
- * @param string $errorCode codice di errore da passare alla 'error page.php'
+ * @param string $errorCode codice di errore da passare alla "errorPage.php"
+ * @param string $prefix path che porta alla "errorPage.php"
  * @return never
  */
-function pageError($errorCode){
-    header("Location: error page.php/?error_code=". $errorCode);
+function pageError($errorCode, $prefix = ""){
+    header("Location: ". $prefix ."errorPage.php/?error_code=". $errorCode);
     exit();
 }
 
@@ -39,6 +44,31 @@ function apiError($errorCode = 500, $message = null) {
         "message" => $message
     ]);
     exit();
+}
+
+/**
+ * Valida gli input dell'utente per i campi username, password e confermaPassword
+ * @param string|null $username Username da validare.
+ * @param string|null $password Password da Validare.
+ * @param string|null $confirmPassword Conferma Password da Validare.
+ * 
+ * @return string Restituisce una stringa se la validazione fallisce:
+ *      - "invalid_username" se $username non corrisponde all'USERNAME_PATTERN
+ *      - "invalid_password" se $password non corrisponde al PASSWORD_PATTERN
+ *      - "password_mismatch" se $confirmPassword non corrisponde a $password.
+ * Se tutti gli input sono validi restituisce una stringa vuota.
+ */
+function validateInputs($username, $password, $confirmPassword){
+    if(is_null($username) || !preg_match(USERNAME_PATTERN, $username))
+        return "invalid_username";
+
+    if(is_null($username) || !preg_match(PASSWORD_PATTERN, $password))
+        return "invalid_password";
+
+    if(!empty($confirmPassword) && $confirmPassword !== $password)
+            return "password_mismatch";
+
+    return '';
 }
 
 
@@ -111,18 +141,6 @@ function getData($username){
     }
 }
 
-/**
- * Funzione che termina la procedura di login riportando un errore tramite GET
- * @param string $errorType indica il tipo di errore
- * @param bool $isLogin indica se l'errore si è effettuato durante il login o il sign-up
- */
-function terminateLogin($errorType, $isLogin){
-    $errorType = urlencode($errorType);
-    $isLogin = urlencode($isLogin);
-
-    header("Location: ../index.php?error=" . $errorType . "&isLogin=". $isLogin);
-    exit();
-}
 
 /**
  * Recupera l'invetario di un'account dal database
@@ -626,6 +644,9 @@ function openBox($box, $accountId){
 function getShop($accountId, $lastRefresh){
     $currentTime = new DateTime("now");
     $tempoTrascorso = $currentTime->getTimestamp() - $lastRefresh->getTimestamp();
+    if($tempoTrascorso < 0){
+        apiError(400, "Tempo negativo rilevato (". $tempoTrascorso ."): il tempo trascorso non può essere negativo.");
+    }
 
     $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
     if($conn->connect_error){

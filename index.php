@@ -1,8 +1,19 @@
 <?php
-    session_start();
 
-    $error = isset($_GET["error"]) ? $_GET["error"] : null;
-    $isLogin = isset($_GET["isLogin"]) ? ($_GET["isLogin"] === 'true' || $_GET["isLogin"] === '1') : null;
+session_start();
+
+$message = null;
+$loginError = null;
+
+if(isset($_SESSION["loginError"])){
+    $loginError = $_SESSION["loginError"];
+    unset($_SESSION["loginError"]);
+}
+
+if(isset($_SESSION["message"])){
+    $message = $_SESSION["message"];
+    unset($_SESSION["message"]);
+}
 ?>
 
 
@@ -16,8 +27,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
-        const error = "<?php echo $error; ?>";
-        const isLogin = <?php echo json_encode($isLogin); ?>;
+        const loginError = <?php echo json_encode($loginError); ?>;
+        const message = <?php echo json_encode($message)?>;
     </script>
     <title>Titles</title>
 </head>
