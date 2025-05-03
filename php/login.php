@@ -1,8 +1,4 @@
 <?php
-if (basename($_SERVER['PHP_SELF']) === 'login.php') {
-    pageError(403);
-}
-
 session_start();
 session_unset();
 require_once "methods.php";
