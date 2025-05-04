@@ -32,6 +32,7 @@ define('ERROR_TYPES', [
     'registration_failed'       => "Registrazione fallita. Riprova.",
     'connection_failed'         => "Il server non è al momento disponibile.\nRiprovare tra un po'.",
     'invalid_param'             => "I parametri forniti non sono corretti.",
+    'image_same_as_current'     => "Stai già utilizzando questa immagine",
     'update_failed'             => "C'è stato un problema durante l'aggiornamento.\nRiprova tra un po'."
 ]);
 
@@ -169,6 +170,19 @@ class Account{
             return true;
         }
 
+        return false;
+    }
+
+    /**
+     * Aggiorna l'immagine Profilo
+     * @param string $newPic path della nnuova immagine, diversa da quella attuale
+     * @return bool esito dell'operazione
+     */
+    public function updateImmagineProfilo($newPic){
+        if($this->immagineProfilo !== $newPic){
+            $this->immagineProfilo = $newPic;
+            return true;   
+        }
         return false;
     }
 

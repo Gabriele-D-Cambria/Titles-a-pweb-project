@@ -1,5 +1,11 @@
 -- Inserimento Elementi
-INSERT INTO Element (Nome) VALUES ('Acqua'), ('Fuoco'), ('Terra'), ('Elettro'), ('Aria');
+INSERT INTO Element (Nome, PathImmagine) VALUES
+('Acqua',	'images/pics/acqua.svg'),
+('Fuoco',	'images/pics/fuoco.svg'),
+('Terra',	'images/pics/terra.svg'),
+('Elettro',	'images/pics/elettro.svg'),
+('Aria'	,	'images/pics/aria.svg');
+
 UPDATE Element SET PrevaleSu = 'Fuoco',   PrevalsaDa = 'Elettro' WHERE Nome = 'Acqua';
 UPDATE Element SET PrevaleSu = 'Aria',    PrevalsaDa = 'Acqua' WHERE Nome = 'Fuoco';
 UPDATE Element SET PrevaleSu = 'Elettro', PrevalsaDa = 'Aria' WHERE Nome = 'Terra';

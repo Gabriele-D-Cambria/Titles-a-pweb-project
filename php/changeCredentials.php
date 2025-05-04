@@ -134,7 +134,7 @@ try{
 		if(!password_verify($password, $currentPassword["Password"])){
 			terminateChangeError("wrong_password_on_delete");
 		}
-		
+
 		$sqlDelete = "DELETE FROM Account WHERE ID = ?";
 		$stmtDelete = $conn->prepare($sqlDelete);
 		$stmtDelete->bind_param('i', $account->getId());
@@ -145,9 +145,33 @@ try{
 		$message = "Account eliminato con successo";
 	}
 	else if(isset($_POST['newPic'])){
-		//TODO da fare
 		$logout = false;
+		$newPath = $_POST['newPic'];
 		
+		$sql = "SELECT ImmagineProfilo
+				FROM Account
+				WHERE ID = ?";
+		$stmtCheck = $conn->prepare($sql);
+		$stmtCheck->bind_param("s", $account->getId());
+		if(!$stmtCheck->execute()){
+			throw new Exception($stmtCheck->error);
+		}
+
+		$result = $stmtCheck->get_result();
+		$currentPath = $result->fetch_assoc();
+		if($currentPath['ImmagineProfilo'] === $newPath){
+			throw new Exception('image_same_as_current');
+		}
+
+		$sqlUpdate = "UPDATE Account SET ImmagineProfilo = ? WHERE ID = ?";
+		
+		$stmtUpdate = $conn->prepare($sqlUpdate);
+		$stmtUpdate->bind_param("si", $newPath, $account->getId());
+		if(!$stmtUpdate->execute()){
+			throw new Exception($stmtUpdate->error);
+		}
+
+		$account->updateImmagineProfilo($newPath);
 		$message = "Immagine cambiata con successo!";
 	}
 	else{
@@ -174,7 +198,7 @@ function terminateChangeError($errorType){
 
 	$errorMessage = ERROR_TYPES[$errorType] ?? "Errore Sconosciuto";
 	$_SESSION['message'] = $errorMessage;
-	
+
 	header("Location: dashboard.php");
 	exit();
 }

@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("shop-btn").addEventListener("click", () => {showShop()});
     document.getElementById("menu").addEventListener("click", () => {showMenu()});
     document.addEventListener("keypress", handleKeyPress);
-    
+
     let addBtn = document.getElementById("add-character");
     if(addBtn !== null)
         addBtn.addEventListener("click", addNewCharacter);
@@ -327,77 +327,90 @@ function changeImage(){
     }
 
     const module = document.getElementById("menuModule");
-    const page = document.createElement("div");
-    page.classList.add("image-page");
+    document.body.classList.add("caricamento");
+    fetch('php/API/getElementPics.php')
+        .then(risposta => risposta.json())
+        .then(images => {
+            document.body.classList.remove("caricamento");
+            if(images.error !== undefined && images.error){
+                throw images.error;
+            }
+            const page = document.createElement("div");
+            page.classList.add("image-page");
 
-    let space = document.createElement("div");
-    space.classList.add("menu-space");
-    space.classList.add("header");
+            let space = document.createElement("div");
+            space.classList.add("menu-space");
+            space.classList.add("header");
 
-    let el = document.createElement("h2");
-    el.innerText = "Cambia Immagine:";
-    space.appendChild(el);
-    page.appendChild(space);
+            let el = document.createElement("h2");
+            el.innerText = "Cambia Immagine:";
+            space.appendChild(el);
+            page.appendChild(space);
 
-    space = document.createElement("div");
-    space.classList.add("menu-space");
+            space = document.createElement("div");
+            space.classList.add("menu-space");
 
-    const form = document.createElement("form");;
-    form.classList.add("image");
-    form.action = "php/changeCredentials.php";
-    form.method = "POST";
+            const form = document.createElement("form");;
+            form.classList.add("image");
+            form.action = "php/changeCredentials.php";
+            form.method = "POST";
 
-    el = document.createElement("div");
-    el.classList.add("choose-box");
+            el = document.createElement("div");
+            el.classList.add("choose-box");
 
-    const images = ['acqua.svg', 'aria.svg', 'elettro.svg', 'fuoco.svg', 'terra.svg', 'default.svg'];
-
-    images.forEach((image, index) => {
-        const option = document.createElement("div");
-        option.classList.add("image-option");
-
-        let tmp = document.createElement("input");
-        tmp.type = "radio";
-        tmp.id = `pic-${index}`;
-        tmp.name = "newPic";
-        tmp.value = image;
-        tmp.toggleAttribute("required", true);
+            images.forEach((imagePath, index) => {
+                const imageName = imagePath.split('/').pop();
+                const option = document.createElement("div");
+                option.classList.add("image-option");
         
-        if(image === 'default.svg')
-            tmp.toggleAttribute("checked", true);
-
-        option.appendChild(tmp);
-
-        tmp = document.createElement("label");
-        tmp.setAttribute('for', `pic-${index}`)
-
-        const img = document.createElement("img");
-        img.src = `images/pics/${image}`;
-        img.alt = `Pic ${image}`;
-        img.draggable = false;
+                let tmp = document.createElement("input");
+                tmp.type = "radio";
+                tmp.id = `pic-${index}`;
+                tmp.name = "newPic";
+                tmp.value = imagePath;
+                tmp.toggleAttribute("required", true);
         
-        tmp.appendChild(img);
-        option.appendChild(tmp);
+                if(imageName === document.getElementById("userPic").src.split('/').pop())
+                    tmp.toggleAttribute("checked", true);
+        
+                option.appendChild(tmp);
+        
+                tmp = document.createElement("label");
+                tmp.setAttribute('for', `pic-${index}`)
+        
+                const img = document.createElement("img");
+                img.src = imagePath;
+                img.alt = `Pic ${imageName}`;
+                img.draggable = false;
+        
+                tmp.appendChild(img);
+                option.appendChild(tmp);
+        
+                el.appendChild(option);
+            });
+            form.appendChild(el);
 
-        el.appendChild(option);
-    });
+            el = createButton("submit", "submit", "Conferma");
+            form.appendChild(el);
 
-    form.appendChild(el);
+            el = createButton("button", "backToMenu", "Annulla", showMenu);
+            form.appendChild(el);
 
-    el = createButton("submit", "submit", "Conferma");
-    form.appendChild(el);
+            space.appendChild(form);
+            page.appendChild(space);
 
-    el = createButton("button", "backToMenu", "Annulla", showMenu);
-    form.appendChild(el);
+            while(module.childElementCount){
+                module.removeChild(module.lastChild);
+            }
 
-    space.appendChild(form);
-    page.appendChild(space);
+            module.appendChild(page);
+        })
+        .catch(error => {
+            errorHandler(error);
+            return;
+        });
+
     
-    while(module.childElementCount){
-        module.removeChild(module.lastChild);
-    }
-
-    module.appendChild(page);
 }
 
 /**
