@@ -1,11 +1,7 @@
 <?php
-if (basename($_SERVER['PHP_SELF']) === 'openBox.php') {
-    pageError(403);
-}
+require_once "../methods.php";
 
 session_start();
-
-require_once "../methods.php";
 
 if(!isset($_SESSION["account"])){
 	apiError(401);

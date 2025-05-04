@@ -1,10 +1,6 @@
 <?php
-if (basename($_SERVER['PHP_SELF']) === 'getInventory.php') {
-    pageError(403);
-}
-
-session_start();
 require_once "../methods.php";
+session_start();
 
 if(!isset($_SESSION['account'])){
     apiError(401);
