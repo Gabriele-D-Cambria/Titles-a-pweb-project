@@ -87,7 +87,7 @@ function getData($username){
     $stmtPersonaggi = null;
 
     try {
-        $sql = "SELECT ID, Username, Monete, RefreshNegozio
+        $sql = "SELECT ID, Username, Monete, RefreshNegozio, ImmagineProfilo
                 FROM Account
                 WHERE Username = ?";
         $stmt = $conn->prepare($sql);
@@ -98,7 +98,7 @@ function getData($username){
         if($result->num_rows > 0){
             $row = $result->fetch_assoc();
             $dateTime = new DateTime($row['RefreshNegozio']);
-            $user = new Account($row['ID'], $row['Username'], $row['Monete'], $dateTime);
+            $user = new Account($row['ID'], $row['Username'], $row['Monete'], $dateTime, $row['ImmagineProfilo']);
 
             $sqlPersonaggi = "SELECT *
                               FROM Personaggi

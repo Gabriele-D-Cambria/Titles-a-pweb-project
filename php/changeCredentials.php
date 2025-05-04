@@ -144,6 +144,12 @@ try{
 
 		$message = "Account eliminato con successo";
 	}
+	else if(isset($_POST['newPic'])){
+		//TODO da fare
+		$logout = false;
+		
+		$message = "Immagine cambiata con successo!";
+	}
 	else{
 		throw new Exception("invalid_param");
 	}

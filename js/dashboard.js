@@ -32,17 +32,15 @@ let openedItems = [];
 let shopTimerInterval = null;
 
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("add-character").addEventListener("click", addNewCharacter);
     document.getElementById("inventory-btn").addEventListener("click", () => {showInventory()});
     document.getElementById("shop-btn").addEventListener("click", () => {showShop()});
     document.getElementById("menu").addEventListener("click", () => {showMenu()});
     document.addEventListener("keypress", handleKeyPress);
+    
     let addBtn = document.getElementById("add-character");
-    if(addBtn !== null){
-        addBtn.addEventListener("click", ()=>{
-            window.location.href = "./php/personaggio.php";
-        });
-    }
+    if(addBtn !== null)
+        addBtn.addEventListener("click", addNewCharacter);
+
     if(message){
         showMessage(message, IMPORTANT_MESSAGE);
     }
@@ -87,17 +85,22 @@ function showMenu(){
     page.classList.add("menu-page");
 
     const menuOptions = [
-        { 
+        {
+            id: "changeImg",
+            text: "Cambia Immagine",
+            action: changeImage
+        },
+        {
             id: "changeUsr",
             text: "Cambia Username",
             action: changeUsername
         },
-        { 
+        {
             id: "changePwd",
             text: "Cambia Password",
             action: changePassword
         },
-        { 
+        {
             id: "deleteAccount",
             text: "Elimina Account",
             action: deleteAccount
@@ -107,7 +110,7 @@ function showMenu(){
     menuOptions.forEach((option) => {
         const div = document.createElement("div");
         div.classList.add("menu-space");
-        
+
         const p = document.createElement("p");
         p.id = option.id;
         p.innerText = option.text;
@@ -132,7 +135,7 @@ function changeUsername(){
     if(currentlyOpened !== "menuModule"){
         return;
     }
-    
+
     const module = document.getElementById("menuModule");
 
     const page = document.createElement("div");
@@ -188,7 +191,7 @@ function changePassword(){
     if(currentlyOpened !== "menuModule"){
         return;
     }
-    
+
     const module = document.getElementById("menuModule");
 
     const page = document.createElement("div");
@@ -244,7 +247,7 @@ function deleteAccount(){
     if(currentlyOpened !== "menuModule"){
         return;
     }
-    
+
     const module = document.getElementById("menuModule");
 
     const page = document.createElement("div");
@@ -279,9 +282,9 @@ function deleteAccount(){
     phantomCheck.value = "1";
     phantomCheck.toggleAttribute("checked", true);
     phantomCheck.toggleAttribute("hidden", true);
-    
+
     form.appendChild(phantomCheck);
-    
+
     el = document.createElement("p");
     el.innerText = "Eliminando l'account ";
     const boldText = document.createElement("b");
@@ -316,6 +319,88 @@ function deleteAccount(){
 }
 
 /**
+ * Mostra il modulo per cambiare l'immagine dell'utente
+ */
+function changeImage(){
+    if(currentlyOpened !== "menuModule"){
+        return;
+    }
+
+    const module = document.getElementById("menuModule");
+    const page = document.createElement("div");
+    page.classList.add("image-page");
+
+    let space = document.createElement("div");
+    space.classList.add("menu-space");
+    space.classList.add("header");
+
+    let el = document.createElement("h2");
+    el.innerText = "Cambia Immagine:";
+    space.appendChild(el);
+    page.appendChild(space);
+
+    space = document.createElement("div");
+    space.classList.add("menu-space");
+
+    const form = document.createElement("form");;
+    form.classList.add("image");
+    form.action = "php/changeCredentials.php";
+    form.method = "POST";
+
+    el = document.createElement("div");
+    el.classList.add("choose-box");
+
+    const images = ['acqua.svg', 'aria.svg', 'elettro.svg', 'fuoco.svg', 'terra.svg', 'default.svg'];
+
+    images.forEach((image, index) => {
+        const option = document.createElement("div");
+        option.classList.add("image-option");
+
+        let tmp = document.createElement("input");
+        tmp.type = "radio";
+        tmp.id = `pic-${index}`;
+        tmp.name = "newPic";
+        tmp.value = image;
+        tmp.toggleAttribute("required", true);
+        
+        if(image === 'default.svg')
+            tmp.toggleAttribute("checked", true);
+
+        option.appendChild(tmp);
+
+        tmp = document.createElement("label");
+        tmp.setAttribute('for', `pic-${index}`)
+
+        const img = document.createElement("img");
+        img.src = `images/pics/${image}`;
+        img.alt = `Pic ${image}`;
+        img.draggable = false;
+        
+        tmp.appendChild(img);
+        option.appendChild(tmp);
+
+        el.appendChild(option);
+    });
+
+    form.appendChild(el);
+
+    el = createButton("submit", "submit", "Conferma");
+    form.appendChild(el);
+
+    el = createButton("button", "backToMenu", "Annulla", showMenu);
+    form.appendChild(el);
+
+    space.appendChild(form);
+    page.appendChild(space);
+    
+    while(module.childElementCount){
+        module.removeChild(module.lastChild);
+    }
+
+    module.appendChild(page);
+}
+
+/**
  * Mostra l'inventario dell'utente, recuperandolo tramite una richiesta API.
  * @param {Boolean} newItems Indica se evidenziare gli oggetti appena ottenuti
  */
@@ -325,7 +410,7 @@ function showInventory(newItems = false){
 
     const module = document.getElementById("inventoryModule");
     currentlyOpened = module.id;
-    
+
     document.body.classList.add("caricamento");
     fetch('php/API/getInventory.php')
         .then(response => response.json())
@@ -455,7 +540,7 @@ function showShop(){
         clearInterval(shopTimerInterval);
         shopTimerInterval = null;
     }
-    
+
     document.body.classList.add("caricamento");
     fetch('php/API/getShopItems.php')
         .then(response => response.json())
@@ -891,5 +976,5 @@ function updateShopTimer(){
  * Mostra un messaggio di placeholder per l'aggiunta di un nuovo personaggio.
  */
 function addNewCharacter(){
-    showMessage("Eh, volevi!!");
+    window.location.href = "./php/personaggio.php";
 }

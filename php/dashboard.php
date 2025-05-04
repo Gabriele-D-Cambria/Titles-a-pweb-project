@@ -58,17 +58,17 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
         </aside>
     </header>
     <div class="top-section">
-        <img id="menu" src="images/menu.svg" alt="menu item" class="clickable">
+        <img draggable="false" id="menu" src="images/menu.svg" alt="menu item" class="clickable">
         <div class="user-info">
             <div class="user-pic">
-                <img src="images/pics/profilepic.svg" alt="Profile Pic">
+                <img draggable="false" src="<?php echo $user['immagineProfilo']; ?>" alt="Profile Pic">
             </div>
             <div class="username-box">
                 <p><?php echo $user['username'];?></p>
             </div>
     </div> 
         <div class="coin-display">
-            <img src="images/coin.svg" alt="coin image">
+            <img draggable="false" src="images/coin.svg" alt="coin image">
             <span id="coin-count"><?php echo $user['monete']; ?></span>
         </div>
     </div>
@@ -79,11 +79,11 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
         </aside>
         <aside class="button-container">
             <div id="inventory-btn" class="button inventory-button">
-                <img src="images/inventoryPic.svg" alt="Immagine Inventario">
+                <img draggable="false" src="images/inventoryPic.svg" alt="Immagine Inventario">
                 <p>Inventario</p>
             </div> 
             <div id="shop-btn" class="button shop-button">
-                <img src="images/shopPic.svg" alt="Immagine Shop">
+                <img draggable="false" src="images/shopPic.svg" alt="Immagine Shop">
                 <p>Negozio</p>
             </div> 
         </aside>

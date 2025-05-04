@@ -1,10 +1,10 @@
 -- Inserimento Elementi
-INSERT INTO Element (Nome, PrevaleSu, PrevalsaDa) VALUES
-('Acqua', 'Fuoco', 'Elettro'),
-('Fuoco', 'Aria', 'Acqua'),
-('Terra', 'Elettro', 'Aria'),
-('Elettro', 'Acqua', 'Terra'),
-('Aria', 'Terra', 'Fuoco');
+INSERT INTO Element (Nome) VALUES ('Acqua'), ('Fuoco'), ('Terra'), ('Elettro'), ('Aria');
+UPDATE Element SET PrevaleSu = 'Fuoco',   PrevalsaDa = 'Elettro' WHERE Nome = 'Acqua';
+UPDATE Element SET PrevaleSu = 'Aria',    PrevalsaDa = 'Acqua' WHERE Nome = 'Fuoco';
+UPDATE Element SET PrevaleSu = 'Elettro', PrevalsaDa = 'Aria' WHERE Nome = 'Terra';
+UPDATE Element SET PrevaleSu = 'Acqua',   PrevalsaDa = 'Terra' WHERE Nome = 'Elettro';
+UPDATE Element SET PrevaleSu = 'Terra',   PrevalsaDa = 'Fuoco' WHERE Nome = 'Aria';
 
 -- Inserimento Tipologie
 INSERT INTO ItemType (Nome) VALUES ('arma'), ('armatura'), ('box'), ('pozione');

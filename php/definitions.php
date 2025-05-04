@@ -1,5 +1,7 @@
 <?php
+
 if (basename($_SERVER['PHP_SELF']) === 'definitions.php') {
+    require_once "methods.php";
     pageError(403);
 }
 
@@ -80,12 +82,14 @@ class Account{
     private $monete;
     private $personaggi = [];
     private $shopRefresh;
+    private $immagineProfilo;
 
-    public function __construct($id, $username, $monete, $shopRefresh){
+    public function __construct($id, $username, $monete, $shopRefresh, $immagineProfilo){
         $this->id = $id;
         $this->username = $username;
         $this->monete = $monete;
         $this->shopRefresh = $shopRefresh;
+        $this->immagineProfilo = $immagineProfilo;
     }
 
     public function getId() {
@@ -106,14 +110,18 @@ class Account{
     public function getPersonaggi() {
         return $this->personaggi;
     }
+    public function getImmagineProfilo() {
+        return $this->immagineProfilo;
+    }
 
     public function getAll(){
         return [
-            'id' => $this->id,
-            'username' => $this->username,
-            'monete' => $this->monete,
-            'personaggi' => $this->personaggi,
-            'shopRefresh' => $this->shopRefresh
+            'id'              => $this->id,
+            'username'        => $this->username,
+            'monete'          => $this->monete,
+            'personaggi'      => $this->personaggi,
+            'shopRefresh'     => $this->shopRefresh,
+            'immagineProfilo' => $this->immagineProfilo
         ];
     }
 
