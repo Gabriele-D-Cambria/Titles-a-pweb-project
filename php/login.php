@@ -74,10 +74,10 @@ try{
 
         $stmtInsert->bind_param("ss", $username, $hashedPassword);
 
-        if(!$stmtSearch->execute()){
+        if(!$stmtInsert->execute()){
             throw new Exception("registration_failed", 500);
         }
-        
+
         startSession($username);
     }
 }
