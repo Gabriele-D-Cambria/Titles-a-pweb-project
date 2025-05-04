@@ -101,8 +101,8 @@ function createModule(login) {
 
     // Aggiunge un listener per chiudere il modulo cliccando fuori
     moduleListener = (e) => {
-        closeModule(e, "loginModule");
-        moduleListener = null;
+        if(closeModule(e, "loginModule"))
+            moduleListener = null;
     };
     window.addEventListener("click", moduleListener);
 }
