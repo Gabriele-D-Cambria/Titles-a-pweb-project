@@ -67,10 +67,8 @@ if(!isset($_SESSION['account'])){
 							<p>5</p>
 						</div>
 						<div class="element-pic">
-							<input type="radio" value="acqua">
-							<label for="chosen">
-								<img id="elementPic" draggable="false" src="images/pics/acqua.svg" alt="Element Pic">
-							</label>
+							<input type="radio" value="acqua" name="element" id="element" checked hidden>
+							<img id="elementPic" draggable="false" src="images/pics/acqua.svg" alt="Element Pic">
     	        		</div>
 						<div class="dodge-box">
 							<p>Schivata</p>
