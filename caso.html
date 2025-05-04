@@ -5,104 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/menu.css">
+    <link rel="stylesheet" href="css/animazioni.css">
     <title>Document</title>
     <style>
-        @keyframes schivata {
-            0% {
-            width: 200px;
-            height: 300px;
-            transform: translate(0, 0);
-            }
-            25% {
-            width: 150px;
-            height: 300px;
-            object-fit: fill;
-            transform: translate(-20px, 0);
-            }
-            50% {
-            /* width: 200px; */
-            height: 300px;
-            transform: translate(20px, 0);
-            }
-            75% {
-            /* width: 180px; */
-            height: 300px;
-            transform: translate(-20px, 0);
-            }
-            100% {
-            /* width: 200px; */
-            height: 300px;
-            transform: translate(0, 0);
-            }
-        }
-
-        @keyframes attacco {
-            0% {
-            width: 200px;
-            height: 300px;
-            transform: translate(0, 0);
-            }
-            50% {
-            width: 250px;
-            height: 350px;
-            object-fit: fill;
-            transform: translate(+20px, -20px);
-            }
-            100% {
-            /* width: 200px; */
-            height: 300px;
-            transform: translate(0, 0);
-            }
+        img{
+            width: 15%;
         }
     </style>
 </head>
 <body>
-    <div id="menuModule" class="module show">
-    <div class="image-page">
-        <div class="menu-space header">
-            <h2>Cambia Immagine:</h2>
-        </div>
-        <div class="menu-space">
-            <form class="image" action="php/changeCredentials.php" method="POST">
-                <div class="choose-box">
-                    <div class="image-option">
-                        <input type="radio" id="image1" name="selected_image" value="immagine1" required>
-                        <label for="image1"><img src="images/pics/acqua.svg" alt="Immagine 1"></label>
-                    </div>
-                    <div class="image-option">
-                        <input type="radio" id="image2" name="selected_image" value="immagine2">
-                        <label for="image2"><img src="images/pics/aria.svg" alt="Immagine 2"></label>
-                    </div>
-                    
-                    <div class="image-option">
-                        <input type="radio" id="image3" name="selected_image" value="immagine3">
-                        <label for="image3"><img src="images/pics/elettro.svg" alt="Immagine 3"></label>
-                    </div>
-                    
-                    <div class="image-option">
-                        <input type="radio" id="image4" name="selected_image" value="immagine4">
-                        <label for="image4"><img src="images/pics/fuoco.svg" alt="Immagine 4"></label>
-                    </div>
-                    
-                    <div class="image-option">
-                        <input type="radio" id="image5" name="selected_image" value="immagine5">
-                        <label for="image5"><img src="images/pics/terra.svg" alt="Immagine 5"></label>
-                    </div>
-                    
-                    <div class="image-option">
-                        <input type="radio" id="image6" name="selected_image" value="immagine6" checked>
-                        <label for="image6"><img src="images/pics/default.svg" alt="Immagine 6"></label>
-                    </div>
-                </div>
-                <button type="submit" id="submit">Conferma</button>
-                <button type="button" id="backToMenu">Annulla</button>
-
-        </form>
-        </div>
-    </div>
-    </div>
-
+    <img src="./images/characters/aria.svg" alt="pg">
+    <img src="./images/characters/acqua.svg" alt="pg">
+    <img src="./images/characters/elettro.svg" alt="pg">
+    <img src="./images/characters/fuoco.svg" alt="pg">
+    <img src="./images/characters/terra.svg" alt="pg">
+    <br>
     <img src="./images/pics/aria.svg" alt="pg">
     <img src="./images/pics/acqua.svg" alt="pg">
     <img src="./images/pics/elettro.svg" alt="pg">
