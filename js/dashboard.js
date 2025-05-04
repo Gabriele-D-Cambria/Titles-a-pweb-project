@@ -986,8 +986,8 @@ function updateShopTimer(){
 }
 
 /**
- * Mostra un messaggio di placeholder per l'aggiunta di un nuovo personaggio.
+ * Effettua un redirect verso la pagina di creazione nuovo personaggio
  */
 function addNewCharacter(){
-    window.location.href = "./php/personaggio.php";
+    window.location.href = "./php/creazionePersonaggio.php";
 }
