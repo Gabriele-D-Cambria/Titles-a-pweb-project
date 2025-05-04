@@ -5,7 +5,6 @@ require_once "methods.php";
 
 if(!isset($_SERVER['REQUEST_METHOD']) || $_SERVER["REQUEST_METHOD"] !== "POST"){
     pageError("403");
-    exit;
 }
 
 $username = $_POST["username"] ?? '';

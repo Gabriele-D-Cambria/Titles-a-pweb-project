@@ -801,3 +801,41 @@ function getRemainingTime(&$currentTime, $shopRefresh) {
         'seconds' => str_pad($seconds, 2, "0", STR_PAD_LEFT)
     ];
 }
+
+/**
+ * Funzione che recupera dal DB tutti gli elementi con relativi modificatori e path
+ * @return 
+ */
+function getElementPG(){
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+    if($conn->connect_error){
+        apiError(500, "Connessione al database fallita: ". $conn->connect_error);
+    }
+
+    $stmt = null;
+
+    try{
+        $sql = "SELECT *
+                FROM Element";
+        $stmt = $conn->prepare($sql);
+        if(!$stmt->execute()){
+            throw new Exception( $stmt->error);
+        }
+
+        $result = $stmt->get_result();
+
+        $output = [];
+        while($row = $result->fetch_assoc())
+            $output[] = $row;
+    
+        return $output;
+
+    }
+    catch(Exception $e){
+        apiError(500, "Errore nella funzione getElementPG: ". $e->getMessage());
+    }
+    finally{
+        if($stmt)   $stmt->close();
+        $conn->close();
+    }
+}

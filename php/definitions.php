@@ -219,8 +219,8 @@ class Account{
  * Caratteristiche e funzioni di un singolo personaggio
  */
 class Personaggio{
-    const MIN_FOR_DEX = -10;
-    const MAX_FOR_DEX = 10;
+    const MIN_FOR_DES = -10;
+    const MAX_FOR_DES = 10;
     const MIN_HEALTH = 0;
     const MAX_EXP = 100;
     const EXP_WIN = 15;
@@ -254,12 +254,15 @@ class Personaggio{
         +10 => 60
     ];
 
+    const DEFAULT_PF = 25;
+    const DEFAULT_FOR_DES = 0;
+
     private $nome;
     private $owner;
     private $FOR;
     private $damage;
     private $dodgingChance;
-    private $DEX;
+    private $DES;
     private $PF;
     private $tmp_PF;
     private $elemento;
@@ -271,6 +274,7 @@ class Personaggio{
     private $isRetrieved;   ///> isnfaodsa
     private $connectionDB;
 
+    // TODO: Fai il costruttore affinché crei da zero con solo nome e elemento (livello 1)
     /**
      * Crea un nuovo personaggio
      * @param string $nome
@@ -305,11 +309,11 @@ class Personaggio{
             throw new InvalidArgumentException("Il proprietario non esiste");
         }
 
-        if ($forza < self::MIN_FOR_DEX || $forza > self::MAX_FOR_DEX){
-            throw new InvalidArgumentException("FOR deve essere tra " . self::MIN_FOR_DEX . " e " . self::MAX_FOR_DEX);
+        if ($forza < self::MIN_FOR_DES || $forza > self::MAX_FOR_DES){
+            throw new InvalidArgumentException("FOR deve essere tra " . self::MIN_FOR_DES . " e " . self::MAX_FOR_DES);
         }
-        if ($destrezza < self::MIN_FOR_DEX || $destrezza > self::MAX_FOR_DEX){
-            throw new InvalidArgumentException("DEX deve essere tra " . self::MIN_FOR_DEX . " e " . self::MAX_FOR_DEX);
+        if ($destrezza < self::MIN_FOR_DES || $destrezza > self::MAX_FOR_DES){
+            throw new InvalidArgumentException("DES deve essere tra " . self::MIN_FOR_DES . " e " . self::MAX_FOR_DES);
         }
         if ($puntiVita < self::MIN_HEALTH){
             throw new InvalidArgumentException("I PF devono essere positivi.");
@@ -318,7 +322,7 @@ class Personaggio{
         $this->nome = $nome;
         $this->owner = $proprietario;
         $this->FOR = $forza;
-        $this->DEX = $destrezza;
+        $this->DES = $destrezza;
         $this->PF = $puntiVita;
         $this->elemento = $elemento;
         $this->armatura = $armatura;
@@ -329,7 +333,7 @@ class Personaggio{
         $this->isRetrieved = $retrieved;
 
         $this->tmp_PF = $puntiVita;
-        $this->dodgingChance = self::DODGE_LOOKUP[$this->DEX];
+        $this->dodgingChance = self::DODGE_LOOKUP[$this->DES];
         $this->damage = self::DAMAGE_LOOKUP[$this->FOR];
     }
 
@@ -346,7 +350,7 @@ class Personaggio{
             'nome' => $this->nome,
             'FOR'=> $this->FOR,
             'damage' => $this->damage,
-            'DEX' => $this->DEX,
+            'DES' => $this->DES,
             'dodgingChance' => $this->dodgingChance,
             'PF' => $this->PF,
             'temp_PF' => $this->tmp_PF,
@@ -428,7 +432,7 @@ class Personaggio{
             $this->nome,
             $this->owner,
             $this->FOR,
-            $this->DEX,
+            $this->DES,
             $this->PF,
             $this->elemento
         );
@@ -470,7 +474,7 @@ class Personaggio{
         // Bind parameters
         $stmt->bind_param('iiisiisiis',
             $this->FOR,
-            $this->DEX,
+            $this->DES,
             $this->PF,
             $this->elemento,
             $this->armatura,

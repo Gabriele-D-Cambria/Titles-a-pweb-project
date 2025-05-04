@@ -731,10 +731,10 @@ function generateInfo(id, item = null, hasIt = true){
 
             tr = document.createElement("tr");
             td = document.createElement("td");
-            td.innerText = "Modificatore DEX";
+            td.innerText = "Modificatore DES";
             tr.appendChild(td);
             td = document.createElement("td");
-            td.innerText = item.ModificatoreDex;
+            td.innerText = item.ModificatoreDes;
             tr.appendChild(td);
 
             table.appendChild(tr);

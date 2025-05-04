@@ -16,10 +16,13 @@ CREATE TABLE Element(
     Nome VARCHAR(50) NOT NULL PRIMARY KEY,
     PathImmagine VARCHAR(255) COLLATE utf8_bin DEFAULT NULL,
     PathImmaginePG VARCHAR(255) COLLATE utf8_bin DEFAULT NULL,
+    ModificatoreFor INT DEFAULT 0,
+    ModificatoreDes INT DEFAULT 0,
+    ModificatorePF INT DEFAULT 0,
     PrevaleSu VARCHAR(50) DEFAULT NULL,
-    PrevalsaDa VARCHAR(50) DEFAULT NULL,
+    PrevalsoDa VARCHAR(50) DEFAULT NULL,
     FOREIGN KEY (PrevaleSu) REFERENCES Element(Nome) ON DELETE SET NULL,
-    FOREIGN KEY (PrevalsaDa) REFERENCES Element(Nome) ON DELETE SET NULL
+    FOREIGN KEY (PrevalsoDa) REFERENCES Element(Nome) ON DELETE SET NULL
 );
 
 CREATE TABLE ItemType(
@@ -38,7 +41,7 @@ CREATE TABLE Item (
     Armatura INT DEFAULT 0,
     RecuperoVita INT DEFAULT 0,
     ModificatoreFor INT DEFAULT 0,
-    ModificatoreDex INT DEFAULT 0,
+    ModificatoreDes INT DEFAULT 0,
 	FOREIGN KEY (Elemento) REFERENCES Element(Nome),
 	FOREIGN KEY (Tipologia) REFERENCES ItemType(Nome)
 );

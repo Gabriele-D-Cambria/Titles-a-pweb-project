@@ -5,7 +5,7 @@ Il gioco si basa su combattimenti nel classico stile _Pokémon_, ma con mosse, s
 Ogni account avrà a disposizione la generazione di un massimo di 5 personaggi (da ora _PG_).
 Le statistiche di ogni _PG_ sono le seguenti:
 - **Forza** `FOR`: indica quanto danno di base faranno gli attacchi del personaggio, senza considerare eventuali bonus/malus.
-- **Destrezza** `DEX`: indica la probabilità di schivare un'attacco del personaggio 
+- **Destrezza** `DES`: indica la probabilità di schivare un'attacco del personaggio 
   La probabilità spazierà dallo 0% al minimo fino al 60% al massimo,  per evitare scontri troppo difficili
 Ogni volta che si subisce un attacco il "tiro" per la schivata avviene automaticamente.
 - **Punti Vita** `PF`
@@ -31,7 +31,7 @@ Ogni volta che si subisce un attacco il "tiro" per la schivata avviene automatic
 Gli oggetti forniscono _buff_ temporanei alle statistiche o permettono di recuperare vita, e una volta utilizzati vengono persi definitivamente. 
 
 
-I valori di `FOR` e `DEX` sono di default `0` ma possono variare in un intervallo che va da `-10` e `+10`.
+I valori di `FOR` e `DES` sono di default `0` ma possono variare in un intervallo che va da `-10` e `+10`.
 I valori hanno i valori di riferimento della tabella (2).
 Di default ogni personaggio ha `25 PF`
 
@@ -78,7 +78,7 @@ Le _box_, oltre a poter essere acquistate nel _negozio_ quando vi si trovano, si
 Di seguito le statistiche delgi _oggetti_ nel gioco.
 
 Informazioni sulle `armi`:
-| Nome               | Descrizione                        | Elemento | Tipologia | Costo | Danno | ModificatoreFor  | ModificatoreDex  |
+| Nome               | Descrizione                        | Elemento | Tipologia | Costo | Danno | ModificatoreFor  | ModificatoreDes  |
 |--------------------|------------------------------------|----------|-----------|-------|-------|------------------|------------------|
 | Spada d'Acqua      | Una spada affilata e leggera.      | Acqua    | arma      | 20    | 6     | 2                | 1                |
 | Spada di Fuoco     | Una spada infuocata.               | Fuoco    | arma      | 30    | 8     | 0                | 1                |
@@ -87,7 +87,7 @@ Informazioni sulle `armi`:
 | Pugnale d'Aria     | Un pugnale leggero e veloce.       | Aria     | arma      | 20    | 6     | 1                | 2                |
 
 Informazioni sulle `armature`:
-| Nome               | Descrizione             | Elemento | Tipologia | Costo | Armatura |  ModificatoreFor  | ModificatoreDex  |
+| Nome               | Descrizione             | Elemento | Tipologia | Costo | Armatura |  ModificatoreFor  | ModificatoreDes  |
 |--------------------|-------------------------|----------|-----------|-------|----------|-------------------|------------------|
 | Armatura d'Acqua   | Leggera e impermeabile. | Acqua    | armatura  | 40    | 4        | -1                |  0               |
 | Armatura di Fuoco  | Resistente al calore.   | Fuoco    | armatura  | 40    | 4        |  0                | -1               |
@@ -97,7 +97,7 @@ Informazioni sulle `armature`:
 
 
 Informazioni sulle `pozioni`:
-| Nome                 | Descrizione                                       | Elemento | Tipologia | Costo | RecuperoVita  | ModificatoreFor | ModificatoreDex |
+| Nome                 | Descrizione                                       | Elemento | Tipologia | Costo | RecuperoVita  | ModificatoreFor | ModificatoreDes |
 |----------------------|---------------------------------------------------|----------|-----------|-------|---------------|-----------------|-----------------|
 | Pozione di Vita      | Ripristina 20 PF.                                 | NULL     | pozione   | 15    | 20            | 0               | 0               |
 | Pozione di Energia   | Ripristina 10 PF.                                 | NULL     | pozione   | 10    | 10            | 0               | 0               |
@@ -105,13 +105,13 @@ Informazioni sulle `pozioni`:
 | Pozione di Destrezza | Aumenta la destrezza temporaneamente di 3 punti.  | NULL     | pozione   |  8    | 0             | 0               | 3               |
 
 Informazioni sulle `box`:
-| Nome               | Descrizione                     | Elemento | Tipologia | Costo | Danno | Armatura | RecuperoVita | ModificatoreFor | ModificatoreDex |
+| Nome               | Descrizione                     | Elemento | Tipologia | Costo | Danno | Armatura | RecuperoVita | ModificatoreFor | ModificatoreDes |
 |--------------------|---------------------------------|----------|-----------|-------|-------|----------|---------------|------------------|------------------|
 | Box Comune         | Contiene monete, pozione, 2 oggetti (armi e/o armature). | NULL     | box       | 50    | 0     | 0        | 0             | 0                | 0                |
 | Box Rara           | Contiene monete, 2 pozioni, 2 armi e 2 armature. | NULL     | box       | 100    | 0     | 0        | 0             | 0                | 0                |
 
 Tabella (1)
-|Elementale|FOR |DEX | PF |Totale|Prevale|Prevalsa da|
+|Elementale|FOR |DES | PF |Totale|Prevale|Prevalsa da|
 |:--------:|:--:|:--:|:--:|:----:|:-----:|:---------:|
 |_Acqua_   |`-3`|`+2`|`+5`| `+4` |Fuoco  |  Elettro  |
 |_Fuoco_   |`+4`|`+3`|`-3`| `+4` |Aria   |   Acqua   |
@@ -120,7 +120,7 @@ Tabella (1)
 |_Aria_    |`-1`|`+6`|`-1`| `+4` |Terra  |   Fuoco   |
 
 Tabella (2)
-|          |FOR - Danni|DEX - % schivata|
+|          |FOR - Danni|DES - % schivata|
 |---------:|:---------:|:--------------:|
 |`-10`/`-9`|    `0`    |      `0%`      |
 |`-8`/`-7` |    `1`    |     `10%`      |

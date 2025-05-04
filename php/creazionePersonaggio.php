@@ -7,6 +7,9 @@ if(!isset($_SESSION['account'])){
 	pageError("401");
 }
 
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -34,21 +37,21 @@ if(!isset($_SESSION['account'])){
 			<div class="stats-section">
 				<div class="lvl-block">
 					<p class="lvl-info">Livello <span id="user-lvl">1</span></p>
-					<!-- <p class="pu-info">PU: <span id="PU-points">1</span></p> -->
+					<!-- <p class="pu-info">PU: <span id="PU-points">3</span></p> -->
 					<div class="exp-bar">
-						<div class="exp-points" style="width: 60%;"></div>
+						<!-- <div class="exp-points" style="width: 60%;"></div> -->
 					</div>
 				</div>
 				<div class="stats-block PF">
-					<div id="PF" class="PF-points">25</div>
+					<div id="PF" class="PF-points"></div>
 					<p>PF</p>
 				</div>
 				<div class="stats-block FOR">
-					<div id="FOR" class="FOR-points">0</div>
+					<div id="FOR" class="FOR-points"></div>
 					<p>FOR</p>
 				</div>
 				<div class="stats-block DES">
-					<div id="DES" class="DES-points">0</div>
+					<div id="DES" class="DES-points"></div>
 					<p>DES</p>
 				</div>
 			</div>
@@ -57,22 +60,22 @@ if(!isset($_SESSION['account'])){
 					<input type="text" name="PG-name" id="PG-name" placeholder="Nome" pattern="^[a-zA-Z][a-z]{2,15}$" required autocomplete="off">
 					<div class="character-choose">
 						<div id="prevPG" class="arrow">←</div>
-						<img src="images/characters/acqua.svg" alt="Personaggio d'Acqua" draggable="false">
+						<img id="imagePG" src="" alt="" draggable="false">
 						<div id="nextPG" class="arrow">→</div>
 					</div>
 					<hr>
 					<footer>
 						<div class="damage-box">
 							<p>Danno</p>
-							<p>5</p>
+							<p id="damage"></p>
 						</div>
 						<div class="element-pic">
-							<input type="radio" value="acqua" name="element" id="element" checked hidden>
-							<img id="elementPic" draggable="false" src="images/pics/acqua.svg" alt="Element Pic">
+							<input type="radio" value="" name="element" id="element" checked hidden>
+							<img id="elementPic" draggable="false" src="" alt="Element Pic">
     	        		</div>
 						<div class="dodge-box">
 							<p>Schivata</p>
-							<p id="dodge">50%</p>
+							<p id="dodge"></p>
 						</div>
 					</footer>
 				</div>
@@ -82,13 +85,13 @@ if(!isset($_SESSION['account'])){
 					<div class="prevalence-block prevails">
 						<p>Prevale</p>
 						<div class="element-pic">
-    	            		<img id="prevalePic" draggable="false" src="images/pics/fuoco.svg" alt="Elemento Prevalso">
+    	            		<img id="prevalePic" draggable="false" src="" alt="">
     	        		</div>
 					</div>
 					<div class="prevalence-block prevailed">
 						<p>Prevalso</p>
 						<div class="element-pic">
-    	            		<img id="prevalsoPic" draggable="false" src="images/pics/elettro.svg" alt="Elemento Prevalso">
+    	            		<img id="prevalsoPic" draggable="false" src="" alt="">
     	        		</div>
 					</div>
 				</div>
