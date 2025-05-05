@@ -19,6 +19,8 @@ define('PASSWORD_PATTERN', "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Z
 //? endsource
 define("VALID_PASSWORD", "Password1!");
 
+define("PG_NAME_PATTERN", "/^[a-zA-Z][a-zA-Z]{2,9}$/");
+
 define('ERROR_TYPES', [
     'invalid_username'          => "Username non valido. Deve iniziare con una lettera e avere tra 3 e 10 caratteri.",
     'username_taken'            => "Username già esistente.",
@@ -33,7 +35,10 @@ define('ERROR_TYPES', [
     'connection_failed'         => "Il server non è al momento disponibile.\nRiprovare tra un po'.",
     'invalid_param'             => "I parametri forniti non sono corretti.",
     'image_same_as_current'     => "Stai già utilizzando questa immagine",
-    'update_failed'             => "C'è stato un problema durante l'aggiornamento.\nRiprova tra un po'."
+    'update_failed'             => "C'è stato un problema durante l'aggiornamento.\nRiprova tra un po'.",
+    'invalid_pg_name'           => "Nome non valido. Deve contenere solo lettere e avere tra i 3 a 10 caratteri.",
+    'invalid_element'           => "L'elemento inserito non è un elemento valido",
+    'full_PG'                   => "L'account ha già il numero massimo di Personaggi associati.\nPer crearne uno nuovo elimina uno vecchio"
 ]);
 
 /**
@@ -181,7 +186,7 @@ class Account{
     public function updateImmagineProfilo($newPic){
         if($this->immagineProfilo !== $newPic){
             $this->immagineProfilo = $newPic;
-            return true;   
+            return true;
         }
         return false;
     }
@@ -206,7 +211,7 @@ class Account{
      */
     public function removePersonaggio($nomePersonaggio){
         foreach($this->personaggi as $key => $personaggio){
-            if($personaggio->getName() === $nomePersonaggio){
+            if($personaggio->getNome() === $nomePersonaggio){
                 unset($this->personaggi[$key]);
                 return true;
             }
@@ -257,6 +262,8 @@ class Personaggio{
     const DEFAULT_PF = 25;
     const DEFAULT_FOR_DES = 0;
 
+    private $pathImmagine;
+    private $pathImmaginePG;
     private $nome;
     private $owner;
     private $FOR;
@@ -266,75 +273,130 @@ class Personaggio{
     private $PF;
     private $tmp_PF;
     private $elemento;
+    private $prevaleSu;
+    private $prevalsoDa;
     private $armatura;  /// Riferimento all'armatura indossata
     private $arma;     /// Riferimento all'arma equipaggiata
     private $livello;
     private $exp;
     private $puntiUpgrade;
-    private $isRetrieved;   ///> isnfaodsa
     private $connectionDB;
 
-    // TODO: Fai il costruttore affinché crei da zero con solo nome e elemento (livello 1)
     /**
-     * Crea un nuovo personaggio
-     * @param string $nome
-     * @param int $forza
-     * @param int $destrezza
-     * @param int $puntiVita
-     * @param string $elemento
-     * @param int $armatura
-     * @param int $arma
-     * @param int $livello
-     * @param int $puntiExp
-     * @param int $puntiUpgrade
-     * @param bool $retrieved: da settare true se il personaggio è stato recuperato dal DB. Di default è impostato a false
-     * @throws \InvalidArgumentException quando i parametri non rispettano il formato corretto
+     * Costruttore della classe Personaggio.
+     * Se il personaggio esiste già nel database, ne recupera i dati.
+     * Altrimenti, crea un nuovo personaggio con i valori di default e lo salva nel database.
+     * 
+     * @param string $nome Nome del personaggio.
+     * @param int $proprietarioId ID del proprietario del personaggio.
+     * @param string $elemento Elemento associato al personaggio.
+     * @throws Exception Se il proprietario non esiste o se si verifica un errore durante l'inserimento o il recupero dei dati.
      */
-    public function __construct($nome, $proprietario, $forza, $destrezza, $puntiVita, $elemento, $armatura, $arma, $livello, $puntiExp, $puntiUpgrade, $retrieved = false){
-
+    public function __construct($nome, $proprietarioId, $elemento){
         $this->connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
-        if ($this->connectionDB->connect_error){
-            throw new InvalidArgumentException("Server non Disponibile");
-        }
 
-        $ownerCheckQuery = "SELECT COUNT(*) FROM Account WHERE ID = ?";
-        $ownerStmt = $this->connectionDB->prepare($ownerCheckQuery);
-        $ownerStmt->bind_param('i', $proprietario);
-        $ownerStmt->execute();
-        $ownerStmt->bind_result($ownerExists);
-        $ownerStmt->fetch();
-        $ownerStmt->close();
+        $ownerStmt = null;
+        $personaggioStmt = null;
 
-        if(!$ownerExists){
-            throw new InvalidArgumentException("Il proprietario non esiste");
-        }
+        try {
+            if ($this->connectionDB->connect_error){
+                throw new Exception("Server non Disponibile", 500);
+            }
 
-        if ($forza < self::MIN_FOR_DES || $forza > self::MAX_FOR_DES){
-            throw new InvalidArgumentException("FOR deve essere tra " . self::MIN_FOR_DES . " e " . self::MAX_FOR_DES);
-        }
-        if ($destrezza < self::MIN_FOR_DES || $destrezza > self::MAX_FOR_DES){
-            throw new InvalidArgumentException("DES deve essere tra " . self::MIN_FOR_DES . " e " . self::MAX_FOR_DES);
-        }
-        if ($puntiVita < self::MIN_HEALTH){
-            throw new InvalidArgumentException("I PF devono essere positivi.");
-        }
+            // Verifico se il proprietario esiste
+            $ownerCheckQuery = "SELECT * FROM Account WHERE ID = ?";
+            $ownerStmt = $this->connectionDB->prepare($ownerCheckQuery);
+            if (!is_numeric($proprietarioId)) {
+                throw new Exception("Proprietario non esistente", 400);
+            }
 
-        $this->nome = $nome;
-        $this->owner = $proprietario;
-        $this->FOR = $forza;
-        $this->DES = $destrezza;
-        $this->PF = $puntiVita;
-        $this->elemento = $elemento;
-        $this->armatura = $armatura;
-        $this->arma = $arma;
-        $this->livello = $livello;
-        $this->exp = $puntiExp;
-        $this->puntiUpgrade = $puntiUpgrade;
-        $this->isRetrieved = $retrieved;
+            $ownerStmt->bind_param('i', $proprietarioId);
+            $ownerStmt->execute();
+            $result = $ownerStmt->get_result();
 
-        $this->tmp_PF = $puntiVita;
-        $this->dodgingChance = self::DODGE_LOOKUP[$this->DES];
-        $this->damage = self::DAMAGE_LOOKUP[$this->FOR];
+            if ($result->num_rows === 0) {
+                throw new Exception("Proprietario non esistente", 400);
+            }
+
+            // Verifico se il PG esiste già
+            $personaggioCheckQuery = "SELECT P.*, E.PathImmagine, E.PathImmaginePG, E.PrevaleSu, E.PrevalsoDa
+                                      FROM Personaggi P JOIN Element E ON P.Elemento = E.Nome
+                                      WHERE P.Nome = ? AND P.Proprietario = ?";
+            $personaggioStmt = $this->connectionDB->prepare($personaggioCheckQuery);
+            $personaggioStmt->bind_param('si', $nome, $proprietarioId);
+            $personaggioStmt->execute();
+            $personaggioResult = $personaggioStmt->get_result();
+
+            if ($personaggioResult->num_rows > 0) {
+                // Il PG esiste
+                $personaggioData = $personaggioResult->fetch_assoc();
+
+                $this->pathImmagine   = $personaggioData['PathImmagine'];
+                $this->pathImmaginePG = $personaggioData['PathImmaginePG'];
+                $this->nome           = $personaggioData['Nome'];
+                $this->owner          = $personaggioData['Proprietario'];
+                $this->FOR            = $personaggioData['Forza'];
+                $this->DES            = $personaggioData['Destrezza'];
+                $this->PF             = $personaggioData['PuntiVita'];
+                $this->elemento       = $personaggioData['Elemento'];
+                $this->prevaleSu      = $personaggioData['PrevaleSu'];
+                $this->prevalsoDa     = $personaggioData['PrevalsoDa'];
+                $this->armatura       = $personaggioData['Armatura'];
+                $this->arma           = $personaggioData['Arma'];
+                $this->livello        = $personaggioData['Livello'];
+                $this->exp            = $personaggioData['PuntiExp'];
+                $this->puntiUpgrade   = $personaggioData['PuntiUpgrade'];
+            }
+            else {
+                // Creo un nuovo PG
+                $elementInfo = getElementInfo($elemento, $this->connectionDB);
+                
+                if(!$elementInfo){
+                    throw new Exception("Elemento non valido: ". $elementInfo, 400);
+                }
+
+                $this->pathImmagine   = $elementInfo['PathImmagine'];
+                $this->pathImmaginePG = $elementInfo['PathImmaginePG'];
+                $this->nome           = $nome;
+                $this->owner          = $proprietarioId;
+                $this->FOR            = self::DEFAULT_FOR_DES + $elementInfo["ModificatoreFor"];
+                $this->DES            = self::DEFAULT_FOR_DES + $elementInfo["ModificatoreDes"];
+                $this->PF             = self::DEFAULT_PF + $elementInfo["ModificatorePF"];
+                $this->elemento       = $elementInfo['Nome'];
+                $this->prevaleSu      = $elementInfo['PrevaleSu'];
+                $this->prevalsoDa     = $elementInfo['PrevalsoDa'];
+                $this->armatura       = null;
+                $this->arma           = null;
+                $this->livello        = 1;
+                $this->exp            = 0;
+                $this->puntiUpgrade   = self::PU_LVL_UP;
+
+                $insertQuery = "INSERT INTO Personaggi (Nome, Proprietario, Forza, Destrezza, PuntiVita, Elemento, Armatura, Arma, Livello, PuntiExp, PuntiUpgrade)
+                                VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, 1, 0, ?)";
+                $insertStmt = $this->connectionDB->prepare($insertQuery);
+                $insertStmt->bind_param('siiiisi', 
+                     $this->nome,
+                    $this->owner, 
+                           $this->FOR,
+                           $this->DES,
+                           $this->PF,
+                           $this->elemento,
+                           $this->puntiUpgrade);
+
+                if (!$insertStmt->execute()) {
+                    throw new Exception("Errore durante l'inserimento del personaggio: " . $insertStmt->error, 500);
+                }
+                $insertStmt->close();
+            }
+
+            $this->tmp_PF = $this->PF;
+            $this->dodgingChance = self::DODGE_LOOKUP[$this->DES];
+            $this->damage = self::DAMAGE_LOOKUP[$this->FOR];
+        } 
+        finally {
+            if ($ownerStmt) $ownerStmt->close();
+            if ($personaggioStmt) $personaggioStmt->close();
+        }
     }
 
     public function __destruct(){
@@ -342,30 +404,42 @@ class Personaggio{
             $this->connectionDB->close();
     }
 
-    public function getName(){
+    public function getNome(){
         return $this->nome;
     }
-    public function getAll(){
+    public function getProprietario(){
+        return $this->owner;
+    }
+    public function getElemento(){
+        return $this->elemento;
+    }
+    
+    public function getAll() {
         return [
-            'nome' => $this->nome,
-            'FOR'=> $this->FOR,
-            'damage' => $this->damage,
-            'DES' => $this->DES,
-            'dodgingChance' => $this->dodgingChance,
-            'PF' => $this->PF,
-            'temp_PF' => $this->tmp_PF,
-            'elemento' => $this->elemento,
-            'armatura' => $this->armatura,
-            'arma' => $this->arma,
-            'livello' => $this->livello,
-            'exp' => $this->exp,
-            'puntiUpgrade' => $this->puntiUpgrade
+            'nome'           => $this->nome,
+            'owner'          => $this->owner,
+            'FOR'            => $this->FOR,
+            'damage'         => $this->damage,
+            'DES'            => $this->DES,
+            'dodgingChance'  => $this->dodgingChance,
+            'PF'             => $this->PF,
+            'temp_PF'        => $this->tmp_PF,
+            'elemento'       => $this->elemento,
+            'prevaleSu'      => $this->prevaleSu,
+            'prevalsoDa'     => $this->prevalsoDa,
+            'armatura'       => $this->armatura,
+            'arma'           => $this->arma,
+            'livello'        => $this->livello,
+            'exp'            => $this->exp,
+            'puntiUpgrade'   => $this->puntiUpgrade,
+            'pathImmagine'   => $this->pathImmagine,
+            'pathImmaginePG' => $this->pathImmaginePG
         ];
     }
 
     /**
      * Aggiungo l'esperienza ed eventualemnte effettuo il lvlUP
-     * @param bool $win Se l'esperienza guadagnata deriva da una vittoria o meno
+     * @param bool $win Se l'esperienza guadagnata deriva da una vittoria (true) o da una sconfitta (false)
      * @return bool Se true indica che c'è stato il level-up, altrimenti false.
      */
     public function addExp($win){
@@ -376,7 +450,7 @@ class Personaggio{
             $this->exp %= self::MAX_EXP;
             $this->livello++;
             $this->puntiUpgrade += self::PU_LVL_UP;
-            return true;
+            return self::updateDB();
         }
 
         return false;
@@ -406,93 +480,115 @@ class Personaggio{
         return true;
     }
 
-
-    public function addToDB(){
-        if(!$this->connectionDB){
-            return [false, "server_not_available"];
-        }
-
-        // Controllo se esiste già un personaggio con lo stesso nome
-        $nameCheckQuery = "SELECT COUNT(*) FROM Personaggi WHERE Nome = ? AND Proprietario = ?";
-        $nameStmt = $this->connectionDB->prepare($nameCheckQuery);
-        $nameStmt->bind_param('si', $this->nome, $this->owner);
-        $nameStmt->execute();
-        $nameStmt->bind_result($nameExists);
-        $nameStmt->fetch();
-        $nameStmt->close();
-
-        if ($nameExists > 0){
-            return [false, "name_already_in_use"];
-        }
-
-        $query = "INSERT INTO Personaggi (Nome, Proprietario, Forza, Destrezza, PuntiVita, Elemento) VALUES (?, ?, ?, ?, ?, ?)";
-        $stmt = $this->connectionDB->prepare($query);
-
-        $stmt->bind_param('siiiis',
-            $this->nome,
-            $this->owner,
-            $this->FOR,
-            $this->DES,
-            $this->PF,
-            $this->elemento
-        );
-
-
-        if ($stmt->execute()){
-            $stmt->close();
-            return true;
-        }
-        else{
-            $stmt->close();
-            return [false, "generic_error"];
-        }
-    }
-
+    /**
+     * Aggiorna i dati del personaggio nel database
+     * @return bool true se l'aggiornamento è avvenuto con successo, false altrimenti
+     */
     public function updateDB() {
         if (!$this->connectionDB) {
-            return [false, "server_not_available"];
+            return false;
         }
 
-        // Prepare the update query
-        $query = "UPDATE Personaggi SET
-                    Forza = ?,
-                    Destrezza = ?,
-                    PuntiVita = ?,
-                    Elemento = ?,
-                    Armatura = ?,
-                    Arma = ?,
-                    Livello = ?,
-                    PuntiExp = ?,
-                    PuntiUpgrade = ?
-                  WHERE Nome = ? AND Proprietario = ?";
+        $stmt = null;
+        try {
+            // Prepare the update query
+            $query = "UPDATE Personaggi SET
+                        Forza = ?,
+                        Destrezza = ?,
+                        PuntiVita = ?,
+                        Elemento = ?,
+                        Armatura = ?,
+                        Arma = ?,
+                        Livello = ?,
+                        PuntiExp = ?,
+                        PuntiUpgrade = ?
+                      WHERE Nome = ? AND Proprietario = ?";
 
-        $stmt = $this->connectionDB->prepare($query);
-        if ($stmt === false) {
-            return [false, "prepare_failed: " . $this->connectionDB->error];
+            $stmt = $this->connectionDB->prepare($query);
+            if (!$stmt) {
+                return false;
+            }
+
+            $stmt->bind_param('iiisiisiis',
+                $this->FOR,
+                $this->DES,
+                $this->PF,
+                $this->elemento,
+                $this->armatura,
+                $this->arma,
+                $this->livello,
+                $this->exp,
+                $this->puntiUpgrade,
+                $this->nome,
+                $this->owner
+            );
+
+            return $stmt->execute();
+        } 
+        finally {
+            if ($stmt)  $stmt->close();
+        }
+    }
+}
+
+/**
+ * Recupera dal database le informazioni relative ai modificatori e debolezze di un elemento specificato.
+ *
+ * Questa funzione interroga il database per ottenere dettagli come i percorsi delle immagini, i modificatori
+ * e le relazioni (ad esempio, punti di forza e debolezze) per un determinato elemento. Il nome dell'elemento
+ * deve essere presente nel database.
+ *
+ * @param string $element Il nome dell'elemento di cui recuperare le informazioni. Deve corrispondere a un record nel database.
+ * @param mysqli &$conn Un riferimento alla connessione MySQLi attiva.
+ * 
+ * @return array Un array associativo contenente le informazioni dell'elemento se l'operazione ha successo, oppure un messaggio di errore
+ *               con la seguente struttura:
+ *               - In caso di successo:
+ *                 [
+ *                   "PathImmagine" => string,  // Percorso dell'immagine dell'elemento.
+ *                   "PathImmaginePG" => string, // Percorso dell'immagine PG dell'elemento.
+ *                   "ModificatoreFor" => float, // Modificatore per la forza.
+ *                   "ModificatoreDes" => float, // Modificatore per la destrezza.
+ *                   "ModificatorePF" => float,  // Modificatore per i punti vita.
+ *                   "PrevaleSu" => string,      // Elemento/i su cui questo elemento prevale.
+ *                   "PrevalsoDa" => string      // Elemento/i da cui questo elemento è prevalso.
+ *                 ]
+ *               - In caso di errore:
+ *                 [
+ *                   "error" => true,
+ *                   "message" => string // Descrizione dell'errore.
+ *                 ]
+ *
+ * @throws Exception Se la connessione al database fallisce, la query fallisce o l'elemento non viene trovato.
+ */
+function getElementInfo($element, &$conn): array{
+    $stmt = null;
+    try{
+        if($conn->connect_error){
+            throw new Exception("Connessione al database fallita: ". $conn->connect_error, 500);
         }
 
-        // Bind parameters
-        $stmt->bind_param('iiisiisiis',
-            $this->FOR,
-            $this->DES,
-            $this->PF,
-            $this->elemento,
-            $this->armatura,
-            $this->arma,
-            $this->livello,
-            $this->exp,
-            $this->puntiUpgrade,
-            $this->nome,
-            $this->owner
-        );
+        $sql = "SELECT *
+            FROM Element
+            WHERE Nome = ?";
 
-        // Execute the statement
-        if ($stmt->execute()) {
-            $stmt->close();
-            return [true, "update_successful"];
-        } else {
-            $stmt->close();
-            return [false, "update_failed: " . $stmt->error];
+        $stmt = $conn->prepare($sql);
+
+        $stmt->bind_param("s", $element);
+        if(!$stmt->execute()){
+            throw new Exception( $stmt->error, 500);
         }
+
+        $result = $stmt->get_result();
+
+        if($result->num_rows === 0){
+            throw new Exception("invalid_element", 400);
+        }
+
+        return $result->fetch_assoc();
+
+    }
+    finally{
+        if($stmt)   $stmt->close();
     }
 }

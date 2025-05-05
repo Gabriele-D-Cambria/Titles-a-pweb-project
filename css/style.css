@@ -1,3 +1,7 @@
+*{
+	user-select: none;
+}
+
 body {
     font-family: cursive, Arial, sans-serif;
     margin: 0;
@@ -15,6 +19,7 @@ body>header {
     background-color: #1e1e1e;
     color: white;
     padding: 5px 20px;
+    box-sizing: border-box;
 }
 
 button{

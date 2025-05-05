@@ -1,6 +1,6 @@
 "use strict";
 
-import {showMessage, errorHandler} from "./methods.js";
+import {showMessage, errorHandler, IMPORTANT_MESSAGE} from "./methods.js";
 
 let listaPersonaggi = null;
 let idCurrentPG = null;
@@ -31,6 +31,10 @@ document.addEventListener("DOMContentLoaded", () => {
 	document.getElementById("PG-name").addEventListener("input", checkValidity);
 
 	getPersonaggi();
+	
+	if(createPGError){
+		errorHandler(createPGError, IMPORTANT_MESSAGE);
+	}
 });
 
 function checkValidity(e){

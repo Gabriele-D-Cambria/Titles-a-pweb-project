@@ -44,7 +44,7 @@ Il quantitativo di esperienza guadagnata è fissato a:
 Arrivati a `100` punti _exp_ si effettua il **passaggio di livello** (_level-up_) del personaggio.
 Il _level-up_ consiste in:
 - Guadagno di `40` monete
-- Guadagno di `+3` _punti upgrade_
+- Guadagno di `+3` _punti upgrade_, utilizzabili per migliorare le statistiche di forza, destrezza e PF
 - Assegnamento di 1 box comune
 
 Le _monete_ possono essere guadagnate nei seguenti modi:

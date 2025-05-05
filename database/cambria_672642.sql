@@ -58,10 +58,10 @@ CREATE TABLE Inventario (
 CREATE TABLE Personaggi (
     Nome VARCHAR(100) COLLATE utf8_bin NOT NULL,
     Proprietario INT NOT NULL,
+    Elemento VARCHAR(50) NOT NULL,
     Forza INT NOT NULL,
     Destrezza INT NOT NULL,
     PuntiVita INT NOT NULL DEFAULT 25,
-    Elemento VARCHAR(50) NOT NULL,
     Armatura INT DEFAULT NULL,     -- Riferimento all'ID dell'armatura equipaggiata
     Arma INT DEFAULT NULL,		 -- Riferimento all'ID dell'arma equipaggiata
     Livello INT NOT NULL DEFAULT 1,

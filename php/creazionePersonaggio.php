@@ -7,6 +7,11 @@ if(!isset($_SESSION['account'])){
 	pageError("401");
 }
 
+$message = null;
+if(isset($_SESSION["createPGError"])){
+    $message = $_SESSION["createPGError"];
+    unset($_SESSION["createPGError"]);
+}
 
 
 
@@ -22,6 +27,9 @@ if(!isset($_SESSION['account'])){
 	<link rel="stylesheet" href="css/style.css">
 	<link rel="stylesheet" href="css/personaggio.css">
 	<script type="module" src="js/creazionePersonaggio.js"></script>
+	<script>
+		const createPGError = <?php echo json_encode($message)?>;
+	</script>
 </head>
 <body>
 	<header>
@@ -57,7 +65,7 @@ if(!isset($_SESSION['account'])){
 			</div>
 			<div class="character-section">
 				<div class="character-box">
-					<input type="text" name="PG-name" id="PG-name" placeholder="Nome" pattern="^[a-zA-Z][a-z]{2,15}$" required autocomplete="off">
+					<input type="text" name="PG-name" id="PG-name" placeholder="Nome" pattern="^[a-zA-Z][a-zA-Z]{2,9}$" required autocomplete="off" title="Inserisci il nome del Personaggio: Dalle 3 alle 15 lettere, con la prima maiuscola">
 					<div class="character-choose">
 						<div id="prevPG" class="arrow">←</div>
 						<img id="imagePG" src="" alt="" draggable="false">

@@ -96,31 +96,23 @@ function getData($username){
         $result = $stmt->get_result();
 
         if($result->num_rows > 0){
-            $row = $result->fetch_assoc();
-            $dateTime = new DateTime($row['RefreshNegozio']);
-            $user = new Account($row['ID'], $row['Username'], $row['Monete'], $dateTime, $row['ImmagineProfilo']);
+            $userRow = $result->fetch_assoc();
+            $dateTime = new DateTime($userRow['RefreshNegozio']);
+            $user = new Account($userRow['ID'], $userRow['Username'], $userRow['Monete'], $dateTime, $userRow['ImmagineProfilo']);
 
-            $sqlPersonaggi = "SELECT *
+            $sqlPersonaggi = "SELECT Nome, Proprietario, Elemento
                               FROM Personaggi
                               WHERE Proprietario = ?";
             $stmtPersonaggi = $conn->prepare($sqlPersonaggi);
-            $stmtPersonaggi->bind_param('i', $row["ID"]);
+            $stmtPersonaggi->bind_param('i', $userRow["ID"]);
             $stmtPersonaggi->execute();
             $resultPersonaggi = $stmtPersonaggi->get_result();
 
             while($personaggioRow = $resultPersonaggi->fetch_assoc()){
                 $personaggio = new Personaggio(
                     $personaggioRow['Nome'],
-                    $row['ID'],
-                    $personaggioRow['Forza'],
-                    $personaggioRow['Destrezza'],
-                    $personaggioRow['PuntiVita'],
-                    $personaggioRow['Elemento'],
-                    $personaggioRow['Armatura'],
-                    $personaggioRow['Arma'],
-                    $personaggioRow['Livello'],
-                    $personaggioRow['PuntiExp'],
-                    $personaggioRow['PuntiUpgrade']
+                    $personaggioRow['Proprietario'],
+                    $personaggioRow['Elemento']
                 );
                 $user->addPersonaggio($personaggio);
             }
@@ -803,8 +795,8 @@ function getRemainingTime(&$currentTime, $shopRefresh) {
 }
 
 /**
- * Funzione che recupera dal DB tutti gli elementi con relativi modificatori e path
- * @return 
+ * Recupera tutti gli elementi dal database, inclusi i relativi modificatori e percorsi.
+ * @return array Ritorna i dati recuperati dal database.
  */
 function getElementPG(){
     $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
