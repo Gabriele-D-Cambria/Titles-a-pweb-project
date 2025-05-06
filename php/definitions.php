@@ -192,7 +192,7 @@ class Account{
     }
 
     /**
-     * Aggiunge un Personaggio alla lista dei personaggi dell'account
+     * Aggiunge un Personaggio già esistente alla lista dei personaggi dell'account
      * @param Personaggio $personaggio il personaggio da aggiungere
      * @return bool Se true indica che l'inserimento è accaduto; false che l'utente ha raggiunto il massimo numero di personaggi ottenibili
      */
@@ -201,6 +201,20 @@ class Account{
             return false;
 
         $this->personaggi[] = $personaggio;
+        return true;
+    }
+
+    /**
+     * Crea e aggiunge un Personaggio alla lista dei personaggi dell'account
+     * @param string $nome nome del personaggio da creare
+     * @param string $elemento elemento del personaggio da creare
+     * @return bool Se true indica che l'inserimento è accaduto; false che l'utente ha raggiunto il massimo numero di personaggi ottenibili
+     */
+    public function addNewPersonaggio($nome, $elemento){
+        if(count($this->personaggi) >= self::MAX_NUM_PERSONAGGI)
+            return false;
+
+        $this->personaggi[] = new Personaggio($nome, $this->id, $elemento);
         return true;
     }
 
@@ -280,7 +294,6 @@ class Personaggio{
     private $livello;
     private $exp;
     private $puntiUpgrade;
-    private $connectionDB;
 
     /**
      * Costruttore della classe Personaggio.
@@ -293,19 +306,19 @@ class Personaggio{
      * @throws Exception Se il proprietario non esiste o se si verifica un errore durante l'inserimento o il recupero dei dati.
      */
     public function __construct($nome, $proprietarioId, $elemento){
-        $this->connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+        $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
 
         $ownerStmt = null;
         $personaggioStmt = null;
 
         try {
-            if ($this->connectionDB->connect_error){
+            if ($connectionDB->connect_error){
                 throw new Exception("Server non Disponibile", 500);
             }
 
             // Verifico se il proprietario esiste
             $ownerCheckQuery = "SELECT * FROM Account WHERE ID = ?";
-            $ownerStmt = $this->connectionDB->prepare($ownerCheckQuery);
+            $ownerStmt = $connectionDB->prepare($ownerCheckQuery);
             if (!is_numeric($proprietarioId)) {
                 throw new Exception("Proprietario non esistente", 400);
             }
@@ -322,7 +335,7 @@ class Personaggio{
             $personaggioCheckQuery = "SELECT P.*, E.PathImmagine, E.PathImmaginePG, E.PrevaleSu, E.PrevalsoDa
                                       FROM Personaggi P JOIN Element E ON P.Elemento = E.Nome
                                       WHERE P.Nome = ? AND P.Proprietario = ?";
-            $personaggioStmt = $this->connectionDB->prepare($personaggioCheckQuery);
+            $personaggioStmt = $connectionDB->prepare($personaggioCheckQuery);
             $personaggioStmt->bind_param('si', $nome, $proprietarioId);
             $personaggioStmt->execute();
             $personaggioResult = $personaggioStmt->get_result();
@@ -349,7 +362,7 @@ class Personaggio{
             }
             else {
                 // Creo un nuovo PG
-                $elementInfo = getElementInfo($elemento, $this->connectionDB);
+                $elementInfo = getElementInfo($elemento, $connectionDB);
                 
                 if(!$elementInfo){
                     throw new Exception("Elemento non valido: ". $elementInfo, 400);
@@ -373,7 +386,7 @@ class Personaggio{
 
                 $insertQuery = "INSERT INTO Personaggi (Nome, Proprietario, Forza, Destrezza, PuntiVita, Elemento, Armatura, Arma, Livello, PuntiExp, PuntiUpgrade)
                                 VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, 1, 0, ?)";
-                $insertStmt = $this->connectionDB->prepare($insertQuery);
+                $insertStmt = $connectionDB->prepare($insertQuery);
                 $insertStmt->bind_param('siiiisi', 
                      $this->nome,
                     $this->owner, 
@@ -396,12 +409,8 @@ class Personaggio{
         finally {
             if ($ownerStmt) $ownerStmt->close();
             if ($personaggioStmt) $personaggioStmt->close();
+            $connectionDB->close();
         }
-    }
-
-    public function __destruct(){
-        if($this->connectionDB)
-            $this->connectionDB->close();
     }
 
     public function getNome(){
@@ -435,6 +444,28 @@ class Personaggio{
             'pathImmagine'   => $this->pathImmagine,
             'pathImmaginePG' => $this->pathImmaginePG
         ];
+    }
+
+    public function getImmaginiPrevalenza(){
+        $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+        
+        $stmt = null;
+        try {
+            $sql = "SELECT 
+                (SELECT PathImmagine FROM Element WHERE Nome = ?) AS prevaleSu,
+                (SELECT PathImmagine FROM Element WHERE Nome = ?) AS prevalsoDa";
+            $stmt = $connectionDB->prepare($sql);
+            $stmt->bind_param("ss", $this->prevaleSu, $this->prevalsoDa);
+            if(!$stmt->execute()){
+                throw new Error("Errore nel recupero: " . $stmt->error);
+            }
+            $result = $stmt->get_result();
+            $output = $result->fetch_assoc();
+            return $output;
+        } finally {
+            if ($stmt) $stmt->close();
+            $connectionDB->close();
+        }
     }
 
     /**
@@ -485,7 +516,9 @@ class Personaggio{
      * @return bool true se l'aggiornamento è avvenuto con successo, false altrimenti
      */
     public function updateDB() {
-        if (!$this->connectionDB) {
+        $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+
+        if($connectionDB->connect_error){
             return false;
         }
 
@@ -504,7 +537,7 @@ class Personaggio{
                         PuntiUpgrade = ?
                       WHERE Nome = ? AND Proprietario = ?";
 
-            $stmt = $this->connectionDB->prepare($query);
+            $stmt = $connectionDB->prepare($query);
             if (!$stmt) {
                 return false;
             }

@@ -18,9 +18,9 @@ $user = $account->getAll();
 
 // $user["personaggi"][] = 1;
 $characterList = "";
-foreach ($user["personaggi"] as $character){
-    $characterList .= '<div class="character-item">';
-    $characterList .= "Personaggio che sborra\n";
+foreach ($user["personaggi"] as $i => $character){
+    $characterList .= '<div id="pg-'.$i.'" class="character-item">';
+    $characterList .= $character->getNome() . "\n";
     $characterList .= '</div>';
 }
 

@@ -41,7 +41,7 @@ if(isset($_SESSION["createPGError"])){
         </aside>
     </header>
 	<main class="main-section">
-		<form class="form-box" action="php/createPG.php" method="POST">
+		<form class="form-box" action="php/handlePG.php" method="POST">
 			<div class="stats-section">
 				<div class="lvl-block">
 					<p class="lvl-info">Livello <span id="user-lvl">1</span></p>

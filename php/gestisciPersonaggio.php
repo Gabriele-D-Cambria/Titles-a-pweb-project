@@ -26,7 +26,7 @@ if(!$currentPGobj){
 }
 
 $currentPG = $currentPGobj->getAll();
-
+$prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
 ?>
 
 <!DOCTYPE html>
@@ -50,7 +50,7 @@ $currentPG = $currentPGobj->getAll();
         </aside>
     </header>
 	<main class="main-section">
-		<form class="form-box" action="php/createPG.php" method="POST">
+		<form class="form-box" action="php/handlePG.php" method="POST">
 			<div class="stats-section">
 				<div class="lvl-block">
 					<p class="lvl-info">Livello <span id="user-lvl">
@@ -85,6 +85,7 @@ $currentPG = $currentPGobj->getAll();
 			<div class="character-section">
 				<div class="character-box">
 					<input type="text" name="PG-name" id="PG-name" value="<?php echo $currentPG["nome"];?>" disabled>
+					<img id="deletePG" src="images/trash.svg" alt="Elimina Personaggio" title="Elimina Personaggio">
 					<div class="character-choose">
 						<!-- <div id="prevPG" class="arrow">←</div> -->
 						<img id="imagePG" src="<?php echo $currentPG["pathImmaginePG"];?>" alt="" draggable="false">
@@ -115,14 +116,17 @@ $currentPG = $currentPGobj->getAll();
 					<div class="prevalence-block prevails">
 						<p>Prevale</p>
 						<div class="element-pic">
-    	            		<img id="prevalePic" draggable="false" src="<?php echo $currentPG["prevaleSu"];?>" alt="Immagine Prevale su">
+    	            		<img id="prevalePic" draggable="false" 
+							src="<?php echo $prevalenceImg["prevaleSu"];?>" 
+							alt="Immagine Prevale su">
     	        		</div>
 					</div>
 					<div class="prevalence-block prevailed">
 						<p>Prevalso</p>
 						<div class="element-pic">
-    	            		<img id="prevalsoPic" draggable="false" src="
-							<?php echo $currentPG["prevalsoDa"];?>" alt="Immagine Prevalso da">
+    	            		<img id="prevalsoPic" draggable="false" 
+							src="<?php echo $prevalenceImg["prevalsoDa"];?>" 
+							alt="Immagine Prevalso da">
     	        		</div>
 					</div>
 				</div>

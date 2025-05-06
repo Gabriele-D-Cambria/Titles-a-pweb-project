@@ -74,8 +74,8 @@ body{
 
 .pu-info, .pu-info *{
 	text-align: right;
-	font-size: normal;
-	color: #5f5f5f;
+	font-size: medium;
+	color: #5f5f5f !important;
 }
 
 .exp-bar{
@@ -151,6 +151,7 @@ body{
 }
 
 .character-box{
+	position: relative;
 	width: 80%;
 	display: grid;
 	grid-template-columns: 1fr;
@@ -181,7 +182,14 @@ body{
 	border-bottom: solid 1pt #1e1e1e;
 }
 
+#deletePG{
+	position: absolute;
+	width: 10%;
+	top: 1%;
+	right: 1%;
+	cursor: pointer;
 
+}
 .character-choose{
 	margin: 0px 20px;
 	height: 100%;
