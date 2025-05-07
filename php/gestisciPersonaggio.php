@@ -3,6 +3,11 @@
 require_once "methods.php";
 session_start();
 
+if($_SERVER['REQUEST_METHOD'] === "POST" && isset($_POST['pg'])) {
+    $_SESSION['currentPG_nome'] = serialize($_POST['pg']);
+	header("Location: gestisciPersonaggio.php");
+	exit;
+}
 
 if(!isset($_SESSION['account']) || !isset($_SESSION['currentPG_nome'])){
 	pageError(401);
@@ -10,6 +15,7 @@ if(!isset($_SESSION['account']) || !isset($_SESSION['currentPG_nome'])){
 
 $account = unserialize($_SESSION['account']);
 $personaggi = $account->getPersonaggi();
+
 $PG_name = unserialize($_SESSION['currentPG_nome']);
 
 $currentPGobj = null;

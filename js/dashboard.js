@@ -37,6 +37,13 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("menu").addEventListener("click", () => {showMenu()});
     document.addEventListener("keypress", handleKeyPress);
 
+    document.querySelectorAll(".character-item").forEach((PG) => {
+        PG.addEventListener("click", (e) => {
+            openCharacter(e.currentTarget.getAttribute("data-id"));
+        })
+    })
+
+
     let addBtn = document.getElementById("add-character");
     if(addBtn !== null)
         addBtn.addEventListener("click", addNewCharacter);
@@ -990,4 +997,40 @@ function updateShopTimer(){
  */
 function addNewCharacter(){
     window.location.href = "./php/creazionePersonaggio.php";
+}
+
+/**
+ * Effettua una richiesta POST per aprire la pagina di gestione del personaggio.
+ * @param {string} characterName Nome del personaggio selezionato.
+ */
+function openCharacter(characterName) {
+    const formData = new FormData();
+    formData.append("pg", characterName);
+
+    fetch("php/gestisciPersonaggio.php", {
+        method: "POST",
+        body: formData,
+    })
+    .then(response => {
+        if (response.ok) {
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                return response.text();
+            }
+        } else {
+            throw new Error(`Errore HTTP: ${response.status}`);
+        }
+    })
+    .then(data => {
+        if(data){
+            console.error("Errore: ", data);
+            showMessage(data, IMPORTANT_MESSAGE);
+        }
+    })
+    .catch(error => {
+        console.error("Errore nella richiesta: ", error);
+        showMessage("Errore nella richiesta al server.", IMPORTANT_MESSAGE);
+    });
+    
 }

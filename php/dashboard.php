@@ -19,13 +19,19 @@ $user = $account->getAll();
 // $user["personaggi"][] = 1;
 $characterList = "";
 foreach ($user["personaggi"] as $i => $character){
-    $characterList .= '<div id="pg-'.$i.'" class="character-item">';
-    $characterList .= $character->getNome() . "\n";
-    $characterList .= '</div>';
+    $PG = $character->getAll();
+    $characterList .= "<div id='" . $i ."' class='character-item' data-id='". $PG["nome"]."'>\n";
+    $characterList .= "<div class='pg-info-block'>\n<img src='". $PG["pathImmagine"] ."' alt='Immagine Personaggio'>\n";
+    $characterList .= "<p class='pg-name-box'>" . $PG["nome"] . "</p>\n</div>\n";
+    $characterList .= "<div class='pg-lvl-block'>\n";
+    $characterList .= "<p class='pg-lvl-info'>Livello: " .$PG['livello'] ."</p>\n";
+    $characterList .= "<div class='pg-exp-bar'>\n<div class='pg-exp-points' style='width: ". $PG['exp'] / Personaggio::MAX_EXP . "%'>";
+    $characterList .= "</div>\n</div>";
+    $characterList .= "</div>\n</div>";
 }
 
 $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI)? 
-'<div id="add-character">Aggiungi un personaggio</div>':
+'<div id="add-character" style="grid-row: span '. 5 - count($user["personaggi"]).'">Aggiungi un personaggio</div>':
 " ";
             
 ?>
