@@ -11,6 +11,7 @@ if (!isset($_SESSION['account'])) {
 }
 
 $account = unserialize($_SESSION['account']);
+$accountId = $account->getId();
 
 $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
 if($conn->connect_error){
@@ -58,7 +59,7 @@ try{
 		$sqlUpdate = "UPDATE Account SET Username = ? WHERE ID = ?";
 
 		$stmtUpdate = $conn->prepare($sqlUpdate);
-		$stmtUpdate->bind_param("si", $newUsername, $account->getId());
+		$stmtUpdate->bind_param("si", $newUsername, $accountId);
 		if(!$stmtUpdate->execute()){
 			throw new Exception($stmtUpdate->error);
 		}
@@ -83,7 +84,7 @@ try{
 					 WHERE ID = ?";
 
 		$stmtCheck = $conn->prepare($sqlCheck);
-		$stmtCheck->bind_param('i', $account->getId());
+		$stmtCheck->bind_param('i', $accountId);
 		if(!$stmtCheck->execute()){
 			throw new Exception($stmtCheck->error);
 		}
@@ -99,7 +100,7 @@ try{
 
 		$sqlUpdate = "UPDATE Account SET Password = ? WHERE ID = ?";
 		$stmtUpdate = $conn->prepare($sqlUpdate);
-		$stmtUpdate->bind_param('si', $hashedPassword, $account->getId());
+		$stmtUpdate->bind_param('si', $hashedPassword, $accountId);
 
 		if(!$stmtUpdate->execute()){
 			throw new Exception($stmtUpdate->error);
@@ -123,7 +124,7 @@ try{
 					 WHERE ID = ?";
 
 		$stmtCheck = $conn->prepare($sqlCheck);
-		$stmtCheck->bind_param('i', $account->getId());
+		$stmtCheck->bind_param('i', $accountId);
 		if(!$stmtCheck->execute()){
 			throw new Exception($stmtCheck->error);
 		}
@@ -137,7 +138,7 @@ try{
 
 		$sqlDelete = "DELETE FROM Account WHERE ID = ?";
 		$stmtDelete = $conn->prepare($sqlDelete);
-		$stmtDelete->bind_param('i', $account->getId());
+		$stmtDelete->bind_param('i', $accountId);
 		if (!$stmtDelete->execute()) {
 			throw new Exception($stmtDelete->error);
 		}
@@ -152,7 +153,7 @@ try{
 				FROM Account
 				WHERE ID = ?";
 		$stmtCheck = $conn->prepare($sql);
-		$stmtCheck->bind_param("s", $account->getId());
+		$stmtCheck->bind_param("s", $accountId);
 		if(!$stmtCheck->execute()){
 			throw new Exception($stmtCheck->error);
 		}
@@ -166,7 +167,7 @@ try{
 		$sqlUpdate = "UPDATE Account SET ImmagineProfilo = ? WHERE ID = ?";
 		
 		$stmtUpdate = $conn->prepare($sqlUpdate);
-		$stmtUpdate->bind_param("si", $newPath, $account->getId());
+		$stmtUpdate->bind_param("si", $newPath, $accountId);
 		if(!$stmtUpdate->execute()){
 			throw new Exception($stmtUpdate->error);
 		}

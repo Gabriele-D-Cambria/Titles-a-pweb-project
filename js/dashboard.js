@@ -1007,11 +1007,13 @@ function openCharacter(characterName) {
     const formData = new FormData();
     formData.append("pg", characterName);
 
+    document.body.classList.add("caricamento");
     fetch("php/gestisciPersonaggio.php", {
         method: "POST",
         body: formData,
     })
     .then(response => {
+        document.body.classList.remove("caricamento");
         if (response.ok) {
             if (response.redirected) {
                 window.location.href = response.url;

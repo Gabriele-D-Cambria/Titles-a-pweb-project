@@ -56,6 +56,7 @@ if(isset($_SESSION["message"])){
             <p>
                 Testo da mettere
                 <!-- TODO: testo per i comandi -->
+                <!-- TODO: sistema i messaggi dove ERROR_TYPES[$errorType] ?? $errorType con il default message -->
             </p>
         </div>
 

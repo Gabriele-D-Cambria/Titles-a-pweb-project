@@ -32,6 +32,10 @@
     flex-direction: column;
     justify-content: center;
 }
+
+h2 i{
+    font-family: "Comic Sans MS", cursive, sans-serif;
+}
 h3{
     text-align: center;
 }

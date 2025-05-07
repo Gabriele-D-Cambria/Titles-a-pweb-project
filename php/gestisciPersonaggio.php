@@ -43,8 +43,9 @@ $prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Titles</title>
 	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/menu.css">
 	<link rel="stylesheet" href="css/personaggio.css">
-	<script type="module" src="js/gestionePersonaggio.js"></script>	
+	<script type="module" src="js/gestisciPersonaggio.js"></script>	
 </head>
 <body>
 	<header>
@@ -141,5 +142,6 @@ $prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
 
 		</form>
 	</main>
+	<div id="deleteModule" class="module"></div>
 </body>
 </html>

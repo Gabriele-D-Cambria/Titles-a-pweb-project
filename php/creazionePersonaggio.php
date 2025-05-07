@@ -7,6 +7,12 @@ if(!isset($_SESSION['account'])){
 	pageError("401");
 }
 
+if (basename(parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH)) !== "dashboard.php" &&
+	basename(parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH)) !== "creazionePersonaggio.php") {
+	header("Location: ./dashboard.php");
+	exit;
+}
+
 $message = null;
 if(isset($_SESSION["createPGError"])){
     $message = $_SESSION["createPGError"];

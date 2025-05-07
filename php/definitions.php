@@ -38,7 +38,10 @@ define('ERROR_TYPES', [
     'update_failed'             => "C'è stato un problema durante l'aggiornamento.\nRiprova tra un po'.",
     'invalid_pg_name'           => "Nome non valido. Deve contenere solo lettere e avere tra i 3 a 10 caratteri.",
     'invalid_element'           => "L'elemento inserito non è un elemento valido",
-    'full_PG'                   => "L'account ha già il numero massimo di Personaggi associati.\nPer crearne uno nuovo elimina uno vecchio"
+    'full_PG'                   => "L'account ha già il numero massimo di Personaggi associati.\nPer crearne uno nuovo elimina uno vecchio",
+    'pg_name_taken'             => "Questo account ha già un personaggio con questo nome!\nScelgine un altro",
+    'pg_not_found'              => "Il personaggio che volevi eliminare non esiste",
+    'default'                   => "Errore generico, ci scusiamo per il disagio."
 ]);
 
 /**
@@ -135,7 +138,7 @@ class Account{
      * Modifica la quantità di monete del personaggio
      * @param bool $spending se true indica che si sta spendendo, altrimenti che si sta guadagnando
      * @param int $amount indica il quantitativo di monete
-     * @return bool Se true la funzione ha avuto effetto correttamente; false indica che '$amount' inteso come spesa è maggiore delle monete attualmente presenti nell'account
+     * @return bool Se true la funzione ha avuto effetto correttamente; false indica che `$amount` inteso come spesa è maggiore delle monete attualmente presenti nell'account
      */
     public function modifyCoins($spending, $amount){
         if($amount < 0)
@@ -226,8 +229,11 @@ class Account{
     public function removePersonaggio($nomePersonaggio){
         foreach($this->personaggi as $key => $personaggio){
             if($personaggio->getNome() === $nomePersonaggio){
-                unset($this->personaggi[$key]);
-                return true;
+                if($personaggio->deleteFromDB()){
+                    unset($this->personaggi[$key]);
+                    return true;
+                }
+                return false;
             }
         }
         return false;
@@ -236,6 +242,7 @@ class Account{
 
 /**
  * Caratteristiche e funzioni di un singolo personaggio
+ * Per funzionare correttamente tutti i metodi **DEVONO ESSERE UTILIZZATI** in blocchy `try{}catch{}`
  */
 class Personaggio{
     const MIN_FOR_DES = -10;
@@ -275,6 +282,7 @@ class Personaggio{
 
     const DEFAULT_PF = 25;
     const DEFAULT_FOR_DES = 0;
+    const ZAINO_SIZE = 3;       // 3 + arma + armatura
 
     private $pathImmagine;
     private $pathImmaginePG;
@@ -291,6 +299,7 @@ class Personaggio{
     private $prevalsoDa;
     private $armatura;  /// Riferimento all'armatura indossata
     private $arma;     /// Riferimento all'arma equipaggiata
+    private $zaino = [];
     private $livello;
     private $exp;
     private $puntiUpgrade;
@@ -299,7 +308,7 @@ class Personaggio{
      * Costruttore della classe Personaggio.
      * Se il personaggio esiste già nel database, ne recupera i dati.
      * Altrimenti, crea un nuovo personaggio con i valori di default e lo salva nel database.
-     * 
+     *
      * @param string $nome Nome del personaggio.
      * @param int $proprietarioId ID del proprietario del personaggio.
      * @param string $elemento Elemento associato al personaggio.
@@ -310,16 +319,19 @@ class Personaggio{
 
         $ownerStmt = null;
         $personaggioStmt = null;
+        $zainoStmt = null;
 
         try {
             if ($connectionDB->connect_error){
                 throw new Exception("Server non Disponibile", 500);
             }
+            $connectionDB->begin_transaction();
 
             // Verifico se il proprietario esiste
             $ownerCheckQuery = "SELECT * FROM Account WHERE ID = ?";
             $ownerStmt = $connectionDB->prepare($ownerCheckQuery);
             if (!is_numeric($proprietarioId)) {
+                $connectionDB->rollback();
                 throw new Exception("Proprietario non esistente", 400);
             }
 
@@ -328,12 +340,14 @@ class Personaggio{
             $result = $ownerStmt->get_result();
 
             if ($result->num_rows === 0) {
+                $connectionDB->rollback();
                 throw new Exception("Proprietario non esistente", 400);
             }
 
             // Verifico se il PG esiste già
             $personaggioCheckQuery = "SELECT P.*, E.PathImmagine, E.PathImmaginePG, E.PrevaleSu, E.PrevalsoDa
-                                      FROM Personaggi P JOIN Element E ON P.Elemento = E.Nome
+                                      FROM Personaggi P 
+                                        JOIN Element E ON P.Elemento = E.Nome
                                       WHERE P.Nome = ? AND P.Proprietario = ?";
             $personaggioStmt = $connectionDB->prepare($personaggioCheckQuery);
             $personaggioStmt->bind_param('si', $nome, $proprietarioId);
@@ -359,12 +373,34 @@ class Personaggio{
                 $this->livello        = $personaggioData['Livello'];
                 $this->exp            = $personaggioData['PuntiExp'];
                 $this->puntiUpgrade   = $personaggioData['PuntiUpgrade'];
+
+
+                // Prelevo lo zaino
+                $sqlZaino = "SELECT Z.Quantita, I.*
+                             FROM Zaino Z
+                                JOIN Item I ON Z.Oggetto = I.ID
+                             WHERE Z.Personaggio = ? AND Z.Proprietario = ?";
+                $zainoStmt = $connectionDB->prepare($sqlZaino);
+                $zainoStmt->bind_param("si", $this->nome, $this->owner);
+
+                $zainoStmt->execute();
+                $zainoResult = $zainoStmt->get_result();
+
+                while($item = $zainoResult->fetch_assoc()){
+                    for($i = 0; $i < $item["Quantita"]; ++$i){
+                        $tmp = $item;
+                        unset($tmp["Quantita"]);
+                        $this->zaino[] = $tmp;
+
+                    }
+                }
             }
             else {
                 // Creo un nuovo PG
                 $elementInfo = getElementInfo($elemento, $connectionDB);
-                
+
                 if(!$elementInfo){
+                    $connectionDB->rollback();
                     throw new Exception("Elemento non valido: ". $elementInfo, 400);
                 }
 
@@ -387,9 +423,9 @@ class Personaggio{
                 $insertQuery = "INSERT INTO Personaggi (Nome, Proprietario, Forza, Destrezza, PuntiVita, Elemento, Armatura, Arma, Livello, PuntiExp, PuntiUpgrade)
                                 VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, 1, 0, ?)";
                 $insertStmt = $connectionDB->prepare($insertQuery);
-                $insertStmt->bind_param('siiiisi', 
+                $insertStmt->bind_param('siiiisi',
                      $this->nome,
-                    $this->owner, 
+                    $this->owner,
                            $this->FOR,
                            $this->DES,
                            $this->PF,
@@ -397,6 +433,7 @@ class Personaggio{
                            $this->puntiUpgrade);
 
                 if (!$insertStmt->execute()) {
+                    $connectionDB->rollback();
                     throw new Exception("Errore durante l'inserimento del personaggio: " . $insertStmt->error, 500);
                 }
                 $insertStmt->close();
@@ -405,24 +442,28 @@ class Personaggio{
             $this->tmp_PF = $this->PF;
             $this->dodgingChance = self::DODGE_LOOKUP[$this->DES];
             $this->damage = self::DAMAGE_LOOKUP[$this->FOR];
-        } 
+
+            $connectionDB->commit();
+        }
         finally {
-            if ($ownerStmt) $ownerStmt->close();
-            if ($personaggioStmt) $personaggioStmt->close();
+            if ($ownerStmt)         $ownerStmt->close();
+            if ($personaggioStmt)   $personaggioStmt->close();
+            if ($zainoStmt)         $zainoStmt->close();
             $connectionDB->close();
         }
     }
 
-    public function getNome(){
+
+    public function getNome(): string{
         return $this->nome;
     }
-    public function getProprietario(){
+    public function getProprietario(): int{
         return $this->owner;
     }
-    public function getElemento(){
+    public function getElemento(): string{
         return $this->elemento;
     }
-    
+
     public function getAll() {
         return [
             'nome'           => $this->nome,
@@ -438,6 +479,7 @@ class Personaggio{
             'prevalsoDa'     => $this->prevalsoDa,
             'armatura'       => $this->armatura,
             'arma'           => $this->arma,
+            'zaino'          => $this->zaino,
             'livello'        => $this->livello,
             'exp'            => $this->exp,
             'puntiUpgrade'   => $this->puntiUpgrade,
@@ -448,10 +490,10 @@ class Personaggio{
 
     public function getImmaginiPrevalenza(){
         $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
-        
+
         $stmt = null;
         try {
-            $sql = "SELECT 
+            $sql = "SELECT
                 (SELECT PathImmagine FROM Element WHERE Nome = ?) AS prevaleSu,
                 (SELECT PathImmagine FROM Element WHERE Nome = ?) AS prevalsoDa";
             $stmt = $connectionDB->prepare($sql);
@@ -481,7 +523,7 @@ class Personaggio{
             $this->exp %= self::MAX_EXP;
             $this->livello++;
             $this->puntiUpgrade += self::PU_LVL_UP;
-            return self::updateDB();
+            return $this->updateDB();
         }
 
         return false;
@@ -497,6 +539,7 @@ class Personaggio{
         return $this->tmp_PF <= 0;
     }
 
+    // FIXME: da rivedere forse con l'utilizzo oggetti
     /**
      * Cura il personaggio
      * @param int $amount valore di cura del personaggio
@@ -511,6 +554,18 @@ class Personaggio{
         return true;
     }
 
+
+    public function useItem($itemId){
+        // TODO
+    }
+
+    public function assignItem($itemId){
+        // TODO
+    }
+    public function removeItem($itemId){
+        // TODO
+    }
+    
     /**
      * Aggiorna i dati del personaggio nel database
      * @return bool true se l'aggiornamento è avvenuto con successo, false altrimenti
@@ -557,9 +612,73 @@ class Personaggio{
             );
 
             return $stmt->execute();
-        } 
+        }
         finally {
             if ($stmt)  $stmt->close();
+            $connectionDB->close();
+        }
+    }
+
+    /**
+     * Rimuove il personaggio dal database e resetta tutti i suoi campi
+     * @return bool true se l'eliminazione è avvenuta con successo, false altrimenti
+     */
+    public function deleteFromDB() {
+        $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+        
+        if($connectionDB->connect_error){
+            throw new Exception("Connessione al database fallita: ". $connectionDB->connect_error, 500);
+        }
+
+        $stmt = null;
+        try {
+            // Prepare the update query
+            $query = "DELETE FROM Personaggi WHERE Nome = ? AND Proprietario = ?";
+
+            $stmt = $connectionDB->prepare($query);
+            if (!$stmt) {
+                return false;
+            }
+
+            $stmt->bind_param('si',
+                $this->nome,
+                $this->owner
+            );
+
+            if($stmt->execute()){
+                $this->pathImmagine = null;
+                $this->pathImmaginePG = null;
+                $this->nome = null;
+                $this->owner = null;
+                $this->FOR = null;
+                $this->DES = null;
+                $this->PF = null;
+                $this->tmp_PF = null;
+                $this->elemento = null;
+                $this->prevaleSu = null;
+                $this->prevalsoDa = null;
+                $this->armatura = null;
+                $this->arma = null;
+                $this->livello = null;
+                $this->exp = null;
+                $this->puntiUpgrade = null;
+                $this->damage = null;
+                $this->dodgingChance = null;
+                
+                foreach ($this->zaino as $i => $elemento) {
+                    $this->removeItem($elemento["ID"]);
+                    unset($this->zaino[$i]);
+                }
+                $this->zaino = null;
+
+                return true;
+            }
+
+            return false;
+        }
+        finally {
+            if ($stmt)  $stmt->close();
+            $connectionDB->close();
         }
     }
 }
@@ -573,7 +692,7 @@ class Personaggio{
  *
  * @param string $element Il nome dell'elemento di cui recuperare le informazioni. Deve corrispondere a un record nel database.
  * @param mysqli &$conn Un riferimento alla connessione MySQLi attiva.
- * 
+ *
  * @return array Un array associativo contenente le informazioni dell'elemento se l'operazione ha successo, oppure un messaggio di errore
  *               con la seguente struttura:
  *               - In caso di successo:
