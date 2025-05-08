@@ -12,7 +12,7 @@ body{
 	padding: 5px 20px;
 }
 
-.form-box{
+.page-box{
 	width: 100%;
 	box-sizing: border-box;
 	height: max-content;
@@ -25,7 +25,7 @@ body{
 	border-radius: 15pt;
 }
 
-.form-box *:not(button){
+.page-box *:not(button){
 	color: black;
 }
 
@@ -151,6 +151,30 @@ body{
 .FOR-points-block .FOR-amount, .DES-points-block .DES-amount, .PF-points-block .PF-amount{
 	grid-column: 2;
 }
+
+.stats-section input[type="number"] {
+  	-webkit-appearance: textfield;
+  	-moz-appearance: textfield;
+  	appearance: textfield;
+  	width: 60%;
+  	height: auto;
+  	text-align: center;
+  	background-color: transparent;
+  	outline: none;
+  	border: none;
+  	user-select: none;
+  	font-size: inherit;
+  	font-family: inherit;
+  	font-weight: inherit;
+	cursor: inherit;
+}
+
+/*? Trovato sul web: https://stackoverflow.com/questions/45396280/customizing-increment-arrows-on-input-of-type-number-using-css */
+.stats-section input[type=number]::-webkit-inner-spin-button,
+.stats-section input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+/*? Fine codice dal web */
 
 .stats-block .clickable{
 	cursor: pointer;
@@ -283,6 +307,17 @@ body{
 .element-pic img{
 	width: 100%;
 	object-fit: cover;
+}
+
+.character-section .play-box{
+	display: flex;
+	align-items: center;
+	justify-content: space-evenly;
+	width: 90%;
+}
+
+.character-section .play-box button{
+	width: 30%;
 }
 
 /***** Info Section *****/

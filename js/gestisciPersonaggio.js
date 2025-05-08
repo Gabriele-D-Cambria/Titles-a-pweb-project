@@ -6,6 +6,10 @@ let moduleListener = null;
 let currentlyOpened = null;
 
 document.addEventListener("DOMContentLoaded", () =>{
+	document.getElementById("backToDash").addEventListener("click", (e)=>{
+		e.preventDefault();
+		window.location.href = "./php/dashboard.php";
+	});
 	document.getElementById("deletePG").addEventListener("click", createDeleteBox);
 });
 

@@ -5,25 +5,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/animazioni.css">
+    <link rel="stylesheet" href="css/personaggio.css">
     <title>Document</title>
     <style>
-        img{
-            width: 15%;
+        body{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: wheat;
+        }
+        *{
+            color: black;
         }
     </style>
 </head>
 <body>
-    <img src="./images/characters/aria.svg" alt="pg">
-    <img src="./images/characters/acqua.svg" alt="pg">
-    <img src="./images/characters/elettro.svg" alt="pg">
-    <img src="./images/characters/fuoco.svg" alt="pg">
-    <img src="./images/characters/terra.svg" alt="pg">
-    <br>
-    <img src="./images/pics/aria.svg" alt="pg">
-    <img src="./images/pics/acqua.svg" alt="pg">
-    <img src="./images/pics/elettro.svg" alt="pg">
-    <img src="./images/pics/fuoco.svg" alt="pg">
-    <img src="./images/pics/terra.svg" alt="pg">
+    <div class="stats-block FOR">
+        <div class="FOR-points-block">
+            <div id="lessFOR" class="clickable">-</div>
+            <input id="FOR" type="number" id="FOR" id="FOR-amount" value="5" readonly>
+            <div id="moreFOR" class="clickable">+</div>
+        </div>
+        <p>FOR</p>
+    </div>
+    </div>
+    <script>
+            document.getElementById("FOR").stepUp();
+            document.getElementById("FOR").stepDown();
+    </script>
 </body>
 </html>

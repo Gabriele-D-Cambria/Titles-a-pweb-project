@@ -45,7 +45,7 @@ $prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
 	<link rel="stylesheet" href="css/style.css">
 	<link rel="stylesheet" href="css/menu.css">
 	<link rel="stylesheet" href="css/personaggio.css">
-	<script type="module" src="js/gestisciPersonaggio.js"></script>	
+	<script type="module" src="js/gestisciPersonaggio.js"></script>
 </head>
 <body>
 	<header>
@@ -57,8 +57,8 @@ $prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
         </aside>
     </header>
 	<main class="main-section">
-		<form class="form-box" action="php/handlePG.php" method="POST">
-			<div class="stats-section">
+		<div class="page-box">
+			<form class="stats-section" action="php/handlePG.php" method="POST">
 				<div class="lvl-block">
 					<p class="lvl-info">Livello <span id="user-lvl">
 						<?php echo $currentPG["livello"];?>
@@ -73,9 +73,9 @@ $prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
 				<div class="stats-block PF">
 					<div class="PF-points-block">
 						<div id="lessPF" class="clickable">-</div>
-						<div id="PF" class="PF-amount">
-							<?php echo $currentPG["PF"];?>
-						</div>
+						<input type="number" id="PF" class="PF-amount" 
+							value="<?php echo $currentPG["PF"];?>"
+							readonly>
 						<div id="morePF" class="clickable">+</div>
 					</div>
 					<p>PF</p>
@@ -83,9 +83,9 @@ $prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
 				<div class="stats-block FOR">
 					<div class="FOR-points-block">
 						<div id="lessFOR" class="clickable">-</div>
-						<div id="FOR" id="FOR-amount">
-							<?php echo $currentPG["FOR"];?>
-						</div>
+						<input id="FOR" type="number"
+							value="<?php echo $currentPG["FOR"];?>"
+							readonly>
 						<div id="moreFOR" class="clickable">+</div>
 					</div>
 					<p>FOR</p>
@@ -93,9 +93,10 @@ $prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
 				<div class="stats-block DES">
 					<div class="DES-points-block">
 						<div id="lessDES" class="clickable">-</div>
-						<div id="DES" class="DES-amount">
-							<?php echo $currentPG["DES"];?>
-						</div>
+						<input type="number" id="DES" 
+							value="<?php echo $currentPG["DES"];?>"
+							readonly>
+						</input>
 						<div id="moreDES" class="clickable">+</div>
 					</div>
 					<p>DES</p>
@@ -103,7 +104,7 @@ $prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
 				<div class="sendUpgrades">
 					<button id="upgradeStats" disabled>Modifica</button>
 				</div>
-			</div>
+			</form>
 			<div class="character-section">
 				<div class="character-box">
 					<input type="text" name="PG-name" id="PG-name" value="<?php echo $currentPG["nome"];?>" disabled>
@@ -132,30 +133,33 @@ $prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
 						</div>
 					</footer>
 				</div>
+				<!-- TODO metti la action -->
+				<form class="play-box" method="POST" action="">
+					<button type="submit">Gioca</button>
+					<button id="backToDash">Home</button>
+				</form>
 			</div>
 			<div class="info-section">
 				<div class="prevalence-box">
 					<div class="prevalence-block prevails">
 						<p>Prevale</p>
 						<div class="element-pic">
-    	            		<img id="prevalePic" draggable="false" 
-							src="<?php echo $prevalenceImg["prevaleSu"];?>" 
+    	            		<img id="prevalePic" draggable="false"
+							src="<?php echo $prevalenceImg["prevaleSu"];?>"
 							alt="Immagine Prevale su">
     	        		</div>
 					</div>
 					<div class="prevalence-block prevailed">
 						<p>Prevalso</p>
 						<div class="element-pic">
-    	            		<img id="prevalsoPic" draggable="false" 
-							src="<?php echo $prevalenceImg["prevalsoDa"];?>" 
+    	            		<img id="prevalsoPic" draggable="false"
+							src="<?php echo $prevalenceImg["prevalsoDa"];?>"
 							alt="Immagine Prevalso da">
     	        		</div>
 					</div>
 				</div>
-				
 			</div>
-
-		</form>
+		</div>
 	</main>
 	<div id="deleteModule" class="module"></div>
 </body>
