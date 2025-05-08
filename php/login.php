@@ -90,9 +90,9 @@ catch(Exception $e){
 
     $_SESSION['loginError'] = $login;
 
-    error_log("Errore login [" .$login['code'] ."]: " . $login['message']);
+    error_log("Errore login [" .$login['errorcode'] ."]: " . $login['message']);
 
-    http_response_code($login['code']);
+    http_response_code($login['errorcode']);
     header("Location: ../index.php");
     exit;
 }

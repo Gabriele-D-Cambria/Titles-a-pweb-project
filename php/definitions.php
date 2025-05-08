@@ -116,8 +116,25 @@ class Account{
         return $this->shopRefresh;
     }
 
-    public function getPersonaggi() {
-        return $this->personaggi;
+    /**
+     * Restituisce uno o tutti i personaggi in base al `$nome` fornito
+     * @param string $name Nome del personaggio. Se non fornito restituisce tutti i personaggi (default: `null`)
+     * @return Personaggio|Personaggio[]|null I tre cavi avvengono:
+     *          - `Personaggio[]` se `$name === null`
+     *          - `Personaggio` se il perosnaggio con nome `$name` è presente
+     *          - `null` se non è presente alcun personaggio con il `$name` fornito
+     */
+    public function getPersonaggi($name = null) {
+        if($name === null)
+            return $this->personaggi;
+        
+        foreach ($this->personaggi as $pg){
+            if($pg->getNome() === $name){
+                return $pg;
+            }
+        }
+
+        return null;
     }
     public function getImmagineProfilo() {
         return $this->immagineProfilo;
@@ -218,6 +235,10 @@ class Account{
             return false;
 
         $this->personaggi[] = new Personaggio($nome, $this->id, $elemento);
+
+        usort($this->personaggi, function($a, $b){
+            return $a->getNome() <=> $b->getNome();
+        });
         return true;
     }
 

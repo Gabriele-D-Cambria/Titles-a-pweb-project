@@ -71,22 +71,37 @@ $prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
 					</div>
 				</div>
 				<div class="stats-block PF">
-					<div id="PF" class="PF-points">
-						<?php echo $currentPG["PF"];?>
+					<div class="PF-points-block">
+						<div id="lessPF" class="clickable">-</div>
+						<div id="PF" class="PF-amount">
+							<?php echo $currentPG["PF"];?>
+						</div>
+						<div id="morePF" class="clickable">+</div>
 					</div>
 					<p>PF</p>
 				</div>
 				<div class="stats-block FOR">
-					<div id="FOR" class="FOR-points">
-						<?php echo $currentPG["FOR"];?>
+					<div class="FOR-points-block">
+						<div id="lessFOR" class="clickable">-</div>
+						<div id="FOR" id="FOR-amount">
+							<?php echo $currentPG["FOR"];?>
+						</div>
+						<div id="moreFOR" class="clickable">+</div>
 					</div>
 					<p>FOR</p>
 				</div>
 				<div class="stats-block DES">
-					<div id="DES" class="DES-points">
-						<?php echo $currentPG["DES"];?>
+					<div class="DES-points-block">
+						<div id="lessDES" class="clickable">-</div>
+						<div id="DES" class="DES-amount">
+							<?php echo $currentPG["DES"];?>
+						</div>
+						<div id="moreDES" class="clickable">+</div>
 					</div>
 					<p>DES</p>
+				</div>
+				<div class="sendUpgrades">
+					<button id="upgradeStats" disabled>Modifica</button>
 				</div>
 			</div>
 			<div class="character-section">
@@ -112,7 +127,7 @@ $prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
 						<div class="dodge-box">
 							<p>Schivata</p>
 							<p id="dodge">
-								<?php echo $currentPG["dodgingChance"];?>
+								<?php echo $currentPG["dodgingChance"];?>%
 							</p>
 						</div>
 					</footer>

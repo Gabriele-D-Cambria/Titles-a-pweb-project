@@ -57,15 +57,19 @@ if(isset($_SESSION["createPGError"])){
 					</div>
 				</div>
 				<div class="stats-block PF">
-					<div id="PF" class="PF-points"></div>
+					<div class="PF-points-block"><div id="PF" class="PF-amount"></div></div>
 					<p>PF</p>
 				</div>
 				<div class="stats-block FOR">
-					<div id="FOR" class="FOR-points"></div>
+					<div class="FOR-points-block">
+						<div class="FOR-amount" id="FOR"></div>
+					</div>
 					<p>FOR</p>
 				</div>
 				<div class="stats-block DES">
-					<div id="DES" class="DES-points"></div>
+					<div class="DES-points-block">
+						<div class="DES-amount" id="DES"></div>
+					</div>
 					<p>DES</p>
 				</div>
 			</div>

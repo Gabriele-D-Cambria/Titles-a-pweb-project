@@ -40,31 +40,19 @@ if(isset($_POST['deleteCheck'])){
 
 }
 else{
-	$conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
 	// Richiesta di Recupero o Creazione Personaggio
-	$stmtCheck = null;
 	try{
-		if($conn->connect_error){
-			throw new Exception("Server non Disponibile", 500);
-		}
 
 		$name = $_POST['PG-name'];
 		if(is_null($name) || !preg_match(PG_NAME_PATTERN, $name)){
 			throw new Exception("invalid_pg_name", 400);
 		}
 
-		$sqlCheck = "SELECT *
-					 FROM Personaggi
-					 WHERE Nome = ? AND Proprietario = ?";
-		$stmtCheck = $conn->prepare($sqlCheck);
-		$stmtCheck->bind_param("si", $name, $userId);
-		$stmtCheck->execute();
-		$result = $stmtCheck->get_result();
+		$personaggi = $account->getPersonaggi($name);
 
-		if($result->num_rows !== 0){
+		if($personaggi !== null){
 			throw new Exception("pg_name_taken");
 		}
-
 
 		$element = $_POST['element'];
 		if (is_null($element)) {
@@ -95,10 +83,6 @@ else{
 		http_response_code($error['errorcode']);
 		header("Location: ./creazionePersonaggio.php");
 		exit;
-	}
-	finally{
-		if($stmtCheck) 	$stmtCheck->close();
-		$conn->close();
 	}
 }
 
