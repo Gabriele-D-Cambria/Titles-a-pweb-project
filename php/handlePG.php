@@ -15,29 +15,52 @@ $userId = $account->getId();
 if(isset($_POST['deleteCheck'])){
 	// Richiesta di eliminazione Personaggio
 	try{
-		$name = unserialize($_SESSION['currentPG_nome']);
+		if(!isset($_SESSION['currentPG_nome'])){
+			throw new Exception("pg_not_selected", 400);
+		}
 
-		if(!$account->removePersonaggio($name)){
+		$nome = unserialize($_SESSION['currentPG_nome']);
+
+		if(!$account->removePersonaggio($nome)){
 			throw new Exception("pg_not_found", 400);
 		}
 
 		unset($_SESSION['currentPG_nome']);
 
 		$_SESSION["account"] = serialize($account);
-		$_SESSION["message"] = "Personaggio ". $nome ." eliminato con successo";
+		$_SESSION["message"] = "Personaggio ". $nome ." eliminato con successo!";
 		header("Location: ./dashboard.php");
 		exit;
 	}
 	catch(Exception $e){
-		$errorType = $e->getMessage();
-		error_log($errorType);
-
-		$errorMessage = ERROR_TYPES[$errorType] ?? "Errore Sconosciuto";
-		$_SESSION["message"] = $errorMessage;
-		header("Location: ./dashboard.php");
-		exit;
+		sendError($e, "errorMessage", "./dashboard.php");
 	}
 
+}
+else if(isset($_POST['upgrade'])){
+	try{
+		if(!isset($_SESSION['currentPG_nome'])){
+			throw new Exception("pg_not_selected", 400);
+		}
+
+		$nome = unserialize($_SESSION['currentPG_nome']);
+
+		$newPF = $_POST["PF"];
+		$newFOR = $_POST["FOR"];
+		$newDES = $_POST["DES"];
+		
+		if(!$account->updatePgStats($nome, $newPF, $newFOR, $newDES)){
+			throw new Exception("upgrade_failed", 400);
+		}
+
+		$_SESSION['account'] = serialize($account);
+		$_SESSION['message'] = "Personaggio " . $nome . " migliorato con successo!";
+		header("Location: ./gestisciPersonaggio.php");
+		exit;
+	}
+	catch(Exception $e){
+		sendError($e, "errorMessage", "./dashboard.php");
+	}
 }
 else{
 	// Richiesta di Recupero o Creazione Personaggio
@@ -70,20 +93,32 @@ else{
 		exit;
 	}
 	catch(Exception $e){
-		$errorType = $e->getMessage();
-		$error = [
-			'message' => ERROR_TYPES[$errorType] ?? $errorType,
-			'errorcode' => $e->getCode()
-		];
-
-		$_SESSION['createPGError'] = $error;
-
-		error_log("Errore createPG [" .$error['errorcode'] ."]: " . $error['message']);
-
-		http_response_code($error['errorcode']);
-		header("Location: ./creazionePersonaggio.php");
-		exit;
+		sendError($e, "createPGError", "./creazionePersonaggio.php");
 	}
 }
+
+/**
+ * Funzione che si occupa di inviare messaggi di errori sollevati durante validazione di richieste tramite form tramite la `$_SESSION`
+ * @param Exception $e eccezzione sollevata
+ * @param string $sessionId id da dare all'errore salvato nella sessione
+ * @param string $dest indirizzo della pagina dove tornare a seguito dell'errore
+ * @return never
+ */
+function sendError($e, $sessionId, $dest){
+	$errorType = $e->getMessage();
+	$error = [
+		'message' => ERROR_TYPES[$errorType] ?? $errorType,
+		'errorcode' => $e->getCode()
+	];
+
+	$_SESSION[$sessionId] = $error;
+
+	error_log("Errore createPG [" .$error['errorcode'] ."]: " . $error['message']);
+
+	http_response_code($error['errorcode']);
+	header("Location: ". $dest);
+	exit;
+}
+
 
 ?>

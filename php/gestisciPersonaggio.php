@@ -18,14 +18,7 @@ $personaggi = $account->getPersonaggi();
 
 $PG_name = unserialize($_SESSION['currentPG_nome']);
 
-$currentPGobj = null;
-
-foreach($personaggi as $pg){
-	if($pg->getNome() === $PG_name){
-		$currentPGobj = $pg;
-		break;
-	}
-}
+$currentPGobj = $account->getPersonaggi($PG_name);
 
 if(!$currentPGobj){
 	pageError(400);
@@ -33,6 +26,12 @@ if(!$currentPGobj){
 
 $currentPG = $currentPGobj->getAll();
 $prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
+
+$errorMessage = null;
+if(isset($_SESSION["errorMessage"])){
+	$errorMessage = $_SESSION["errorMessage"];
+	unset($_SESSION["errorMessage"]);
+}
 ?>
 
 <!DOCTYPE html>
@@ -45,7 +44,11 @@ $prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
 	<link rel="stylesheet" href="css/style.css">
 	<link rel="stylesheet" href="css/menu.css">
 	<link rel="stylesheet" href="css/personaggio.css">
+	<link rel="stylesheet" href="css/inventory.css">
 	<script type="module" src="js/gestisciPersonaggio.js"></script>
+	<script>
+		const errorMessage = <?php echo json_encode($errorMessage)?>;
+	</script>
 </head>
 <body>
 	<header>
@@ -59,6 +62,7 @@ $prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
 	<main class="main-section">
 		<div class="page-box">
 			<form class="stats-section" action="php/handlePG.php" method="POST">
+				<input type="radio" name="upgrade" checked hidden>
 				<div class="lvl-block">
 					<p class="lvl-info">Livello <span id="user-lvl">
 						<?php echo $currentPG["livello"];?>
@@ -72,37 +76,36 @@ $prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
 				</div>
 				<div class="stats-block PF">
 					<div class="PF-points-block">
-						<div id="lessPF" class="clickable">-</div>
-						<input type="number" id="PF" class="PF-amount" 
+						<div id="less-PF" class="statsButton">-</div>
+						<input class="PF-amount" type="number" id="PF" name="PF" 
 							value="<?php echo $currentPG["PF"];?>"
 							readonly>
-						<div id="morePF" class="clickable">+</div>
+						<div id="more-PF" class="statsButton">+</div>
 					</div>
 					<p>PF</p>
 				</div>
 				<div class="stats-block FOR">
 					<div class="FOR-points-block">
-						<div id="lessFOR" class="clickable">-</div>
-						<input id="FOR" type="number"
+						<div id="less-FOR" class="statsButton">-</div>
+						<input type="number" id="FOR" name="FOR"
 							value="<?php echo $currentPG["FOR"];?>"
 							readonly>
-						<div id="moreFOR" class="clickable">+</div>
+						<div id="more-FOR" class="statsButton">+</div>
 					</div>
 					<p>FOR</p>
 				</div>
 				<div class="stats-block DES">
 					<div class="DES-points-block">
-						<div id="lessDES" class="clickable">-</div>
-						<input type="number" id="DES" 
+						<div id="less-DES" class="statsButton">-</div>
+						<input type="number" id="DES" name="DES"
 							value="<?php echo $currentPG["DES"];?>"
 							readonly>
-						</input>
-						<div id="moreDES" class="clickable">+</div>
+						<div id="more-DES" class="statsButton">+</div>
 					</div>
 					<p>DES</p>
 				</div>
 				<div class="sendUpgrades">
-					<button id="upgradeStats" disabled>Modifica</button>
+					<button type="submit" id="upgradeStats" disabled>Migliora</button>
 				</div>
 			</form>
 			<div class="character-section">
@@ -133,7 +136,6 @@ $prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
 						</div>
 					</footer>
 				</div>
-				<!-- TODO metti la action -->
 				<form class="play-box" method="POST" action="">
 					<button type="submit">Gioca</button>
 					<button id="backToDash">Home</button>
@@ -156,6 +158,30 @@ $prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
 							src="<?php echo $prevalenceImg["prevalsoDa"];?>"
 							alt="Immagine Prevalso da">
     	        		</div>
+					</div>
+				</div>
+				<div class="zaino-section">
+					<div class="equipment-section">
+						<p>Arma</p>
+						<p>Armatura</p>
+						<div class="item-container">
+							<div class="item-slot bag-item"></div>
+						</div>
+						<div class="item-container">
+							<div class="item-slot bag-item"></div>
+						</div>
+					</div>
+					<div class="bag-section">
+						<p>Oggetti</p>
+						<div class="item-container">
+							<div class="item-slot bag-item"></div>
+						</div>
+						<div class="item-container">
+							<div class="item-slot bag-item"></div>
+						</div>
+						<div class="item-container">
+							<div class="item-slot bag-item"></div>
+						</div>
 					</div>
 				</div>
 			</div>

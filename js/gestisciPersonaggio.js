@@ -1,9 +1,14 @@
 "use strict";
 
-import {showMessage, showModule, closeModule, createButton} from "./methods.js";
+import {showMessage, showModule, closeModule, createButton, errorHandler} from "./methods.js";
 
 let moduleListener = null;
 let currentlyOpened = null;
+let usedPU = {
+	PF: 0,
+	FOR: 0,
+	DES: 0
+};
 
 document.addEventListener("DOMContentLoaded", () =>{
 	document.getElementById("backToDash").addEventListener("click", (e)=>{
@@ -11,6 +16,12 @@ document.addEventListener("DOMContentLoaded", () =>{
 		window.location.href = "./php/dashboard.php";
 	});
 	document.getElementById("deletePG").addEventListener("click", createDeleteBox);
+	
+	setUpgradePointsPrivileges();
+
+	if(errorMessage){
+		errorHandler(errorMessage);
+	}
 });
 
 function createDeleteBox(){
@@ -110,4 +121,129 @@ function closeModuleEvent(event, id, overload = false){
 		currentlyOpened = null;
 		closeModule(null, id, true);
 	}
+}
+
+function setUpgradePointsPrivileges(){
+	// return;
+	fetch("php/API/getCurrentPG.php")
+		.then(response => response.json())
+		.then(PG => {
+			if(PG.error !== undefined && PG.error){
+				throw PG;
+			}
+			console.log(PG); //! da rimuovere ----------------------------------------------------
+
+			let btn = null;
+			if(PG.puntiUpgrade > 0){
+				btn = document.getElementById("more-PF");
+				btn.classList.add("clickable");
+				btn.addEventListener("click", (e) =>{
+					aggiornaStat(e.target.id, true, PG);
+				});
+
+				document.getElementById("less-PF").addEventListener("click", (e) =>{
+					aggiornaStat(e.target.id, false, PG);
+				});
+				
+
+				if(PG.FOR < PG.MAX_FOR_DES){
+					btn = document.getElementById("more-FOR")
+					btn.classList.add("clickable");
+					btn.addEventListener("click", (e) =>{
+						aggiornaStat(e.target.id, true, PG);
+					});
+				}
+				
+				document.getElementById("less-FOR").addEventListener("click", (e) =>{
+					aggiornaStat(e.target.id, false, PG);
+				});
+				
+				if(PG.DES < PG.MAX_FOR_DES){
+					btn = document.getElementById("more-DES");
+					btn.classList.add("clickable");
+					btn.addEventListener("click", (e) =>{
+						aggiornaStat(e.target.id, true, PG);
+					});
+				}
+				
+				document.getElementById("less-DES").addEventListener("click", (e) =>{
+					aggiornaStat(e.target.id, false, PG);
+				});
+				
+			}
+		})
+		.catch(error => {
+			errorHandler(error);
+			return;
+		})
+}
+
+/**
+ * Aggiorna le statistiche del personaggio.
+ * @param {string} id id della statistica da modificare
+ * @param {boolean} aumenta se `true` aumenta il valore, altrimenti lo diminuisce
+ * @param {Array} PG contiene informazioni sulle statistiche del personaggio
+ */
+function aggiornaStat(id, aumenta, PG){
+	let statId = id.split("-")[1];
+	let upd = (aumenta)? 1 : -1;
+	let totalUsedPU = Object.values(usedPU).reduce((prev, curr) => {
+		return prev + curr;
+	}, 0);
+
+	if(aumenta && PG.puntiUpgrade === totalUsedPU){
+		return;
+	}
+	
+	switch (statId) {
+        case "PF":
+			if(!aumenta && !usedPU.PF)
+				return;
+            PG.PF += upd;
+            usedPU.PF += upd;
+			document.getElementById(`less-${statId}`).classList.toggle("clickable", (usedPU.PF));
+            break;
+        case "FOR":
+			if(!aumenta && !usedPU.FOR)
+				return;
+            if (PG.FOR < PG.MAX_FOR_DES && PG.FOR > PG.MIN_FOR_DES) {
+                PG.FOR += upd;
+                usedPU.FOR += upd;
+				document.getElementById(`more-${statId}`).classList.toggle("clickable", (PG.FOR !== PG.MAX_FOR_DES));
+				document.getElementById(`less-${statId}`).classList.toggle("clickable", (PG.FOR !== PG.MIN_FOR_DES && usedPU.FOR));
+				document.getElementById("damage").innerText = PG.DAMAGE_LOOKUP[PG.FOR];
+				document.getElementById("damage").classList.toggle("updated", (PG.damage !== PG.DAMAGE_LOOKUP[PG.FOR]));
+				break;
+            } 
+            return;
+        case "DES":
+			if(!aumenta && !usedPU.DES)
+				return;
+            if (PG.DES < PG.MAX_FOR_DES && PG.DES > PG.MIN_FOR_DES) {
+                PG.DES += upd;
+                usedPU.DES += upd;
+				document.getElementById(`more-${statId}`).classList.toggle("clickable", (PG.DES !== PG.MAX_FOR_DES));
+				document.getElementById(`less-${statId}`).classList.toggle("clickable", (PG.DES !== PG.MIN_FOR_DES && usedPU.DES));
+				document.getElementById("dodge").innerText = `${PG.DODGE_LOOKUP[PG.DES]}%`;
+				document.getElementById("dodge").classList.toggle("updated", (PG.dodgingChance !== PG.DODGE_LOOKUP[PG.DES]));
+				break;
+            } 
+			return;
+        default:
+            return;
+    }
+
+	totalUsedPU += upd;
+
+	document.getElementById(statId).value = PG[statId];
+	document.getElementById(statId).classList.toggle("updated", usedPU[statId]);
+	
+	document.getElementById("more-PF").classList.toggle("clickable", (PG.puntiUpgrade !== totalUsedPU));
+	document.getElementById("more-FOR").classList.toggle("clickable", (PG.puntiUpgrade !== totalUsedPU));
+	document.getElementById("more-DES").classList.toggle("clickable", (PG.puntiUpgrade !== totalUsedPU));
+
+	document.getElementById("PU-points").innerText = PG.puntiUpgrade - totalUsedPU;
+
+	document.getElementById("upgradeStats").toggleAttribute("disabled", (totalUsedPU === 0));
+	
 }

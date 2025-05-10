@@ -367,7 +367,7 @@ function updateCoins($accountId, $amount, &$conn){
  * Funzione API che vende un oggetto dell'account
  * @param int $itemId ID dell'oggetto
  * @param int $accountId ID dell'account
- * @return array{errore: string|array{guadagno: int, rimosso: bool, successo: bool}} contiene informazioni sull'esito della richiesta
+ * @return array contiene informazioni sull'esito della richiesta
  */
 function sellItem($itemId, $accountId){
     $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
@@ -392,7 +392,7 @@ function sellItem($itemId, $accountId){
         if(!$item){
             // Oggetto non nell'inventario
             $conn->rollback();
-            return ["errore" => "Item non presente nell'Inventario!"];
+            apiError(400, "Item non presente nell'Inventario!");
         }
 
         // Rimuovo l'oggetto
@@ -402,7 +402,7 @@ function sellItem($itemId, $accountId){
         $guadagno = updateCoins($accountId, floor($item['Costo'] / 2), $conn);
 
         if($guadagno === -1){
-            throw new Exception("Errore durante l'aggiornamento delle monete");
+            throw new Exception("Errore durante l'aggiornamento delle monete", 400);
         }
 
         $conn->commit();
@@ -415,7 +415,7 @@ function sellItem($itemId, $accountId){
     catch(Exception $e){
         $conn->rollback();
         error_log("Errore in sellItem: ". $e->getMessage());
-        return ["errore" => "Fallimento: ". $e->getMessage()];
+        apiError($e->getCode(), $e->getMessage());
     }
     finally{
         if($stmt)   $stmt->close();
@@ -454,7 +454,7 @@ function buyItem($itemId, $accountId){
 
         if(!$item){
             $conn->rollback();
-            return ["errore" => "Item non presente nel Negozio!"];
+            apiError(400, "Item non presente nel Negozio!");
         }
 
         // Recupero il costo
@@ -469,16 +469,16 @@ function buyItem($itemId, $accountId){
         $costo = $result->fetch_assoc();
 
         if(!$costo){
-            throw new Exception("Costo dell'oggetto non trovato.");
+            throw new Exception("Costo dell'oggetto non trovato.", 400);
         }
 
         $spesa = -$costo["Costo"];
         if(updateCoins($accountId, $spesa, $conn) === -1){
-            throw new Exception("Fondi insufficienti per completare l'acquisto");
+            throw new Exception("Fondi insufficienti per completare l'acquisto", 400);
         }
 
         if(!addOneItem($itemId, $accountId, $conn)){
-            throw new Exception("Spazio insufficente nell'invetario.");
+            throw new Exception("Spazio insufficente nell'invetario.", 400);
         }
 
         $conn->commit();
@@ -489,8 +489,7 @@ function buyItem($itemId, $accountId){
 
     } catch (Exception $e) {
         $conn->rollback();
-        error_log("Errore in buyItem: ". $e->getMessage());
-        return ["errore" => "Fallimento: " . $e->getMessage()];
+        apiError($e->getCode(), $e->getMessage());
     }
     finally{
         if($stmtInShop) $stmtInShop->close();
@@ -524,7 +523,7 @@ function openBox($box, $accountId){
         $count= $result->fetch_assoc();
 
         if(!$count){
-            throw new Exception("Immpossibile recuperare la dimensione dell'inventario. L'account ". $accountId ." potrebbe non esistere");
+            throw new Exception("Immpossibile recuperare la dimensione dell'inventario. L'account ". $accountId ." potrebbe non esistere", 400);
         }
 
         $added = ($box["nome"] === "Box Comune")? 3 : 6;
@@ -593,7 +592,7 @@ function openBox($box, $accountId){
         }
 
         if(updateCoins($accountId, $output["coins"], $conn) === -1){
-            throw new Exception("Errore nell'aggiornamento delle monete");
+            throw new Exception("Errore nell'aggiornamento delle monete", 400);
         }
 
         $itemsIDs = [];
@@ -618,7 +617,7 @@ function openBox($box, $accountId){
     catch(Exception $e){
         $conn->rollback();
         error_log("Errore in openBox: ". $e->getMessage());
-        return ["errore" => "Fallimento" . $e->getMessage()];
+        apiError($e->getCode(), $e->getMessage());
     }
     finally{
         if($stmtCount)      $stmtCount->close();
@@ -677,7 +676,7 @@ function getShop($accountId, $lastRefresh){
     }
     catch(Exception $e){
         error_log("Errore in getShop: ". $e->getMessage());
-        apiError(500, "Errore durante il recuper del negozio: ". $e->getMessage());
+        apiError(500, "Errore durante il recupero del negozio: ". $e->getMessage());
     }
     finally{
         if($stmtRecupero)   $stmtRecupero->close();

@@ -13,6 +13,12 @@ if(isset($_SESSION["message"])){
     unset($_SESSION["message"]);
 }
 
+$errorMessage = null;
+if(isset($_SESSION["errorMessage"])){
+    $errorMessage = $_SESSION["errorMessage"];
+    unset($_SESSION["errorMessage"]);
+}
+
 $account = unserialize($_SESSION['account']);
 $user = $account->getAll();
 
@@ -51,6 +57,7 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
     <script>
         const USERNAME = "<?php echo $user["username"]?>";
         const message = <?php echo json_encode($message)?>;
+        const errorMessage = <?php echo json_encode($errorMessage)?>;
     </script>
     <title>Dashboard</title>
 </head>

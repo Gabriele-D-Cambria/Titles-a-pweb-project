@@ -53,7 +53,7 @@ function getPersonaggi(){
 		.then(response => response.json())
 		.then(data =>{
 			if(data.error !== undefined && data.error){
-				throw data.error;
+				throw data;
 			}
 
 			listaPersonaggi = data['personaggi'];

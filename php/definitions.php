@@ -41,6 +41,8 @@ define('ERROR_TYPES', [
     'full_PG'                   => "L'account ha già il numero massimo di Personaggi associati.\nPer crearne uno nuovo elimina uno vecchio",
     'pg_name_taken'             => "Questo account ha già un personaggio con questo nome!\nScelgine un altro",
     'pg_not_found'              => "Il personaggio che volevi eliminare non esiste",
+    'pg_not_selected'           => "Non è stato fornito nessun personaggio valido sul quale agire",
+    'upgrade_failed'            => "C'è stato un problema con l'aggiornamento.",
     'default'                   => "Errore generico, ci scusiamo per il disagio."
 ]);
 
@@ -119,7 +121,7 @@ class Account{
     /**
      * Restituisce uno o tutti i personaggi in base al `$nome` fornito
      * @param string $name Nome del personaggio. Se non fornito restituisce tutti i personaggi (default: `null`)
-     * @return Personaggio|Personaggio[]|null I tre cavi avvengono:
+     * @return Personaggio|Personaggio[]|null I tre casi avvengono:
      *          - `Personaggio[]` se `$name === null`
      *          - `Personaggio` se il perosnaggio con nome `$name` è presente
      *          - `null` se non è presente alcun personaggio con il `$name` fornito
@@ -127,7 +129,7 @@ class Account{
     public function getPersonaggi($name = null) {
         if($name === null)
             return $this->personaggi;
-        
+
         foreach ($this->personaggi as $pg){
             if($pg->getNome() === $name){
                 return $pg;
@@ -212,7 +214,7 @@ class Account{
     }
 
     /**
-     * Aggiunge un Personaggio già esistente alla lista dei personaggi dell'account
+     * Aggiunge un `Personaggio` già esistente alla lista dei personaggi dell'account
      * @param Personaggio $personaggio il personaggio da aggiungere
      * @return bool Se true indica che l'inserimento è accaduto; false che l'utente ha raggiunto il massimo numero di personaggi ottenibili
      */
@@ -225,7 +227,7 @@ class Account{
     }
 
     /**
-     * Crea e aggiunge un Personaggio alla lista dei personaggi dell'account
+     * Crea e aggiunge un `Personaggio` alla lista dei personaggi dell'account
      * @param string $nome nome del personaggio da creare
      * @param string $elemento elemento del personaggio da creare
      * @return bool Se true indica che l'inserimento è accaduto; false che l'utente ha raggiunto il massimo numero di personaggi ottenibili
@@ -240,6 +242,23 @@ class Account{
             return $a->getNome() <=> $b->getNome();
         });
         return true;
+    }
+
+    /**
+     * Aggiorna le statistiche di un `Personaggio` dell'account
+     * @param string $nomePersonaggio nome del personaggio
+     * @param int $newPF nuovo valore per la statistica `PF` del `Personaggio`
+     * @param int $newFOR nuovo valore per la statistica `FOR` del `Personaggio`
+     * @param int $newDES nuovo valore per la statistica `DES` del `Personaggio`
+     * @return boolean
+     */
+    public function updatePgStats($nomePersonaggio, $newPF, $newFOR, $newDES){
+        foreach($this->personaggi as $personaggio){
+            if($personaggio->getNome() === $nomePersonaggio){
+                return $personaggio->upgradeStats($newPF, $newFOR, $newDES);
+            }
+        }
+        return false;
     }
 
     /**
@@ -367,7 +386,7 @@ class Personaggio{
 
             // Verifico se il PG esiste già
             $personaggioCheckQuery = "SELECT P.*, E.PathImmagine, E.PathImmaginePG, E.PrevaleSu, E.PrevalsoDa
-                                      FROM Personaggi P 
+                                      FROM Personaggi P
                                         JOIN Element E ON P.Elemento = E.Nome
                                       WHERE P.Nome = ? AND P.Proprietario = ?";
             $personaggioStmt = $connectionDB->prepare($personaggioCheckQuery);
@@ -474,7 +493,6 @@ class Personaggio{
         }
     }
 
-
     public function getNome(): string{
         return $this->nome;
     }
@@ -484,7 +502,6 @@ class Personaggio{
     public function getElemento(): string{
         return $this->elemento;
     }
-
     public function getAll() {
         return [
             'nome'           => $this->nome,
@@ -506,6 +523,20 @@ class Personaggio{
             'puntiUpgrade'   => $this->puntiUpgrade,
             'pathImmagine'   => $this->pathImmagine,
             'pathImmaginePG' => $this->pathImmaginePG
+        ];
+    }
+    public function getStatsRelated(){
+        return [
+            'FOR'            => $this->FOR,
+            'damage'         => $this->damage,
+            'DAMAGE_LOOKUP'  => self::DAMAGE_LOOKUP,
+            'DES'            => $this->DES,
+            'dodgingChance'  => $this->dodgingChance,
+            'DODGE_LOOKUP'   => self::DODGE_LOOKUP,
+            'PF'             => $this->PF,
+            'puntiUpgrade'   => $this->puntiUpgrade,
+            'MIN_FOR_DES'    => self::MIN_FOR_DES,
+            'MAX_FOR_DES'    => self::MAX_FOR_DES,
         ];
     }
 
@@ -574,19 +605,29 @@ class Personaggio{
 
         return true;
     }
-
+    /**
+     * Funzione che si occupa di migliorare le statistiche del personaggio
+     * @param int $newPF nuove statistiche per i PF
+     * @param int $newFOR nuove statistiche per la FOR
+     * @param int $newDES nuove statistiche per la DES
+     * @return boolean `true` se l'aggiornamento viene effettuato, `false` altrimenti
+     */
+    public function upgradeStats($newPF, $newFOR, $newDES){
+        // TODO: implementa la funzione
+        // $this->updateDB();
+        return false;
+    }
 
     public function useItem($itemId){
         // TODO
     }
-
     public function assignItem($itemId){
         // TODO
     }
     public function removeItem($itemId){
         // TODO
     }
-    
+
     /**
      * Aggiorna i dati del personaggio nel database
      * @return bool true se l'aggiornamento è avvenuto con successo, false altrimenti
@@ -639,14 +680,13 @@ class Personaggio{
             $connectionDB->close();
         }
     }
-
     /**
      * Rimuove il personaggio dal database e resetta tutti i suoi campi
      * @return bool true se l'eliminazione è avvenuta con successo, false altrimenti
      */
     public function deleteFromDB() {
         $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
-        
+
         if($connectionDB->connect_error){
             throw new Exception("Connessione al database fallita: ". $connectionDB->connect_error, 500);
         }
@@ -685,7 +725,7 @@ class Personaggio{
                 $this->puntiUpgrade = null;
                 $this->damage = null;
                 $this->dodgingChance = null;
-                
+
                 foreach ($this->zaino as $i => $elemento) {
                     $this->removeItem($elemento["ID"]);
                     unset($this->zaino[$i]);

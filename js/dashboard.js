@@ -49,7 +49,11 @@ document.addEventListener("DOMContentLoaded", () => {
         addBtn.addEventListener("click", addNewCharacter);
 
     if(message){
-        showMessage(message, IMPORTANT_MESSAGE);
+        showMessage(message);
+    }
+    
+    if(errorMessage){
+        errorHandler(errorMessage);
     }
 });
 
@@ -340,7 +344,7 @@ function changeImage(){
         .then(images => {
             document.body.classList.remove("caricamento");
             if(images.error !== undefined && images.error){
-                throw images.error;
+                throw images;
             }
             const page = document.createElement("div");
             page.classList.add("image-page");
@@ -437,7 +441,7 @@ function showInventory(newItems = false){
         .then(risposta =>{
             document.body.classList.remove("caricamento");
             if(risposta.error !== undefined && risposta.error){
-                throw risposta.error;
+                throw risposta;
             }
             const data = risposta["inventario"];
             const MAX_SIZE = risposta["MAX_SIZE"];
@@ -486,6 +490,7 @@ function showInventory(newItems = false){
         })
         .catch(error => {
             errorHandler(error);
+            return;
         })
 
 }
@@ -567,7 +572,7 @@ function showShop(){
         .then(risposta => {
             document.body.classList.remove("caricamento");
             if(risposta.error !== undefined && risposta.error){
-                throw risposta.error;
+                throw risposta;
             }
             const data = risposta.items;
             const remainingTime = risposta.remainingTime;
@@ -630,6 +635,7 @@ function showShop(){
         })
         .catch(error => {
             errorHandler(error);
+            return;
         })
 }
 
@@ -848,7 +854,7 @@ function sellItem(){
     .then(data => {
         document.body.classList.remove("caricamento");
         if(data.error !== undefined && data.error){
-            throw data.error;
+            throw data;
         }
         else{
             updateCoins(data.guadagno);
@@ -861,6 +867,7 @@ function sellItem(){
     })
     .catch(error => {
         errorHandler(error);
+        return;
     });
 }
 
@@ -890,10 +897,7 @@ function buyItem(){
     .then(data => {
         document.body.classList.remove("caricamento");
         if(data.error !== undefined && data.error){
-            throw data.error;
-        }
-        if(data.errore){
-            showMessage("Errore: " + data.errore);
+            throw data;
         }
         else{
             updateCoins(data.spesa);
@@ -902,6 +906,7 @@ function buyItem(){
     })
     .catch(error => {
         errorHandler(error);
+        return;
     });
 }
 
@@ -941,10 +946,7 @@ function openBox(){
     .then(data =>{
         document.body.classList.remove("caricamento");
         if(data.error !== undefined && data.error){
-            throw data.error;
-        }
-        if(data.error){
-            showMessage("Error: " + data.error);
+            throw data;
         }
         else if(data.full){
             showMessage("Non hai abbastanza slot!");
@@ -961,6 +963,7 @@ function openBox(){
     })
     .catch(error => {
         errorHandler(error);
+        return;
     });
 }
 

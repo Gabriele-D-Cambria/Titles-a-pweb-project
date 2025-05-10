@@ -7,8 +7,18 @@ if(!isset($_SESSION['account'])){
 	pageError("401");
 }
 
-if (basename(parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH)) !== "dashboard.php" &&
+if (!isset($_SERVER['HTTP_REFERER']) || 
+	basename(parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH)) !== "dashboard.php" &&
 	basename(parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH)) !== "creazionePersonaggio.php") {
+	header("Location: ./dashboard.php");
+	exit;
+}
+
+
+$account = unserialize($_SESSION['account']);
+
+if(count($account->getPersonaggi()) === Account::MAX_NUM_PERSONAGGI){
+	$_SESSION['message'] = ERROR_TYPES['full_PG'];
 	header("Location: ./dashboard.php");
 	exit;
 }
