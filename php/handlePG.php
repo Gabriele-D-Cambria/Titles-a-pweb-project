@@ -45,11 +45,11 @@ else if(isset($_POST['upgrade'])){
 
 		$nome = unserialize($_SESSION['currentPG_nome']);
 
-		$newPF = $_POST["PF"];
-		$newFOR = $_POST["FOR"];
-		$newDES = $_POST["DES"];
-		
-		if(!$account->updatePgStats($nome, $newPF, $newFOR, $newDES)){
+		$newPF = (int)$_POST["PF"];
+		$newFOR = (int)$_POST["FOR"];
+		$newDES = (int)$_POST["DES"];
+
+		if(!$account->upgradePgStats($nome, $newPF, $newFOR, $newDES)){
 			throw new Exception("upgrade_failed", 400);
 		}
 

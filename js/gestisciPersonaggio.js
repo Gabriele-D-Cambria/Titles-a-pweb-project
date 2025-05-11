@@ -19,6 +19,9 @@ document.addEventListener("DOMContentLoaded", () =>{
 	
 	setUpgradePointsPrivileges();
 
+	if(message){
+		showMessage(message);
+	}
 	if(errorMessage){
 		errorHandler(errorMessage);
 	}
@@ -199,7 +202,7 @@ function aggiornaStat(id, aumenta, PG){
         case "PF":
 			if(!aumenta && !usedPU.PF)
 				return;
-            PG.PF += upd;
+            PG.PF = Number(PG.PF) + upd;
             usedPU.PF += upd;
 			document.getElementById(`less-${statId}`).classList.toggle("clickable", (usedPU.PF));
             break;

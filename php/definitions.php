@@ -250,12 +250,13 @@ class Account{
      * @param int $newPF nuovo valore per la statistica `PF` del `Personaggio`
      * @param int $newFOR nuovo valore per la statistica `FOR` del `Personaggio`
      * @param int $newDES nuovo valore per la statistica `DES` del `Personaggio`
-     * @return boolean
+     * @return boolean `true` se l'aggiornamento è avvenuto correttamente, `false` altrimenti
      */
-    public function updatePgStats($nomePersonaggio, $newPF, $newFOR, $newDES){
+    public function upgradePgStats($nomePersonaggio, $newPF, $newFOR, $newDES){
         foreach($this->personaggi as $personaggio){
             if($personaggio->getNome() === $nomePersonaggio){
-                return $personaggio->upgradeStats($newPF, $newFOR, $newDES);
+                $personaggio->upgradeStats($newPF, $newFOR, $newDES);
+                return true;
             }
         }
         return false;
@@ -613,9 +614,38 @@ class Personaggio{
      * @return boolean `true` se l'aggiornamento viene effettuato, `false` altrimenti
      */
     public function upgradeStats($newPF, $newFOR, $newDES){
-        // TODO: implementa la funzione
-        // $this->updateDB();
-        return false;
+        if ($newFOR < self::MIN_FOR_DES || $newFOR > self::MAX_FOR_DES || $newFOR < $this->FOR) {
+            throw new Exception("Aggiornamento Fallito: Valore non ammissibile per la Forza: " . $newFOR, 400);
+        }
+        
+        if ($newDES < self::MIN_FOR_DES || $newDES > self::MAX_FOR_DES || $newDES < $this->DES) {
+            throw new Exception("Aggiornamento Fallito: Valore non ammissibile per la Destrezza: " . $newDES, 400);
+        }
+        
+        if ($newPF < $this->PF) {
+            throw new Exception("Aggiornamento Fallito: Valore non ammissibile per i Punti Ferita: ". $newPF, 400);
+        }
+
+
+        $usedPU = [];
+        $usedPU["PF"] = $newPF - $this->PF;
+        $usedPU["FOR"] = $newFOR - $this->FOR;
+        $usedPU["DES"] = $newDES - $this->DES;
+        $totalUsedPU = array_sum($usedPU);
+        error_log($totalUsedPU);
+
+        if($totalUsedPU > $this->puntiUpgrade){
+            throw new Exception("Aggiornamento Fallito: Usati troppi Punti Upgrade (". $totalUsedPU . ") rispetto a quelli a disposizione (" . $this->puntiUpgrade . ")", 400);
+        }
+
+        $this->puntiUpgrade -= $totalUsedPU;
+        $this->PF = $newPF;
+        $this->FOR = $newFOR;
+        $this->DES = $newDES;
+        $this->damage = self::DAMAGE_LOOKUP[$newFOR];
+        $this->dodgingChance = self::DODGE_LOOKUP[$newDES];
+
+        return $this->updateDB();
     }
 
     public function useItem($itemId){
@@ -636,7 +666,7 @@ class Personaggio{
         $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
 
         if($connectionDB->connect_error){
-            return false;
+            throw new Exception("Connessione al database fallita: ". $connectionDB->connect_error, 500);
         }
 
         $stmt = null;
@@ -646,7 +676,6 @@ class Personaggio{
                         Forza = ?,
                         Destrezza = ?,
                         PuntiVita = ?,
-                        Elemento = ?,
                         Armatura = ?,
                         Arma = ?,
                         Livello = ?,
@@ -659,11 +688,10 @@ class Personaggio{
                 return false;
             }
 
-            $stmt->bind_param('iiisiisiis',
+            $stmt->bind_param('iiiiiiiisi',
                 $this->FOR,
                 $this->DES,
                 $this->PF,
-                $this->elemento,
                 $this->armatura,
                 $this->arma,
                 $this->livello,
