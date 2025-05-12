@@ -22,7 +22,6 @@ if(isset($_SESSION["errorMessage"])){
 $account = unserialize($_SESSION['account']);
 $user = $account->getAll();
 
-// $user["personaggi"][] = 1;
 $characterList = "";
 foreach ($user["personaggi"] as $i => $character){
     $PG = $character->getAll();

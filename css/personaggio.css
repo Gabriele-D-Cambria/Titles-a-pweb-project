@@ -163,6 +163,20 @@ body{
 	cursor: default !important;
 }
 
+.PD-amount{
+	display: flex;
+	align-items: center;
+}
+.PD-amount input[type="number"]:first-child{
+	text-align: right !important;
+}
+.PD-amount input[type="number"]:last-child{
+	text-align: left !important;
+}
+.PD-amount *{
+	margin: 0px;
+}
+
 .stats-section input[type="number"] {
   	-webkit-appearance: textfield;
   	-moz-appearance: textfield;

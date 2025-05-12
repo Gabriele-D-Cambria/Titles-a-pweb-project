@@ -38,7 +38,7 @@ CREATE TABLE Item (
     Tipologia VARCHAR(50) NOT NULL,
     Costo INT NOT NULL,
     Danno INT DEFAULT 0,
-    Armatura INT DEFAULT 0,
+    ProtezioneDanno INT DEFAULT 0,
     RecuperoVita INT DEFAULT 0,
     ModificatoreFor INT DEFAULT 0,
     ModificatoreDes INT DEFAULT 0,

@@ -331,15 +331,18 @@ class Personaggio{
     private $owner;
     private $FOR;
     private $damage;
-    private $dodgingChance;
     private $DES;
+    private $dodgingChance;
     private $PF;
     private $tmp_PF;
     private $elemento;
     private $prevaleSu;
     private $prevalsoDa;
-    private $armatura;  /// Riferimento all'armatura indossata
-    private $arma;     /// Riferimento all'arma equipaggiata
+    /// Informazioni complete sull'arma equipaggiata
+    private $arma;
+    /// Informazioni complete sull'armatura equipaggiata
+    private $armatura;
+    private $protezioneDanno;
     private $zaino = [];
     private $livello;
     private $exp;
@@ -399,22 +402,58 @@ class Personaggio{
                 // Il PG esiste
                 $personaggioData = $personaggioResult->fetch_assoc();
 
-                $this->pathImmagine   = $personaggioData['PathImmagine'];
-                $this->pathImmaginePG = $personaggioData['PathImmaginePG'];
-                $this->nome           = $personaggioData['Nome'];
-                $this->owner          = $personaggioData['Proprietario'];
-                $this->FOR            = $personaggioData['Forza'];
-                $this->DES            = $personaggioData['Destrezza'];
-                $this->PF             = $personaggioData['PuntiVita'];
-                $this->elemento       = $personaggioData['Elemento'];
-                $this->prevaleSu      = $personaggioData['PrevaleSu'];
-                $this->prevalsoDa     = $personaggioData['PrevalsoDa'];
-                $this->armatura       = $personaggioData['Armatura'];
-                $this->arma           = $personaggioData['Arma'];
-                $this->livello        = $personaggioData['Livello'];
-                $this->exp            = $personaggioData['PuntiExp'];
-                $this->puntiUpgrade   = $personaggioData['PuntiUpgrade'];
+                $this->pathImmagine    = $personaggioData['PathImmagine'];
+                $this->pathImmaginePG  = $personaggioData['PathImmaginePG'];
+                $this->nome            = $personaggioData['Nome'];
+                $this->owner           = $personaggioData['Proprietario'];
+                $this->FOR             = $personaggioData['Forza'];
+                $this->DES             = $personaggioData['Destrezza'];
+                $this->PF              = $personaggioData['PuntiVita'];
+                $this->elemento        = $personaggioData['Elemento'];
+                $this->prevaleSu       = $personaggioData['PrevaleSu'];
+                $this->prevalsoDa      = $personaggioData['PrevalsoDa'];
+                $this->arma            = null;
+                $this->armatura        = null;
+                $this->livello         = $personaggioData['Livello'];
+                $this->exp             = $personaggioData['PuntiExp'];
+                $this->puntiUpgrade    = $personaggioData['PuntiUpgrade'];
+                $this->damage          = 0;
+                $this->dodgingChance   = 0;
+                $this->protezioneDanno = 0;
 
+                // Prelevo le informazioni sull'arma
+                if($personaggioData['Arma'] !== null){
+                    $sqlArma = "SELECT ID, Nome, Descrizione, Elemento, PathImmagine, Danno, ModificatoreFor, ModificatoreDes
+                                FROM Item
+                                WHERE ID = ?";
+                    $armaStmt = $connectionDB->prepare($sqlArma);
+                    $armaStmt->bind_param("i", $personaggioData['Arma']);
+                    $armaStmt->execute();
+                    $armaResult = $armaStmt->get_result();
+                    $this->arma = $armaResult->fetch_assoc();
+                    $this->FOR = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->FOR + $this->arma['ModificatoreFor']));
+                    $this->DES = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->DES + $this->arma['ModificatoreDes']));
+                    $this->damage = $this->arma['Danno'];
+
+                    unset($this->arma['Danno']);
+                    unset($this->arma['ModificatoreFor']);
+                    unset($this->arma['ModificatoreDes']);
+                }
+                // Prelevo le informazioni sull'armatura
+                if($personaggioData['Armatura'] !== null){
+                    $sqlArmatura = "SELECT ID, Nome, Descrizione, Elemento, PathImmagine, ProtezioneDanno, ModificatoreFor, ModificatoreDes
+                                    FROM Item
+                                    WHERE ID = ?";
+                    $armaturaStmt = $connectionDB->prepare($sqlArmatura);
+                    $armaturaStmt->bind_param("i", $personaggioData['Armatura']);
+                    $armaturaStmt->execute();
+                    $armaturaResult = $armaturaStmt->get_result();
+                    $this->armatura = $armaturaResult->fetch_assoc();
+                    $this->FOR = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->FOR + $this->armatura['ModificatoreFor']));
+                    $this->DES = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->DES + $this->armatura['ModificatoreDes']));
+
+                    $this->protezioneDanno = $this->armatura['ProtezioneDanno'];
+                }
 
                 // Prelevo lo zaino
                 $sqlZaino = "SELECT Z.Quantita, I.*
@@ -445,21 +484,24 @@ class Personaggio{
                     throw new Exception("Elemento non valido: ". $elementInfo, 400);
                 }
 
-                $this->pathImmagine   = $elementInfo['PathImmagine'];
-                $this->pathImmaginePG = $elementInfo['PathImmaginePG'];
-                $this->nome           = $nome;
-                $this->owner          = $proprietarioId;
-                $this->FOR            = self::DEFAULT_FOR_DES + $elementInfo["ModificatoreFor"];
-                $this->DES            = self::DEFAULT_FOR_DES + $elementInfo["ModificatoreDes"];
-                $this->PF             = self::DEFAULT_PF + $elementInfo["ModificatorePF"];
-                $this->elemento       = $elementInfo['Nome'];
-                $this->prevaleSu      = $elementInfo['PrevaleSu'];
-                $this->prevalsoDa     = $elementInfo['PrevalsoDa'];
-                $this->armatura       = null;
-                $this->arma           = null;
-                $this->livello        = 1;
-                $this->exp            = 0;
-                $this->puntiUpgrade   = self::PU_LVL_UP;
+                $this->pathImmagine    = $elementInfo['PathImmagine'];
+                $this->pathImmaginePG  = $elementInfo['PathImmaginePG'];
+                $this->nome            = $nome;
+                $this->owner           = $proprietarioId;
+                $this->FOR             = self::DEFAULT_FOR_DES + $elementInfo["ModificatoreFor"];
+                $this->DES             = self::DEFAULT_FOR_DES + $elementInfo["ModificatoreDes"];
+                $this->PF              = self::DEFAULT_PF + $elementInfo["ModificatorePF"];
+                $this->elemento        = $elementInfo['Nome'];
+                $this->prevaleSu       = $elementInfo['PrevaleSu'];
+                $this->prevalsoDa      = $elementInfo['PrevalsoDa'];
+                $this->armatura        = null;
+                $this->arma            = null;
+                $this->livello         = 1;
+                $this->exp             = 0;
+                $this->puntiUpgrade    = self::PU_LVL_UP;
+                $this->damage          = 0;
+                $this->dodgingChance   = 0;
+                $this->protezioneDanno = 0;
 
                 $insertQuery = "INSERT INTO Personaggi (Nome, Proprietario, Forza, Destrezza, PuntiVita, Elemento, Armatura, Arma, Livello, PuntiExp, PuntiUpgrade)
                                 VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, 1, 0, ?)";
@@ -481,8 +523,10 @@ class Personaggio{
             }
 
             $this->tmp_PF = $this->PF;
-            $this->dodgingChance = self::DODGE_LOOKUP[$this->DES];
-            $this->damage = self::DAMAGE_LOOKUP[$this->FOR];
+
+            // Aggiungo alle basi date dai modificatori di arma e armatura (0 nel caso non ci siano/sia)
+            $this->damage        += self::DAMAGE_LOOKUP[$this->FOR];
+            $this->dodgingChance += self::DODGE_LOOKUP[$this->DES];
 
             $connectionDB->commit();
         }
@@ -490,6 +534,8 @@ class Personaggio{
             if ($ownerStmt)         $ownerStmt->close();
             if ($personaggioStmt)   $personaggioStmt->close();
             if ($zainoStmt)         $zainoStmt->close();
+            if ($armaStmt)          $armaStmt->close();
+            if ($armaturaStmt)      $armaturaStmt->close();
             $connectionDB->close();
         }
     }
@@ -505,39 +551,45 @@ class Personaggio{
     }
     public function getAll() {
         return [
-            'nome'           => $this->nome,
-            'owner'          => $this->owner,
-            'FOR'            => $this->FOR,
-            'damage'         => $this->damage,
-            'DES'            => $this->DES,
-            'dodgingChance'  => $this->dodgingChance,
-            'PF'             => $this->PF,
-            'temp_PF'        => $this->tmp_PF,
-            'elemento'       => $this->elemento,
-            'prevaleSu'      => $this->prevaleSu,
-            'prevalsoDa'     => $this->prevalsoDa,
-            'armatura'       => $this->armatura,
-            'arma'           => $this->arma,
-            'zaino'          => $this->zaino,
-            'livello'        => $this->livello,
-            'exp'            => $this->exp,
-            'puntiUpgrade'   => $this->puntiUpgrade,
-            'pathImmagine'   => $this->pathImmagine,
-            'pathImmaginePG' => $this->pathImmaginePG
+            'nome'            => $this->nome,
+            'owner'           => $this->owner,
+            'FOR'             => $this->FOR,
+            'damage'          => $this->damage,
+            'DES'             => $this->DES,
+            'dodgingChance'   => $this->dodgingChance,
+            'PF'              => $this->PF,
+            'temp_PF'         => $this->tmp_PF,
+            'elemento'        => $this->elemento,
+            'prevaleSu'       => $this->prevaleSu,
+            'prevalsoDa'      => $this->prevalsoDa,
+            'armatura'        => $this->armatura,
+            'arma'            => $this->arma,
+            'zaino'           => $this->zaino,
+            'livello'         => $this->livello,
+            'exp'             => $this->exp,
+            'puntiUpgrade'    => $this->puntiUpgrade,
+            'pathImmagine'    => $this->pathImmagine,
+            'pathImmaginePG'  => $this->pathImmaginePG,
+            'protezioneDanno' => $this->protezioneDanno
         ];
     }
-    public function getStatsRelated(){
+    public function getStatsAndEquipment(){
         return [
-            'FOR'            => $this->FOR,
-            'damage'         => $this->damage,
-            'DAMAGE_LOOKUP'  => self::DAMAGE_LOOKUP,
-            'DES'            => $this->DES,
-            'dodgingChance'  => $this->dodgingChance,
-            'DODGE_LOOKUP'   => self::DODGE_LOOKUP,
-            'PF'             => $this->PF,
-            'puntiUpgrade'   => $this->puntiUpgrade,
-            'MIN_FOR_DES'    => self::MIN_FOR_DES,
-            'MAX_FOR_DES'    => self::MAX_FOR_DES,
+            'DAMAGE_LOOKUP'   => self::DAMAGE_LOOKUP,
+            'DODGE_LOOKUP'    => self::DODGE_LOOKUP,
+            'MIN_FOR_DES'     => self::MIN_FOR_DES,
+            'MAX_FOR_DES'     => self::MAX_FOR_DES,
+            'ZAINO_SIZE'      => self::ZAINO_SIZE,
+            'FOR'             => $this->FOR,
+            'damage'          => $this->damage,
+            'protezioneDanno' => $this->protezioneDanno,
+            'DES'             => $this->DES,
+            'dodgingChance'   => $this->dodgingChance,
+            'PF'              => $this->PF,
+            'puntiUpgrade'    => $this->puntiUpgrade,
+            'arma'            => $this->arma,
+            'armatura'        => $this->armatura,
+            'zaino'           => $this->zaino
         ];
     }
 
@@ -617,11 +669,11 @@ class Personaggio{
         if ($newFOR < self::MIN_FOR_DES || $newFOR > self::MAX_FOR_DES || $newFOR < $this->FOR) {
             throw new Exception("Aggiornamento Fallito: Valore non ammissibile per la Forza: " . $newFOR, 400);
         }
-        
+
         if ($newDES < self::MIN_FOR_DES || $newDES > self::MAX_FOR_DES || $newDES < $this->DES) {
             throw new Exception("Aggiornamento Fallito: Valore non ammissibile per la Destrezza: " . $newDES, 400);
         }
-        
+
         if ($newPF < $this->PF) {
             throw new Exception("Aggiornamento Fallito: Valore non ammissibile per i Punti Ferita: ". $newPF, 400);
         }
@@ -632,7 +684,6 @@ class Personaggio{
         $usedPU["FOR"] = $newFOR - $this->FOR;
         $usedPU["DES"] = $newDES - $this->DES;
         $totalUsedPU = array_sum($usedPU);
-        error_log($totalUsedPU);
 
         if($totalUsedPU > $this->puntiUpgrade){
             throw new Exception("Aggiornamento Fallito: Usati troppi Punti Upgrade (". $totalUsedPU . ") rispetto a quelli a disposizione (" . $this->puntiUpgrade . ")", 400);

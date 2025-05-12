@@ -18,6 +18,6 @@ if($output === null)
 	apiError(400);
 
 header('Content-Type: application/json');
-echo json_encode($output->getStatsRelated());
+echo json_encode($output->getStatsAndEquipment());
 
 ?>

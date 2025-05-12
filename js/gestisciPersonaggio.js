@@ -1,9 +1,9 @@
 "use strict";
 
-import {showMessage, showModule, closeModule, createButton, errorHandler} from "./methods.js";
+import {showMessage, showModule, closeModule, createButton, errorHandler, showInventory} from "./methods.js";
 
 let moduleListener = null;
-let currentlyOpened = null;
+let currentlyOpened = { current: null };
 let usedPU = {
 	PF: 0,
 	FOR: 0,
@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () =>{
 	});
 	document.getElementById("deletePG").addEventListener("click", createDeleteBox);
 	
-	setUpgradePointsPrivileges();
+	configurePage();
 
 	if(message){
 		showMessage(message);
@@ -28,12 +28,12 @@ document.addEventListener("DOMContentLoaded", () =>{
 });
 
 function createDeleteBox(){
-	if(currentlyOpened !== null && currentlyOpened !== "deleteModule"){
+	if(currentlyOpened.current !== null && currentlyOpened.current !== "deleteModule"){
 		return;
 	}
 
 	const module = document.getElementById("deleteModule");
-	currentlyOpened = module.id;
+	currentlyOpened.current = module.id;
 
 	const page = document.createElement("div");
 	page.classList.add("delete-page");
@@ -114,21 +114,21 @@ function createDeleteBox(){
  * @param {Boolean} overload Indica se effettuare il controllo sull'evento
  */
 function closeModuleEvent(event, id, overload = false){
-	if(moduleListener === null || currentlyOpened !== id)
+	if(moduleListener === null || currentlyOpened.current !== id)
 		return;
 
 	const module = document.getElementById(id);
 	if(overload || event.target === module){
 		window.removeEventListener("click", moduleListener);
 		moduleListener = null;
-		currentlyOpened = null;
+		currentlyOpened.current = null;
 		closeModule(null, id, true);
 	}
 }
 
-function setUpgradePointsPrivileges(){
+function configurePage(){
 	// return;
-	fetch("php/API/getCurrentPG.php")
+	fetch("php/API/getCurrentPGinfos.php")
 		.then(response => response.json())
 		.then(PG => {
 			if(PG.error !== undefined && PG.error){
@@ -136,44 +136,11 @@ function setUpgradePointsPrivileges(){
 			}
 			console.log(PG); //! da rimuovere ----------------------------------------------------
 
-			let btn = null;
-			if(PG.puntiUpgrade > 0){
-				btn = document.getElementById("more-PF");
-				btn.classList.add("clickable");
-				btn.addEventListener("click", (e) =>{
-					aggiornaStat(e.target.id, true, PG);
-				});
+			if(PG.puntiUpgrade > 0)
+				setUpgradePointsPrivileges(PG);
+			
+			setEquimpent(PG.arma, PG.armatura, PG.zaino);
 
-				document.getElementById("less-PF").addEventListener("click", (e) =>{
-					aggiornaStat(e.target.id, false, PG);
-				});
-				
-
-				if(PG.FOR < PG.MAX_FOR_DES){
-					btn = document.getElementById("more-FOR")
-					btn.classList.add("clickable");
-					btn.addEventListener("click", (e) =>{
-						aggiornaStat(e.target.id, true, PG);
-					});
-				}
-				
-				document.getElementById("less-FOR").addEventListener("click", (e) =>{
-					aggiornaStat(e.target.id, false, PG);
-				});
-				
-				if(PG.DES < PG.MAX_FOR_DES){
-					btn = document.getElementById("more-DES");
-					btn.classList.add("clickable");
-					btn.addEventListener("click", (e) =>{
-						aggiornaStat(e.target.id, true, PG);
-					});
-				}
-				
-				document.getElementById("less-DES").addEventListener("click", (e) =>{
-					aggiornaStat(e.target.id, false, PG);
-				});
-				
-			}
 		})
 		.catch(error => {
 			errorHandler(error);
@@ -181,6 +148,100 @@ function setUpgradePointsPrivileges(){
 		})
 }
 
+function setUpgradePointsPrivileges(PG){
+	let btn = document.getElementById("more-PF");
+	btn.classList.add("clickable");
+	btn.addEventListener("click", (e) =>{
+		aggiornaStat(e.target.id, true, PG);
+	});
+
+	document.getElementById("less-PF").addEventListener("click", (e) =>{
+		aggiornaStat(e.target.id, false, PG);
+	});
+	
+
+	if(PG.FOR < PG.MAX_FOR_DES){
+		btn = document.getElementById("more-FOR")
+		btn.classList.add("clickable");
+		btn.addEventListener("click", (e) =>{
+			aggiornaStat(e.target.id, true, PG);
+		});
+	}
+	
+	document.getElementById("less-FOR").addEventListener("click", (e) =>{
+		aggiornaStat(e.target.id, false, PG);
+	});
+	
+	if(PG.DES < PG.MAX_FOR_DES){
+		btn = document.getElementById("more-DES");
+		btn.classList.add("clickable");
+		btn.addEventListener("click", (e) =>{
+			aggiornaStat(e.target.id, true, PG);
+		});
+	}
+	
+	document.getElementById("less-DES").addEventListener("click", (e) =>{
+		aggiornaStat(e.target.id, false, PG);
+	});
+}
+
+function setEquimpent(arma = null, armatura = null, zaino = null){
+	let space = null;
+	let img = null;
+	if(arma !== null){
+		space = document.getElementById("weapon");
+		
+		img = document.createElement("img");
+		img.id = "weapon-img";
+		img.src = arma.PathImmagine;
+		img.alt = arma.Descrizione;
+		img.title = arma.Nome;
+		
+		while(space.childElementCount)
+			space.removeChild(space.firstChild);
+		space.appendChild(img);
+	}
+	if(armatura !== null){
+		space = document.getElementById("armor");
+	
+		img = document.createElement("img");
+		img.id = "armor-img";
+		img.src = armatura.PathImmagine;
+		img.alt = armatura.Descrizione;
+		img.title = armatura.Nome;
+		
+		while(space.childElementCount)
+			space.removeChild(space.firstChild);
+		space.appendChild(img);
+	}
+	if(zaino !== null){
+		zaino.forEach((item, index) => {
+			space = document.getElementById(`obj_${index}`);
+			
+			img = document.createElement("img");
+			img.id = `obj_${index}-img`;
+			img.src = item.PathImmagine;
+			img.alt = item.Descrizione;
+			img.title = item.Nome;
+
+			while(space.childElementCount)
+				space.removeChild(space.firstChild);
+			space.appendChild(img);
+		});
+	}
+
+	space = document.querySelectorAll(".item-slot.bag-item");
+	space.forEach(item => {
+		item.addEventListener("click", (e) => {
+			const id = String(e.target.id).split("-")[0];
+			equipNewItem(id);
+		})
+	})
+}
+
+function equipNewItem(id){
+	showInventory(false, true);
+}
 /**
  * Aggiorna le statistiche del personaggio.
  * @param {string} id id della statistica da modificare

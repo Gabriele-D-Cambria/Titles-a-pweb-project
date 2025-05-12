@@ -84,12 +84,18 @@ if(isset($_SESSION["message"])){
 				<div class="stats-block PF">
 					<div class="PF-points-block">
 						<div id="less-PF" class="statsButton">-</div>
-						<input class="PF-amount" type="number" id="PF" name="PF" 
-							value="<?php echo $currentPG["PF"];?>"
-							readonly>
+						<div class="PF-amount PD-amount">
+							<input type="number" id="PF" name="PF"
+								value="<?php echo $currentPG["PF"];?>"
+								readonly> 
+								<pre> + </pre>
+							<input type="number" id="PD" name="PD"
+								value="<?php echo $currentPG["protezioneDanno"];?>"
+								readonly disabled>
+						</div>
 						<div id="more-PF" class="statsButton">+</div>
 					</div>
-					<p>PF</p>
+					<p>PF + PD</p>
 				</div>
 				<div class="stats-block FOR">
 					<div class="FOR-points-block">
@@ -112,7 +118,7 @@ if(isset($_SESSION["message"])){
 					<p>DES</p>
 				</div>
 				<div class="sendUpgrades">
-					<button type="submit" id="upgradeStats" disabled>Migliora</button>
+					<button type="submit" id="upgradeStats" disabled>Migliora Statistiche</button>
 				</div>
 			</form>
 			<div class="character-section">
@@ -172,22 +178,22 @@ if(isset($_SESSION["message"])){
 						<p>Arma</p>
 						<p>Armatura</p>
 						<div class="item-container">
-							<div class="item-slot bag-item"></div>
+							<div id="weapon" class="item-slot bag-item"></div>
 						</div>
 						<div class="item-container">
-							<div class="item-slot bag-item"></div>
+							<div id="armor" class="item-slot bag-item"></div>
 						</div>
 					</div>
 					<div class="bag-section">
 						<p>Oggetti</p>
 						<div class="item-container">
-							<div class="item-slot bag-item"></div>
+							<div id="obj_0" class="item-slot bag-item"></div>
 						</div>
 						<div class="item-container">
-							<div class="item-slot bag-item"></div>
+							<div id="obj_1" class="item-slot bag-item"></div>
 						</div>
 						<div class="item-container">
-							<div class="item-slot bag-item"></div>
+							<div id="obj_2" class="item-slot bag-item"></div>
 						</div>
 					</div>
 				</div>
@@ -195,5 +201,6 @@ if(isset($_SESSION["message"])){
 		</div>
 	</main>
 	<div id="deleteModule" class="module"></div>
+	<div id="inventoryModule" class="module"></div>
 </body>
 </html>
