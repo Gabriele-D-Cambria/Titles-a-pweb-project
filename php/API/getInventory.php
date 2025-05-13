@@ -7,9 +7,37 @@ if(!isset($_SESSION['account'])){
     exit;
 }
 
+if($_SERVER["REQUEST_METHOD"] !== "POST" || !isset($_POST['filter'])){
+    apiError(400);
+    exit;
+}
+
 $account = unserialize(($_SESSION['account']));
 $accountId = $account->getId();
-$inventory = getInventory($accountId);
+$filter = json_decode($_POST['filter']);
+
+if($filter !== null){
+    if (!is_array($filter)) {
+        $filter = [$filter];
+    }   
+    $allItemType = getItemTypes();
+    error_log("Items: ".json_encode($allItemType));
+    foreach($filter as $index => $el){
+        if(!in_array($el, $allItemType)){
+            unset($filter[$index]);
+        }
+        if(preg_match('/^obj_/', $el)){
+            foreach($allItemType as $type){
+                if(!in_array($type, NOT_OBJECT_TYPES))
+                    $filter[]  = $type;
+            }
+        }
+    }
+    
+    $filter = array_unique($filter);
+}
+
+$inventory = getInventory($accountId, $filter);
 
 header('Content-Type: application/json');
 

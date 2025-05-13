@@ -87,7 +87,7 @@ if(isset($_SESSION["message"])){
 						<div class="PF-amount PD-amount">
 							<input type="number" id="PF" name="PF"
 								value="<?php echo $currentPG["PF"];?>"
-								readonly> 
+								readonly>
 								<pre> + </pre>
 							<input type="number" id="PD" name="PD"
 								value="<?php echo $currentPG["protezioneDanno"];?>"
@@ -178,10 +178,10 @@ if(isset($_SESSION["message"])){
 						<p>Arma</p>
 						<p>Armatura</p>
 						<div class="item-container">
-							<div id="weapon" class="item-slot bag-item"></div>
+							<div id="arma" class="item-slot bag-item"></div>
 						</div>
 						<div class="item-container">
-							<div id="armor" class="item-slot bag-item"></div>
+							<div id="armatura" class="item-slot bag-item"></div>
 						</div>
 					</div>
 					<div class="bag-section">

@@ -81,6 +81,10 @@ define("MAX_SHOP_ITEMS", 10);
  */
 define('SHOP_TIMER_RESET_SECONDS', value: 3*60);
 
+/**
+ * Contiene i tipi di oggetto che non possono essere inseriti nello zaino
+ */
+define("NOT_OBJECT_TYPES", ['arma', 'armatura', 'box']);
 
 /**
  * Informazioni sull'account con riferimento ai personaggi

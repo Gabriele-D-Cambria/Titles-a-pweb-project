@@ -5,6 +5,7 @@ body{
 
 .updated{
 	color: #2ecc71 !important;
+	font-size: large !important;
 	text-shadow:
         -1px -1px 0 #1e1e1e,
          1px -1px 0 #1e1e1e,
@@ -333,6 +334,7 @@ body{
 .character-box footer p{
 	margin: 0px;
 	text-align: center;
+	height: 3.5vh;
 }
 
 .dodge-box p:first-child, .damage-box p:first-child{

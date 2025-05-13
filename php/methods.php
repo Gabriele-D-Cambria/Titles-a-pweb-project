@@ -137,14 +137,15 @@ function getData($username){
 /**
  * Recupera l'invetario di un'account dal database
  * @param int $accountID ID dell'account
+ * @param array $filter array contenente i tipi degli oggetti che vogliamo recuperare
  * @return array contenente gli item nell'inventario e la loro quantità
  */
-function getInventory($accountID){
+function getInventory($accountID, $filter){
     $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
     if($conn->connect_error){
         apiError(500, "Connessione al database fallita: " . $conn->connect_error);
     }
-
+    $stmtFilter = null;
     $stmt = null;
     try{
         $sql = "SELECT Item.*, Inventario.Quantita
@@ -161,7 +162,11 @@ function getInventory($accountID){
         $output["MAX_SIZE"] = MAX_ITEMS;
         $inventory = [];
         while($row = $result->fetch_assoc()){
+            if($filter !== null && !in_array($row['Tipologia'], $filter)){
+                continue;
+            }
             $inventory[] = $row;
+            
         }
 
         $output["inventario"] = $inventory;
@@ -172,7 +177,8 @@ function getInventory($accountID){
         apiError(500, "Errore durante il recupero dell'inventario: " . $e->getMessage());
     }
     finally {
-        if($stmt)  $stmt->close();
+        if($stmt)        $stmt->close();
+        if($stmtFilter)  $stmtFilter->close();
         $conn->close();
     }
 }
@@ -824,6 +830,45 @@ function getElementPG(){
     }
     catch(Exception $e){
         apiError(500, "Errore nella funzione getElementPG: ". $e->getMessage());
+    }
+    finally{
+        if($stmt)   $stmt->close();
+        $conn->close();
+    }
+}
+
+/**
+ * Recupera dal database tutti i tipi validi
+ * @throws \Exception se ci sono problemi con la query
+ * @return array contenente tutti gli `ItemTypes` contenuti nel database
+ */
+function getItemTypes(){
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+    if($conn->connect_error){
+        apiError(500, "Connessione al database fallita: ". $conn->connect_error);
+    }
+
+    $stmt = null;
+
+    try{
+        $sql = "SELECT *
+                FROM ItemType";
+        $stmt = $conn->prepare($sql);
+        if(!$stmt->execute()){
+            throw new Exception( $stmt->error);
+        }
+
+        $result = $stmt->get_result();
+
+        $output = [];
+        while($row = $result->fetch_assoc())
+            $output[] = $row['Nome'];
+    
+        return $output;
+
+    }
+    catch(Exception $e){
+        apiError(500, "Errore nella funzione getItemTypes: ". $e->getMessage());
     }
     finally{
         if($stmt)   $stmt->close();

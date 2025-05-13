@@ -284,17 +284,23 @@ export function createHTMLElement(type, className, id, innerText){
  * Mostra l'inventario dell'utente, recuperandolo tramite una richiesta API.
  * @param {Boolean} newItems Indica se evidenziare gli oggetti appena ottenuti
  * @param {Boolean} equipment Indica l'inventario serve per equipaggiare oggetti (`true`) o per la sua gestione (Default: `false`)
+ * @param {Array} Array contenente i tipi degli elementi da raccogliere
  */
-export function showInventory(newItems = false, equipment = false) {
+export function showInventory(newItems = false, equipment = false, filterObj = null) {
     if (currentlyOpened !== null && currentlyOpened !== "inventoryModule")
         return;
 
     const module = document.getElementById("inventoryModule");
     currentlyOpened = module.id;
     
+    const formData = new FormData();
+    formData.append("filter", JSON.stringify(filterObj));
 
     document.body.classList.add("caricamento");
-    fetch('php/API/getInventory.php')
+    fetch('php/API/getInventory.php', {
+        method: "POST",
+        body: formData,
+    })
         .then(response => response.json())
         .then(risposta => {
             document.body.classList.remove("caricamento");
@@ -465,8 +471,8 @@ export function generateInfo(id, item = null, hasIt = true, equipment = false){
                     txt = "Bonus Danno";
                     break;
                 case "armatura":
-                    modificatore = "Armatura";
-                    txt = "Bonus Armatura ";
+                    modificatore = "ProtezioneDanno";
+                    txt = "Classe Armatura";
                     break;
                 default:
                     modificatore = "RecuperoVita";
@@ -512,18 +518,20 @@ export function generateInfo(id, item = null, hasIt = true, equipment = false){
 
         let btn = document.createElement("button");
         if(hasIt){
-            btn.id = "sell-btn";
-            btn.innerText = "Vendi: " + Math.floor(item.Costo / 2) + "🪙";
-            btn.addEventListener("click", sellItem);
+            if(equipment){
+                btn.id = "equip-btn";
+                btn.innerText = "Equipaggia";
+            }
+            else{
+                btn.id = "sell-btn";
+                btn.innerText = "Vendi: " + Math.floor(item.Costo / 2) + "🪙";
+                btn.addEventListener("click", sellItem);
+            }
         }
-        else if(!equipment){
+        else{
             btn.id = "buy-btn";
             btn.innerText = "Compra: " + item.Costo + "🪙";
             btn.addEventListener("click", buyItem);
-        }
-        else{
-            btn.id = "equip-btn";
-            btn.innerText = "Equipaggia";
         }
 
         el.appendChild(btn);

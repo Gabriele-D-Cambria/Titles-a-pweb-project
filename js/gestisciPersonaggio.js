@@ -127,7 +127,6 @@ function closeModuleEvent(event, id, overload = false){
 }
 
 function configurePage(){
-	// return;
 	fetch("php/API/getCurrentPGinfos.php")
 		.then(response => response.json())
 		.then(PG => {
@@ -240,7 +239,7 @@ function setEquimpent(arma = null, armatura = null, zaino = null){
 }
 
 function equipNewItem(id){
-	showInventory(false, true);
+	showInventory(false, true, id);
 }
 /**
  * Aggiorna le statistiche del personaggio.

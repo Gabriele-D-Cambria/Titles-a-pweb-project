@@ -241,4 +241,36 @@ BEGIN
 END;
 //
 
+CREATE TRIGGER trg_zaino_check
+BEFORE INSERT ON Zaino
+FOR EACH ROW
+BEGIN
+    DECLARE tipologia_invalid BOOLEAN;
+
+    SELECT COUNT(*) > 0 INTO tipologia_invalid
+    FROM Item
+    WHERE ID = NEW.Oggetto AND Tipologia IN ('arma', 'armatura', 'box');
+
+    IF tipologia_invalid THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Tipologia non valida per Zaino (arma, armatura, box non consentiti)';
+    END IF;
+END;
+//
+
+CREATE TRIGGER trg_zaino_update_check
+BEFORE UPDATE ON Zaino
+FOR EACH ROW
+BEGIN
+    DECLARE tipologia_invalid BOOLEAN;
+
+    SELECT COUNT(*) > 0 INTO tipologia_invalid
+    FROM Item
+    WHERE ID = NEW.Oggetto AND Tipologia IN ('arma', 'armatura', 'box');
+
+    IF tipologia_invalid THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Tipologia non valida per Zaino (arma, armatura, box non consentiti)';
+    END IF;
+END;
+//
+
 DELIMITER ;
