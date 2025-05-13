@@ -110,18 +110,15 @@ class Account{
     public function getId() {
         return $this->id;
     }
-
     public function getUsername() {
         return $this->username;
     }
-
     public function getMonete() {
         return $this->monete;
     }
     public function getShopRefresh() {
         return $this->shopRefresh;
     }
-
     /**
      * Restituisce uno o tutti i personaggi in base al `$nome` fornito
      * @param string $name Nome del personaggio. Se non fornito restituisce tutti i personaggi (default: `null`)
@@ -260,6 +257,21 @@ class Account{
         foreach($this->personaggi as $personaggio){
             if($personaggio->getNome() === $nomePersonaggio){
                 $personaggio->upgradeStats($newPF, $newFOR, $newDES);
+                return true;
+            }
+        }
+        return false;
+    }
+    /**
+     * Aggiunge un item all'equipaggiamento di un `Personaggio` dell'account
+     * @param string $nomePersonaggio nome del personaggio
+     * @param int $itemId id dell'`Item` da aggiungere al personaggio
+     * @return boolean `true` se l'aggiornamento è avvenuto correttamente, `false` altrimenti
+     */
+    public function equipItem($nomePersonaggio, $itemId){
+        foreach($this->personaggi as $personaggio){
+            if($personaggio->getNome() === $nomePersonaggio){
+                $personaggio->equipItem($itemId);
                 return true;
             }
         }
@@ -427,36 +439,11 @@ class Personaggio{
 
                 // Prelevo le informazioni sull'arma
                 if($personaggioData['Arma'] !== null){
-                    $sqlArma = "SELECT ID, Nome, Descrizione, Elemento, PathImmagine, Danno, ModificatoreFor, ModificatoreDes
-                                FROM Item
-                                WHERE ID = ?";
-                    $armaStmt = $connectionDB->prepare($sqlArma);
-                    $armaStmt->bind_param("i", $personaggioData['Arma']);
-                    $armaStmt->execute();
-                    $armaResult = $armaStmt->get_result();
-                    $this->arma = $armaResult->fetch_assoc();
-                    $this->FOR = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->FOR + $this->arma['ModificatoreFor']));
-                    $this->DES = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->DES + $this->arma['ModificatoreDes']));
-                    $this->damage = $this->arma['Danno'];
-
-                    unset($this->arma['Danno']);
-                    unset($this->arma['ModificatoreFor']);
-                    unset($this->arma['ModificatoreDes']);
+                    $this->setArma($connectionDB, $personaggioData['Arma'], false);
                 }
                 // Prelevo le informazioni sull'armatura
                 if($personaggioData['Armatura'] !== null){
-                    $sqlArmatura = "SELECT ID, Nome, Descrizione, Elemento, PathImmagine, ProtezioneDanno, ModificatoreFor, ModificatoreDes
-                                    FROM Item
-                                    WHERE ID = ?";
-                    $armaturaStmt = $connectionDB->prepare($sqlArmatura);
-                    $armaturaStmt->bind_param("i", $personaggioData['Armatura']);
-                    $armaturaStmt->execute();
-                    $armaturaResult = $armaturaStmt->get_result();
-                    $this->armatura = $armaturaResult->fetch_assoc();
-                    $this->FOR = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->FOR + $this->armatura['ModificatoreFor']));
-                    $this->DES = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->DES + $this->armatura['ModificatoreDes']));
-
-                    $this->protezioneDanno = $this->armatura['ProtezioneDanno'];
+                    $this->setArmatura($connectionDB, $personaggioData['Armatura'], false);
                 }
 
                 // Prelevo lo zaino
@@ -474,8 +461,9 @@ class Personaggio{
                     for($i = 0; $i < $item["Quantita"]; ++$i){
                         $tmp = $item;
                         unset($tmp["Quantita"]);
+                        unset($tmp['Danno']);
+                        unset($tmp['ProtezioneDanno']);
                         $this->zaino[] = $tmp;
-
                     }
                 }
             }
@@ -538,9 +526,159 @@ class Personaggio{
             if ($ownerStmt)         $ownerStmt->close();
             if ($personaggioStmt)   $personaggioStmt->close();
             if ($zainoStmt)         $zainoStmt->close();
-            if ($armaStmt)          $armaStmt->close();
-            if ($armaturaStmt)      $armaturaStmt->close();
             $connectionDB->close();
+        }
+    }
+
+    /**
+     * Funzione privata che si occupa di equipaggiare un'arma e, eventualmente, aggiornare il database
+     * @param mysqli &$connectionDB connessione al database passare per riferimento
+     * @param int $armaId id dell'arma da equipaggiare
+     * @param boolean $updateDB Indica se aggiornare o meno il database con aggiornamento del campo. (Default `true`)
+     * @return void
+     */
+    private function setArma(&$connectionDB, $armaId, $updateDB = true){
+        if($this->arma && $armaId === $this->arma['ID'])
+            return;
+        $armaStmt = null;
+        $updateStmt = null;
+        try{
+            if($updateDB){
+                $sqlUpdate = "UPDATE Personaggi SET Arma = ? WHERE Nome = ? AND Proprietario = ?";
+                $updateStmt = $connectionDB->prepare($sqlUpdate);
+                $updateStmt->bind_param("isi", $armaId, $this->nome, $this->owner);
+                if(!$updateStmt->execute()){
+                    throw new Exception("Errore durante l'equipaggiamento dell'arma", $updateStmt->errno);
+                }
+            }
+
+            if ($this->arma) {
+                addToInventario($connectionDB, $this->owner, $this->arma['ID']);
+                $this->arma = null;
+            }
+
+            $sqlArma = "SELECT ID, Nome, Descrizione, Elemento, PathImmagine, Danno, ModificatoreFor, ModificatoreDes
+                        FROM Item
+                        WHERE ID = ?";
+
+            $armaStmt = $connectionDB->prepare($sqlArma);
+            $armaStmt->bind_param("i", $armaId);
+            $armaStmt->execute();
+            $armaResult = $armaStmt->get_result();
+
+            $this->arma = $armaResult->fetch_assoc();
+            $this->FOR = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->FOR + $this->arma['ModificatoreFor']));
+            $this->DES = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->DES + $this->arma['ModificatoreDes']));
+            $this->damage = $this->arma['Danno'];
+
+            unset($this->arma['Danno']);
+            unset($this->arma['ModificatoreFor']);
+            unset($this->arma['ModificatoreDes']);
+        }
+        finally{
+            if($armaStmt) $armaStmt->close();
+            if($updateStmt) $updateStmt->close();
+        }
+    }
+    /**
+     * Funzione privata che si occupa di equipaggiare un'armatura e, eventualmente, aggiornare il database
+     * @param mysqli &$connectionDB connessione al database passare per riferimento
+     * @param int $armaturaId id dell'armatura da equipaggiare
+     * @param boolean $updateDB Indica se aggiornare o meno il database con aggiornamento del campo. (Default `true`)
+     * @return void
+     */
+    private function setArmatura(&$connectionDB, $armaturaId, $updateDB = true){
+        if($this->armatura && $armaturaId === $this->armatura['ID'])
+            return;
+        $armaturaStmt = null;
+        $updateStmt = null;
+        try{
+            if($updateDB){
+                $sqlUpdate = "UPDATE Personaggi SET Armatura = ? WHERE Nome = ? AND Proprietario = ?";
+                $updateStmt = $connectionDB->prepare($sqlUpdate);
+                $updateStmt->bind_param("isi", $armaturaId, $this->nome, $this->owner);
+                if(!$updateStmt->execute()){
+                    throw new Exception("Errore durante l'equipaggiamento dell'arma", $updateStmt->errno);
+                }
+            }
+
+            if ($this->armatura) {
+                addToInventario($connectionDB, $this->owner, $this->armatura['ID']);
+                $this->armatura = null;
+            }
+
+            $sqlArmatura = "SELECT ID, Nome, Descrizione, Elemento, PathImmagine, ProtezioneDanno, ModificatoreFor, ModificatoreDes
+                            FROM Item
+                            WHERE ID = ?";
+            $armaturaStmt = $connectionDB->prepare($sqlArmatura);
+            $armaturaStmt->bind_param("i", $armaturaId);
+            $armaturaStmt->execute();
+            $armaturaResult = $armaturaStmt->get_result();
+            $this->armatura = $armaturaResult->fetch_assoc();
+
+            $this->FOR = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->FOR + $this->armatura['ModificatoreFor']));
+            $this->DES = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->DES + $this->armatura['ModificatoreDes']));
+            $this->protezioneDanno = $this->armatura['ProtezioneDanno'];
+
+            unset($this->armatura['ProtezioneDanno']);
+            unset($this->armatura['ModificatoreFor']);
+            unset($this->armatura['ModificatoreDes']);
+        }
+        finally{
+            if($armaturaStmt) $armaturaStmt->close();
+            if($updateStmt) $updateStmt->close();
+        }
+    }
+
+    /**
+     * Funzione privata che si occupa di aggiungere un `Item` allo zaino, eventualmente aggiornando il database
+     * @param mysqli &$connectionDB connessione al database passare per riferimento
+     * @param int $itemId id dell'`Item` da equipaggiare
+     * @param boolean $updateDB Indica se aggiornare o meno il database con aggiornamento del campo. (Default `true`)
+     * @return void
+     */
+    private function addToZaino(&$connectionDB, $itemId, $updateDB = true){
+        $itemStmt = null;
+        $zainoStmt = null;
+        try{
+            if(count($this->zaino) === self::ZAINO_SIZE){
+                throw new Exception("Zaino già pieno, non puoi aggiungere altri oggetti", 400);
+            }
+
+            if($updateDB){
+
+                $sqlZaino = "INSERT INTO Zaino (Personaggio, Proprietario, Oggetto, Quantita) 
+                             VALUES (?, ?, ?, 1) 
+                             ON DUPLICATE KEY UPDATE Quantita = Quantita + 1;";
+
+                $zainoStmt = $connectionDB->prepare($sqlZaino);
+
+                $zainoStmt->bind_param('sii', $this->nome, $this->owner, $itemId);
+                if(!$zainoStmt->execute()){
+                    throw new Exception("Problemi durante l'aggiornamento dello zaino di ". $this->nome ." dell'oggetto " . $itemId, 400);
+                }
+            }
+
+            $sqlItem = "SELECT *
+                        FROM Item
+                        WHERE ID = ?";
+            $itemStmt = $connectionDB->prepare($sqlItem);
+            $itemStmt->bind_param('i', $itemId);
+            $itemStmt->execute();
+            $result = $itemStmt->get_result();
+
+            $this->zaino[] = $result->fetch_assoc();
+            unset($this->zaino['Danno']);
+            unset($this->zaino['Elemento']);
+            unset($this->zaino['ProtezioneDanno']);
+
+            usort($this->zaino, function($a, $b){
+                return $a['ID'] <=> $b['ID'];
+            });
+        }
+        finally{
+            if($itemStmt) $itemStmt->close();
+            if($zainoStmt) $zainoStmt->close();
         }
     }
 
@@ -596,7 +734,6 @@ class Personaggio{
             'zaino'           => $this->zaino
         ];
     }
-
     public function getImmaginiPrevalenza(){
         $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
 
@@ -706,10 +843,82 @@ class Personaggio{
     public function useItem($itemId){
         // TODO
     }
-    public function assignItem($itemId){
-        // TODO
+    public function equipItem($itemId){
+        $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+        if($connectionDB->connect_error){
+            throw new Exception("Connessione al database fallita: ". $connectionDB->connect_error, 500);
+        }
+        $connectionDB->begin_transaction();
+        $searchStmt = null;
+        $inventoryStmt = null;
+        try{
+            $sqlSearch = "SELECT Inventario.Quantita, Item.Tipologia
+                          FROM Inventario
+                            JOIN Item ON Inventario.Oggetto = Item.ID
+                          WHERE Inventario.Proprietario = ? AND Inventario.Oggetto = ?";
+            $searchStmt = $connectionDB->prepare($sqlSearch);
+            $searchStmt->bind_param('ii', $this->owner, $itemId);
+            $searchStmt->execute();
+            $result = $searchStmt->get_result();
+
+            if($result->num_rows === 0){
+                throw new Exception("Non possiedi questo oggetto!", 400);
+            }
+
+            $resultArray = $result->fetch_assoc();
+
+            $currentQuantity = $resultArray["Quantita"];
+            $tipologia = $resultArray['Tipologia'];
+            $newQuantity = $currentQuantity - 1;
+
+            if($tipologia === "box"){
+                throw new Exception("Non puoi equipaggiare una box al tuo personaggio", 400);
+            }
+
+            if($newQuantity > 0){
+                $inventorySql = "UPDATE Inventario SET Quantita = ? WHERE Oggetto = ? AND Proprietario = ?;";
+                $inventoryStmt = $connectionDB->prepare($inventorySql);
+                $inventoryStmt->bind_param("iii", $newQuantity, $itemId, $this->owner);
+
+                if(!$inventoryStmt->execute())
+                    throw new Exception("Errore nell'aggiornamento della quantità dell'oggetto con ID: ". $itemId . ", per l'account: ". $this->owner . ", durante l'equipaggiamento al personaggio '" . $this->nome . "'");
+            }
+            else {
+                $inventorySql = "DELETE FROM Inventario WHERE Oggetto = ? AND Proprietario = ?";
+                $inventoryStmt = $connectionDB->prepare($inventorySql);
+                $inventoryStmt->bind_param("ii", $itemId, $this->owner);
+                if(!$inventoryStmt->execute())
+                    throw new Exception("Errore nella rimozione dell'oggetto con ID: ". $itemId . " per l'account: ". $this->owner. ", durante l'equipaggiamento al personaggio '" . $this->nome . "'");
+
+            }
+
+
+            switch($tipologia){
+                case 'arma':
+                    $this->setArma($connectionDB, $itemId);
+                    break;
+                case 'armatura':
+                    $this->setArmatura($connectionDB, $itemId);
+                    break;
+                default:
+                    $this->addToZaino($connectionDB, $itemId);
+            }
+
+            $connectionDB->commit();
+            return true;
+        }
+        catch(Exception $e){
+            $connectionDB->rollback();
+
+            throw $e;
+        }
+        finally{
+            if($searchStmt)      $searchStmt->close();
+            if($inventoryStmt)   $inventoryStmt->close();
+        }
     }
-    public function removeItem($itemId){
+
+    public function removeFromZaino($itemId){
         // TODO
     }
 
@@ -717,7 +926,7 @@ class Personaggio{
      * Aggiorna i dati del personaggio nel database
      * @return bool true se l'aggiornamento è avvenuto con successo, false altrimenti
      */
-    public function updateDB() {
+    private function updateDB() {
         $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
 
         if($connectionDB->connect_error){
@@ -790,30 +999,31 @@ class Personaggio{
             );
 
             if($stmt->execute()){
-                $this->pathImmagine = null;
-                $this->pathImmaginePG = null;
-                $this->nome = null;
-                $this->owner = null;
-                $this->FOR = null;
-                $this->DES = null;
-                $this->PF = null;
-                $this->tmp_PF = null;
-                $this->elemento = null;
-                $this->prevaleSu = null;
-                $this->prevalsoDa = null;
-                $this->armatura = null;
-                $this->arma = null;
-                $this->livello = null;
-                $this->exp = null;
-                $this->puntiUpgrade = null;
-                $this->damage = null;
-                $this->dodgingChance = null;
-
-                foreach ($this->zaino as $i => $elemento) {
-                    $this->removeItem($elemento["ID"]);
-                    unset($this->zaino[$i]);
+                addToInventario($connectionDB, $this->owner, $this->arma);
+                addToInventario($connectionDB, $this->owner, $this->armatura);
+                foreach($this->zaino as $item){
+                    addToInventario($connectionDB, $this->owner, $item);
                 }
-                $this->zaino = null;
+                $this->protezioneDanno = null;
+                $this->pathImmagine    = null;
+                $this->pathImmaginePG  = null;
+                $this->nome            = null;
+                $this->owner           = null;
+                $this->FOR             = null;
+                $this->DES             = null;
+                $this->PF              = null;
+                $this->tmp_PF          = null;
+                $this->elemento        = null;
+                $this->prevaleSu       = null;
+                $this->prevalsoDa      = null;
+                $this->armatura        = null;
+                $this->arma            = null;
+                $this->livello         = null;
+                $this->exp             = null;
+                $this->puntiUpgrade    = null;
+                $this->damage          = null;
+                $this->dodgingChance   = null;
+                $this->zaino           = null;
 
                 return true;
             }
@@ -887,4 +1097,16 @@ function getElementInfo($element, &$conn): array{
     finally{
         if($stmt)   $stmt->close();
     }
+}
+
+function addToInventario(&$conn, $proprietarioId, $itemId){
+    $sqlInventario = "INSERT INTO Inventario (Proprietario, Oggetto, Quantita)
+                     VALUES (?, ?, 1)
+                     ON DUPLICATE KEY UPDATE Quantita = Quantita + 1";
+    $inventarioStmt = $conn->prepare($sqlInventario);
+    $inventarioStmt->bind_param("ii", $proprietarioId, $itemId);
+    if (!$inventarioStmt->execute()) {
+        throw new Exception("Errore durante l'aggiornamento dell'inventario per l'oggetto con ID: " . $itemId, $inventarioStmt->errno);
+    }
+    $inventarioStmt->close();
 }

@@ -7,7 +7,7 @@ if(!isset($_SESSION['account'])){
     exit;
 }
 
-if($_SERVER["REQUEST_METHOD"] !== "POST" || !isset($_POST['filter'])){
+if(!isset($_SERVER['REQUEST_METHOD']) || $_SERVER["REQUEST_METHOD"] !== "POST" || !isset($_POST['filter'])){
     apiError(400);
     exit;
 }
@@ -21,7 +21,6 @@ if($filter !== null){
         $filter = [$filter];
     }   
     $allItemType = getItemTypes();
-    error_log("Items: ".json_encode($allItemType));
     foreach($filter as $index => $el){
         if(!in_array($el, $allItemType)){
             unset($filter[$index]);

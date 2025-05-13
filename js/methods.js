@@ -521,6 +521,7 @@ export function generateInfo(id, item = null, hasIt = true, equipment = false){
             if(equipment){
                 btn.id = "equip-btn";
                 btn.innerText = "Equipaggia";
+                btn.addEventListener("click", equipItem);
             }
             else{
                 btn.id = "sell-btn";
@@ -1212,5 +1213,106 @@ function buyItem(){
     .catch(error => {
         errorHandler(error);
         return;
+    });
+}
+
+export function createDeleteBox(){
+    if(currentlyOpened !== null && currentlyOpened !== "deleteModule"){
+        return;
+    }
+
+    const module = document.getElementById("deleteModule");
+    currentlyOpened = module.id;
+
+    const page = document.createElement("div");
+    page.classList.add("delete-page");
+
+    let space = document.createElement("div");
+    space.classList.add("menu-space");
+    space.classList.add("header");
+
+    let el = document.createElement("h2");
+    el.innerText = "Stai per Eliminare il personaggio";
+    space.appendChild(el);
+
+    el = document.createElement("p");
+    el.innerText = "Sei sicuro?";
+
+    space.appendChild(el);
+    page.appendChild(space);
+
+    space = document.createElement("div");
+    space.classList.add("menu-space");
+
+    const form = document.createElement("form");
+    form.action = "php/handlePG.php";
+    form.method = "POST";
+
+    // Lo sfrutto per capire se la richiesta è o meno di elimina account
+    const phantomCheck = document.createElement("input");
+
+    phantomCheck.type = "checkbox";
+    phantomCheck.name = phantomCheck.id = "deleteCheck";
+    phantomCheck.value = "1";
+    phantomCheck.toggleAttribute("checked", true);
+    phantomCheck.toggleAttribute("hidden", true);
+
+    form.appendChild(phantomCheck);
+
+    el = document.createElement("p");
+    el.innerText = "Eliminando il personaggio ";
+    const boldText = document.createElement("b");
+    boldText.innerText = "lo perderai in maniera definitiva.";
+    el.appendChild(boldText);
+    el.appendChild(document.createTextNode(", sei sicuro di volerlo fare?\nGli oggetti nello zaino verranno inviati al tuo inventario."));
+    form.appendChild(el);
+
+    const aside = document.createElement("aside");
+    aside.classList.add("button-holder");
+
+    el = createButton("submit", "submit", "Elimina");
+    aside.appendChild(el);
+
+    el = createButton("button", "backToMenu", "Annulla", () => {
+        closeModuleEvent(null, module.id, true, false);
+    });
+    
+    aside.appendChild(el);
+    form.appendChild(aside);
+
+    space.appendChild(form);
+    page.appendChild(space);
+
+    while(module.childElementCount){
+        module.removeChild(module.lastChild);
+    }
+
+    closeModule(null, module.id, true, false);
+    module.appendChild(page);
+    showModule(module.id);
+    moduleListener = (e) => {
+        closeModuleEvent(e, module.id, false, false);
+    };
+    window.addEventListener("click", moduleListener);
+}
+
+function equipItem(){
+    console.log(shownItem);
+    const formData = new FormData();
+    formData.append("itemId", Number(shownItem.ID));
+
+    fetch("php/API/equipItem.php", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(esito =>{
+        if(esito.error !== undefined && esito.error === true){
+            throw esito;
+        }
+        window.location.reload();
+    })
+    .catch(error =>{
+        errorHandler(error);
     });
 }
