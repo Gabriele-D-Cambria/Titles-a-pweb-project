@@ -202,5 +202,6 @@ if(isset($_SESSION["message"])){
 	</main>
 	<div id="deleteModule" class="module"></div>
 	<div id="inventoryModule" class="module"></div>
+	<div id="remove-item-menu" class="context-menu"></div>
 </body>
 </html>

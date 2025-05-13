@@ -8,7 +8,8 @@ body {
     padding: 0;
     padding-bottom: 2rem;
     background-color: #121212;
-    color: #e0e0e0; 
+    color: #e0e0e0;
+    position: relative;
 }
 
 body>header {
@@ -83,8 +84,8 @@ a:hover{
 }
 
 .show{
-    opacity: 1;
-    visibility: visible;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 .module p, .module figure *, .module table *{

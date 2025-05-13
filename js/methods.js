@@ -1301,7 +1301,7 @@ function equipItem(){
     const formData = new FormData();
     formData.append("itemId", Number(shownItem.ID));
 
-    fetch("php/API/equipItem.php", {
+    fetch("php/API/togglePGItem.php", {
         method: "POST",
         body: formData
     })

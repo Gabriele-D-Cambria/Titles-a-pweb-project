@@ -25,6 +25,13 @@ document.addEventListener("DOMContentLoaded", () =>{
 	}
 });
 
+document.addEventListener("click", () => {
+	const menu = document.getElementById("remove-item-menu");
+	menu.classList.remove("show");
+	while(menu.childElementCount)
+		menu.removeChild(menu.firstChild);
+})
+
 
 function configurePage(){
 	fetch("php/API/getCurrentPGinfos.php")
@@ -33,7 +40,6 @@ function configurePage(){
 			if(PG.error !== undefined && PG.error){
 				throw PG;
 			}
-			console.log(PG); //! da rimuovere ----------------------------------------------------
 
 			if(PG.puntiUpgrade > 0)
 				setUpgradePointsPrivileges(PG);
@@ -165,6 +171,9 @@ function setEquimpent(arma = null, armatura = null, zaino = null){
 		img.src = arma.PathImmagine;
 		img.alt = arma.Descrizione;
 		img.title = arma.Nome;
+		img.addEventListener("contextmenu", (e) => {
+			addRemoveMenu(e.target.id, arma.ID);
+		});
 		
 		while(space.childElementCount)
 			space.removeChild(space.firstChild);
@@ -178,6 +187,9 @@ function setEquimpent(arma = null, armatura = null, zaino = null){
 		img.src = armatura.PathImmagine;
 		img.alt = armatura.Descrizione;
 		img.title = armatura.Nome;
+		img.addEventListener("contextmenu",(e) => {
+			addRemoveMenu(e, armatura.ID);
+		});
 		
 		while(space.childElementCount)
 			space.removeChild(space.firstChild);
@@ -192,6 +204,9 @@ function setEquimpent(arma = null, armatura = null, zaino = null){
 			img.src = item.PathImmagine;
 			img.alt = item.Descrizione;
 			img.title = item.Nome;
+			img.addEventListener("contextmenu",(e) => {
+			addRemoveMenu(e, item.ID);
+		});
 
 			while(space.childElementCount)
 				space.removeChild(space.firstChild);
@@ -202,8 +217,51 @@ function setEquimpent(arma = null, armatura = null, zaino = null){
 	space = document.querySelectorAll(".item-slot.bag-item");
 	space.forEach(item => {
 		item.addEventListener("click", (e) => {
-			const id = String(e.target.id).split("-")[0];
+			const id = String(e).split("-")[0];
 			showInventory(false, true, id);
 		})
 	})
+}
+
+function addRemoveMenu(e, itemId){
+	e.preventDefault();
+
+	const menu = document.getElementById("remove-item-menu");
+
+	menu.style.left = `${e.pageX}px`;
+	menu.style.top = `${e.pageY}px`;
+	menu.style.display = "block";
+	
+
+	const img = document.createElement("img");
+	img.src = "images/trash.svg";
+	img.alt = "Rimuovi l'Item";
+	img.title = "Clicca l'immagine per rimuovere l'oggetto da questo personaggio";
+	img.addEventListener("click", () =>{
+		const formData = new FormData();
+		
+		formData.append("itemId_remove", JSON.stringify(itemId));
+
+		fetch("php/API/togglePGItem.php", {
+			method: "POST",
+			body: formData,
+		})
+			.then(response => response.json())
+			.then(data =>{
+				if(data.error !== undefined && data.error){
+				throw data;
+				}
+
+				window.location.reload();
+			})
+			.catch(error => {
+				errorHandler(error);
+			});
+	})
+
+	while(menu.childElementCount)
+		menu.removeChild(menu.firstChild);
+	menu.appendChild(img);
+
+	menu.classList.add("show");
 }

@@ -472,3 +472,43 @@ body{
 .bag-section .bag-item{
 	width: 60% !important;
 }
+
+/***** Rimuovi Item *****/
+
+.context-menu {
+	display: initial;
+	width: 2%;
+	position: absolute;
+    background-color: rgba(30, 30, 30, 0.8);
+	border-radius: 15pt;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+}
+
+.context-menu img{
+	transition: transform 0.3 ease;
+}
+.context-menu img:hover{
+	animation: tilt 0.6s ease;
+}
+
+@keyframes tilt {
+    0% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(10deg);
+    }
+    50% {
+        transform: rotate(-10deg);
+    }
+    75% {
+        transform: rotate(10deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}
