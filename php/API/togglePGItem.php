@@ -13,7 +13,6 @@ if(!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== "POST" |
 
 $account = unserialize($_SESSION['account']);
 $nomePG = unserialize($_SESSION['currentPG_nome']);
-
 try{
 	if(isset($_POST['itemId'])){
 		$itemId = json_decode($_POST['itemId']);
@@ -23,14 +22,11 @@ try{
 		
 	}
 	else{
-		$itemId = json_decode($_POST['itemId']);
+		$itemId = json_decode($_POST['itemId_remove']);
 		
-		if($account->unequipItem($nomePG, $itemId))
+		if($account->unequipItem($nomePG, $itemId)){
 			$_SESSION['account'] = serialize($account);
-		/**
-	 	//TODO:
-	 	* - fai la funzione in definitions.php
-	 	*/
+		}
 	}
 }
 catch(Exception $e){

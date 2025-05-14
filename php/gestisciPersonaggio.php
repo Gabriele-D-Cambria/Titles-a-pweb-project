@@ -101,7 +101,7 @@ if(isset($_SESSION["message"])){
 					<div class="FOR-points-block">
 						<div id="less-FOR" class="statsButton">-</div>
 						<input type="number" id="FOR" name="FOR"
-							value="<?php echo $currentPG["FOR"];?>"
+							value="<?php echo $currentPG["currentFOR"];?>"
 							readonly>
 						<div id="more-FOR" class="statsButton">+</div>
 					</div>
@@ -111,7 +111,7 @@ if(isset($_SESSION["message"])){
 					<div class="DES-points-block">
 						<div id="less-DES" class="statsButton">-</div>
 						<input type="number" id="DES" name="DES"
-							value="<?php echo $currentPG["DES"];?>"
+							value="<?php echo $currentPG["currentDES"];?>"
 							readonly>
 						<div id="more-DES" class="statsButton">+</div>
 					</div>

@@ -40,7 +40,7 @@ function configurePage(){
 			if(PG.error !== undefined && PG.error){
 				throw PG;
 			}
-
+			console.log(PG);
 			if(PG.puntiUpgrade > 0)
 				setUpgradePointsPrivileges(PG);
 			
@@ -123,8 +123,12 @@ export function aggiornaStat(id, aumenta, PG){
                 usedPU.FOR += upd;
 				document.getElementById(`more-${statId}`).classList.toggle("clickable", (PG.FOR !== PG.MAX_FOR_DES));
 				document.getElementById(`less-${statId}`).classList.toggle("clickable", (PG.FOR !== PG.MIN_FOR_DES && usedPU.FOR));
-				document.getElementById("damage").innerText = PG.DAMAGE_LOOKUP[PG.FOR];
-				document.getElementById("damage").classList.toggle("updated", (PG.damage !== PG.DAMAGE_LOOKUP[PG.FOR]));
+				let danno = PG.DAMAGE_LOOKUP[PG.FOR];
+				if(PG.arma !== null){
+					danno += PG.arma['Danno'];
+				}
+				document.getElementById("damage").innerText = danno;
+				document.getElementById("damage").classList.toggle("updated", (PG.damage !== danno));
 				break;
             } 
             return;
@@ -172,7 +176,7 @@ function setEquimpent(arma = null, armatura = null, zaino = null){
 		img.alt = arma.Descrizione;
 		img.title = arma.Nome;
 		img.addEventListener("contextmenu", (e) => {
-			addRemoveMenu(e.target.id, arma.ID);
+			addRemoveMenu(e, arma.ID);
 		});
 		
 		while(space.childElementCount)
@@ -217,7 +221,8 @@ function setEquimpent(arma = null, armatura = null, zaino = null){
 	space = document.querySelectorAll(".item-slot.bag-item");
 	space.forEach(item => {
 		item.addEventListener("click", (e) => {
-			const id = String(e).split("-")[0];
+			const id = String(e.target.id).split("-")[0];
+			console.log(id);
 			showInventory(false, true, id);
 		})
 	})
