@@ -3,7 +3,6 @@
 import {closeModule, showModule, createUsernameInput, createPasswordInput, createButton, showMessage, IMPORTANT_MESSAGE, errorHandler} from './methods.js'
 
 let moduleListener = null;
-const LOGIN_PAGE = "php/login.php";
 
 document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("loginBtn").addEventListener("click", () => {
@@ -40,7 +39,7 @@ function createModule(login) {
     let form = document.createElement("form");
 
     form.method = "POST";
-    form.action = LOGIN_PAGE;
+    form.action = "php/login.php";
 
     // Crea il campo per il nome utente
     let tag = createUsernameInput("Username:");

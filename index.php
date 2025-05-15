@@ -23,7 +23,8 @@ if(isset($_SESSION["message"])){
     <base href="http://localhost/cambria_672642/">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/index.css">
-    <link rel="icon" href="images/items/weapons/acqua.svg" type="image/svg+xml" sizes="any" >
+    <title>Titles</title>
+    <link rel="icon" href="images/icon.svg" type="image/svg+xml" sizes="16x16" >
     <script type="module" src="js/index.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,7 +32,6 @@ if(isset($_SESSION["message"])){
         const loginError = <?php echo json_encode($loginError); ?>;
         const message = <?php echo json_encode($message)?>;
     </script>
-    <title>Titles</title>
 </head>
 <body>
     <header>
@@ -66,7 +66,6 @@ if(isset($_SESSION["message"])){
         <a href="documentazione.html"> Documentazione HTML</a>
         <p>Creato da <i>Gabriele Domenico Cambria - mat. 672642</i></p>
     </footer>
-    <div id="loginModule" class="module">
-    </div>
+    <div id="loginModule" class="module"></div>
 </body>
 </html>

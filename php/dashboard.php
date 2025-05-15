@@ -30,7 +30,7 @@ foreach ($user["personaggi"] as $i => $character){
     $characterList .= "<p class='pg-name-box'>" . $PG["nome"] . "</p>\n</div>\n";
     $characterList .= "<div class='pg-lvl-block'>\n";
     $characterList .= "<p class='pg-lvl-info'>Livello: " .$PG['livello'] ."</p>\n";
-    $characterList .= "<div class='pg-exp-bar'>\n<div class='pg-exp-points' style='width: ". $PG['exp'] / Personaggio::MAX_EXP . "%'>";
+    $characterList .= "<div class='pg-exp-bar'>\n<div class='pg-exp-points' style='width: ". $PG['exp'] . "%'>";
     $characterList .= "</div>\n</div>";
     $characterList .= "</div>\n</div>";
 }
@@ -47,6 +47,8 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
     <base href="http://localhost/cambria_672642/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titles - Dashboard</title>
+    <link rel="icon" href="images/icon.svg" type="image/svg+xml" sizes="16x16" >
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/inventory.css">
@@ -58,7 +60,6 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
         const message = <?php echo json_encode($message)?>;
         const errorMessage = <?php echo json_encode($errorMessage)?>;
     </script>
-    <title>Dashboard</title>
 </head>
 <body>
     <header>
