@@ -1,34 +1,34 @@
 # 1. Titles
 
-Il gioco si basa su combattimenti nel classico stile _Pokémon_, ma con mosse, strumenti, statistiche e stile dei personaggi più vicino a realtà simili a _D&D_.
+Il gioco si basa su combattimenti nel classico stile _Pokémon_(R), ma con mosse, strumenti, statistiche e stile dei personaggi più vicino a giochi di ruolo, come ad esempio _Dungeons & Dragons_.
 
-Ogni account avrà a disposizione la generazione di un massimo di 5 personaggi (da ora _PG_).
+Ogni account avrà a disposizione la generazione di un massimo di `5` personaggi (da ora _PG_).
 Le statistiche di ogni _PG_ sono le seguenti:
 - **Forza** `FOR`: indica quanto danno di base faranno gli attacchi del personaggio, senza considerare eventuali bonus/malus.
-- **Destrezza** `DES`: indica la probabilità di schivare un'attacco del personaggio 
+- **Destrezza** `DES`: indica la probabilità di schivare un'attacco del personaggio
   La probabilità spazierà dallo 0% al minimo fino al 60% al massimo,  per evitare scontri troppo difficili
 Ogni volta che si subisce un attacco il "tiro" per la schivata avviene automaticamente.
-- **Punti Vita** `PF`
+- **Punti Ferita** `PF`
 - **Elementale**: ogni PG ha un proprio elemento a scelta tra (_acqua_, _fuoco_, _terra_, _elettro_, _aria_).
- Esiste il concetto di _prevalenza_ su un'altro elemento. 
-    Quando un elemento _prevale_ sull'altro, i danni da lui effettuati hanno un bonus `+1`, inoltre chi viene attaccato **ha dimezzate le possibilità di schivare**.
+ Esiste il concetto di _prevalenza_ su un'altro elemento.
+    Quando un elemento _prevale_ sull'altro i danni da lui effettuati hanno un bonus `+1`, inoltre chi viene attaccato **ha dimezzate le possibilità di schivare**.
     Ogni elemento fornisce dei bonus fissi al _PG_, vedere la tabella (1) dopo.
-    Per _allineamento_ si intende che l'elemtale del _PG_ e dello strumento combaciano.
-    Per _opposto_ si intede che l'elementale dello strumento _prevale_ su quello _PG_
+    Per _allineamento_ si intende che l'elemento del _PG_ e dello strumento combaciano.
+    Per _opposto_ si intede che l'elemento dello strumento _prevale_ su quello del _PG_
 - **Armatura**: diminuisce la quantità di danni subita.
   Le armature hanno un loro archetipo elementare:
-    - Se _allineato_ all'elemento del _PG_ fornisce `-2` ai danni subiti
+    - Se _allineato_ all'elemento del _PG_ fornisce `-1` ai danni subiti
     - Se _opposto_ all'elemento del _PG_ rimuove le eventuali prevalenze dell'avversario sull'elemento del _PG_
     - Se _neutro_ non ha effetti
 - **Arma**: ogni personaggio avrà un'arma.
   Le armi possono fornire i suoi bonus e malus.
-  Sono sbloccate tramite _box_ ricompensa. 
+  Sono sbloccate tramite _box_ ricompensa.
   Anche le armi hanno un loro archetipo elementare:
-    - Se _allineato_ all'elemento del _PG_ fornisce `+2` ai danni effettuati
+    - Se _allineato_ all'elemento del _PG_ fornisce `+1` ai danni effettuati
     - Se _opposto_ all'elemento del _PG_ fornisce prevalenza anche sull'elemento stesso del _PG_ (acqua + arma elettro $\overset{\text{prevale}}{\to}$ fuoco e acqua )
     - Se _neutro_ non ha effetti secondari
-- **Oggetti**: ogni personaggio potrà portarsi in battaglia fino a un massimo di `5` oggetti nello zaino che possono essere utilizzati al posto di un'azione. 
-Gli oggetti forniscono _buff_ temporanei alle statistiche o permettono di recuperare vita, e una volta utilizzati vengono persi definitivamente. 
+- **Oggetti**: ogni personaggio potrà portarsi in battaglia fino a un massimo di `3` oggetti nello zaino che possono essere utilizzati al posto di un'azione.
+Gli oggetti forniscono _buff_ temporanei alle statistiche o permettono di recuperare vita, e una volta utilizzati vengono persi definitivamente.
 
 
 I valori di `FOR` e `DES` sono di default `0` ma possono variare in un intervallo che va da `-10` e `+10`.
@@ -55,7 +55,7 @@ Le _monete_ possono essere guadagnate nei seguenti modi:
 Ogni account ha un suo inventario di oggetti non assegnati contenente fino ad un massimo di `40` oggetti non assegnati che possono essere assegnati ai vari _PG_.
 Quando un oggetto viene assegnato ad un _PG_ viene rimosso dall'inventario dell'account.
 L'assegnamento al _PG_ non è definitivo, infatti è possibile rimuovere un'oggetto da un _PG_ per riportarlo all'inventario dell'_account_.
-Gli oggetti possono essere scartati per ottenere in monete la metà del loro valore. 
+Gli oggetti possono essere scartati per ottenere in monete la metà del loro valore.
 Tutti gli oggetti possono essere acquistati nel **_Negozio_**. Il _negozio_ si aggiorna con nuovi oggetti ogni `3 minuti` dalla creazione dell'account.
 
 Gli oggetti si categorizzano in:
@@ -66,7 +66,7 @@ Gli oggetti si categorizzano in:
 
 Le _box_, oltre a poter essere acquistate nel _negozio_ quando vi si trovano, si ottengono vincendo partite, e si differenziano in `box comuni` e `box rare`:
 - Nelle `box comuni` si trova:
-  - `5`-`10` monete 
+  - `5`-`10` monete
   - `2` oggetti tra armi e armature
   - `1` pozione
 - Nelle `box rare` si trova:
