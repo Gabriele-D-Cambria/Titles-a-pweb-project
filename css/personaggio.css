@@ -476,6 +476,15 @@ body{
 	width: 60% !important;
 }
 
+.equipment-section .allineato{
+	background-color: #2ecc71 !important;
+	border: inset 1pt #27ae60 !important;
+}
+.equipment-section .opposto{
+	background-color: #e67e22 !important;
+	border: outset 1pt #d35400 !important;
+}
+
 /***** Rimuovi Item *****/
 
 .context-menu {

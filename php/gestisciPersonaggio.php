@@ -159,7 +159,7 @@ if(isset($_SESSION["message"])){
 			<div class="info-section">
 				<div class="prevalence-box">
 					<div class="prevalence-block prevails">
-						<p>Prevale</p>
+						<p title="Il danno inflitto su questo elemento aumenta di 1 punto">Prevale</p>
 						<div class="element-pic">
     	            		<img id="prevalePic" draggable="false"
 							src="<?php echo $prevalenceImg["prevaleSu"];?>"
@@ -168,7 +168,7 @@ if(isset($_SESSION["message"])){
     	        		</div>
 					</div>
 					<div class="prevalence-block prevailed">
-						<p>Prevalso</p>
+						<p title="La probabilità di schivare contro questo elemento è dimezzata">Prevalso</p>
 						<div class="element-pic">
     	            		<img id="prevalsoPic" draggable="false"
 							src="<?php echo $prevalenceImg["prevalsoDa"];?>"

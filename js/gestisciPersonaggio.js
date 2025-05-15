@@ -44,7 +44,7 @@ function configurePage(){
 			if(PG.puntiUpgrade > 0)
 				setUpgradePointsPrivileges(PG);
 			
-			setEquimpent(PG.arma, PG.armatura, PG.zaino);
+			setEquimpent(PG.arma, PG.armatura, PG.zaino, PG.elementInfo);
 
 		})
 		.catch(error => {
@@ -164,7 +164,7 @@ export function aggiornaStat(id, aumenta, PG){
 	
 }
 
-function setEquimpent(arma = null, armatura = null, zaino = null){
+function setEquimpent(arma = null, armatura = null, zaino = null, elementi = null){
 	let space = null;
 	let img = null;
 	if(arma !== null){
@@ -175,6 +175,14 @@ function setEquimpent(arma = null, armatura = null, zaino = null){
 		img.src = arma.PathImmagine;
 		img.alt = arma.Descrizione;
 		img.title = arma.Nome;
+		if(arma.Elemento === elementi['elementoPG']){
+			space.classList.add("allineato");
+			img.title += " - Allineato (+1 danni effettuati)";
+		}
+		else if(arma.Elemento === elementi['prevalsoDa']){
+			space.classList.add("opposto");
+			img.title += ` - Opposto (prevalenza anche su ${elementi['elementoPG']})`;
+		}
 		// img.addEventListener("contextmenu", (e) => {
 		// 	addRemoveMenu(e, arma.ID);
 		// });
@@ -195,6 +203,15 @@ function setEquimpent(arma = null, armatura = null, zaino = null){
 		img.src = armatura.PathImmagine;
 		img.alt = armatura.Descrizione;
 		img.title = armatura.Nome;
+
+		if(armatura.Elemento === elementi['elementoPG']){
+			space.classList.add("allineato");
+			img.title += " - Allineato (+1 Protezione Danni)";
+		}
+		else if(armatura.Elemento === elementi['prevalsoDa']){
+			space.classList.add("opposto");
+			img.title += ` - Opposto (Non sei più prevalso da ${elementi['prevalsoDa']})`;
+		}
 		// img.addEventListener("contextmenu",(e) => {
 		// 	addRemoveMenu(e, armatura.ID);
 		// });
