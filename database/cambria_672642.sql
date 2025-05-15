@@ -223,8 +223,8 @@ BEGIN
     IF NEW.Livello < 1 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Livello deve essere >= 1';
     END IF;
-    IF NEW.PuntiExp < 0 OR NEW.PuntiExp > 100 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'PuntiExp deve essere tra 0 e 100';
+    IF NEW.PuntiExp < 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'PuntiExp deve essere >= 100';
     END IF;
     IF NEW.PuntiUpgrade < 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'PuntiUpgrade deve essere >= 0';
@@ -272,5 +272,34 @@ BEGIN
     END IF;
 END;
 //
+
+CREATE TRIGGER trg_personaggi_exp_update_for_lvl_up
+BEFORE UPDATE ON Personaggi
+FOR EACH ROW
+BEGIN
+    DECLARE proprietario_id INT;
+    DECLARE livelli_guadagnati INT;
+
+    IF NEW.PuntiExp >= 100 THEN
+        SET livelli_guadagnati =  NEW.PuntiExp DIV 100;
+
+        SET NEW.PuntiExp = NEW.PuntiExp % 100;
+        SET NEW.Livello = NEW.Livello + livelli_guadagnati;
+        SET NEW.PuntiUpgrade = NEW.PuntiUpgrade + (3 * livelli_guadagnati);
+
+        SET proprietario_id = NEW.Proprietario;
+
+        UPDATE Account
+        SET Monete = Monete + (40 * livelli_guadagnati)
+        WHERE ID = proprietario_id;
+
+
+        INSERT INTO Inventario (Proprietario, Oggetto, Quantita)
+        VALUES (proprietario_id, 15, livelli_guadagnati)
+        ON DUPLICATE KEY UPDATE Quantita = Quantita + livelli_guadagnati;
+    END IF;
+END;
+//
+
 
 DELIMITER ;

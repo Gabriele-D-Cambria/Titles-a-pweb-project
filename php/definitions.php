@@ -261,6 +261,15 @@ class Account{
         }
         return false;
     }
+
+    public function addPGExp($nomePersonaggio, $hasWon){
+        foreach($this->personaggi as $pg){
+            if($pg->getNome() === $nomePersonaggio){
+                $nLvlUp = $pg->addExp($hasWon);
+                $this->modifyCoins(false, self::COINS_LVL_UP * $nLvlUp);
+            }
+        }
+    }
     /**
      * Aggiunge un item all'equipaggiamento di un `Personaggio` dell'account
      * @param string $nomePersonaggio nome del personaggio
@@ -553,16 +562,10 @@ class Personaggio{
         $this->protezioneDanno = 0;
         
         if($this->arma){
-            if($this->arma['Elemento'] === $this->elemento)
-                $this->arma['Danno'] += 1;
-            
             $this->damage += $this->arma['Danno'];
         }
 
         if($this->armatura){
-            if($this->armatura['Elemento'] === $this->elemento)
-                $this->armatura['ProtezioneDanno'] += 1;
-            
             $this->protezioneDanno += $this->armatura['ProtezioneDanno'];
         }
     }
@@ -615,6 +618,10 @@ class Personaggio{
                 $armaResult = $armaStmt->get_result();
 
                 $this->arma = $armaResult->fetch_assoc();
+                
+                if($this->arma['Elemento'] === $this->elemento)
+                    $this->arma['Danno'] += 1;
+
                 $preFOR = $this->currentFOR;
                 $preDES = $this->currentDES;
                 $this->currentFOR = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->currentFOR + $this->arma['ModificatoreFor']));
@@ -680,6 +687,8 @@ class Personaggio{
                 $armaturaResult = $armaturaStmt->get_result();
                 $this->armatura = $armaturaResult->fetch_assoc();
 
+                if($this->armatura['Elemento'] === $this->elemento)
+                    $this->armatura['ProtezioneDanno'] += 1;
                 $preFOR = $this->currentFOR;
                 $preDES = $this->currentDES;
                 $this->currentFOR = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->currentFOR + $this->armatura['ModificatoreFor']));
@@ -844,7 +853,12 @@ class Personaggio{
             'puntiUpgrade'    => $this->puntiUpgrade,
             'arma'            => $this->arma,
             'armatura'        => $this->armatura,
-            'zaino'           => $this->zaino
+            'zaino'           => $this->zaino,
+            'elementInfo'     => [
+                'elementoPG'    => $this->elemento,
+                'prevaleSu'     => $this->prevaleSu,
+                'prevalsoDa'    => $this->prevalsoDa,
+            ]
         ];
     }
     public function getImmaginiPrevalenza(){
@@ -872,20 +886,46 @@ class Personaggio{
     /**
      * Aggiungo l'esperienza ed eventualemnte effettuo il lvlUP
      * @param bool $win Se l'esperienza guadagnata deriva da una vittoria (true) o da una sconfitta (false)
-     * @return bool Se true indica che c'è stato il level-up, altrimenti false.
+     * @throws Exception qual'ora ci fossero problemi di connessione al database
+     * @return int Indica il numero di lvlUp effettuati
      */
     public function addExp($win){
-        $amount = $win? self::EXP_WIN : self::EXP_LOSS;
-        $this->exp += $amount;
-
-        if($this->exp >= self::MAX_EXP){
-            $this->exp %= self::MAX_EXP;
-            $this->livello++;
-            $this->puntiUpgrade += self::PU_LVL_UP;
-            return $this->updateDB();
+        $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+        if($connectionDB->connect_error){
+            throw new Exception("Connessione al database fallita: ". $connectionDB->connect_error, 500);
         }
 
-        return false;
+        $livelliGuadagnati = 0;
+        $stmt = null;
+        try{
+            $amount = $win? self::EXP_WIN : self::EXP_LOSS;
+
+            $this->exp += $amount;
+            
+            $sql = "UPDATE Personaggi SET PuntiExp = ? WHERE Nome = ? AND Proprietario = ?";
+
+            $stmt = $connectionDB->prepare($sql);
+            $stmt->bind_param("isi", $this->exp, $this->nome, $this->owner);
+
+            if(!$stmt->execute()){
+                $this->exp -= $amount;
+                throw new Exception("Errore nell'aggiornamento dei punti esperienza di " . $this->nome . " (proprietario" . $this->owner .")");
+            }
+
+            if($this->exp >= self::MAX_EXP){
+                $livelliGuadagnati = $this->exp / self::MAX_EXP;
+                $this->exp %= self::MAX_EXP;
+                $this->livello += $livelliGuadagnati;
+                $this->puntiUpgrade += self::PU_LVL_UP * $livelliGuadagnati;
+            }
+
+        }
+        finally{
+            if($stmt)   $stmt->close();
+            $connectionDB->close();
+        }
+
+        return $livelliGuadagnati;
     }
 
     /**
