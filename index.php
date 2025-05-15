@@ -23,6 +23,7 @@ if(isset($_SESSION["message"])){
     <base href="http://localhost/cambria_672642/">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/index.css">
+    <link rel="icon" href="images/items/weapons/acqua.svg" type="image/svg+xml" sizes="any" >
     <script type="module" src="js/index.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -61,6 +62,10 @@ if(isset($_SESSION["message"])){
         </div>
 
     </section>
+    <footer class="footer">
+        <a href="documentazione.html"> Documentazione HTML</a>
+        <p>Creato da <i>Gabriele Domenico Cambria - mat. 672642</i></p>
+    </footer>
     <div id="loginModule" class="module">
     </div>
 </body>

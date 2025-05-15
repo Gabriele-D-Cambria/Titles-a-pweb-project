@@ -552,11 +552,19 @@ class Personaggio{
         $this->dodgingChance   = self::DODGE_LOOKUP[$this->currentDES];
         $this->protezioneDanno = 0;
         
-        if($this->arma)
+        if($this->arma){
+            if($this->arma['Elemento'] === $this->elemento)
+                $this->arma['Danno'] += 1;
+            
             $this->damage += $this->arma['Danno'];
+        }
 
-        if($this->armatura)
+        if($this->armatura){
+            if($this->armatura['Elemento'] === $this->elemento)
+                $this->armatura['ProtezioneDanno'] += 1;
+            
             $this->protezioneDanno += $this->armatura['ProtezioneDanno'];
+        }
     }
     /**
      * Funzione privata che si occupa di equipaggiare un'arma e, eventualmente, aggiornare il database

@@ -51,6 +51,7 @@ if(isset($_SESSION["message"])){
 	<link rel="stylesheet" href="css/menu.css">
 	<link rel="stylesheet" href="css/personaggio.css">
 	<link rel="stylesheet" href="css/inventory.css">
+	<link rel="stylesheet" href="css/pgAnimations.css">
 	<script type="module" src="js/gestisciPersonaggio.js"></script>
 	<script>
 		const errorMessage = <?php echo json_encode($errorMessage)?>;
@@ -126,9 +127,9 @@ if(isset($_SESSION["message"])){
 					<input type="text" name="PG-name" id="PG-name" value="<?php echo $currentPG["nome"];?>" disabled>
 					<img id="deletePG" src="images/trash.svg" alt="Elimina Personaggio" title="Elimina Personaggio">
 					<div class="character-choose">
-						<!-- <div id="prevPG" class="arrow">←</div> -->
-						<img id="imagePG" src="<?php echo $currentPG["pathImmaginePG"];?>" alt="" draggable="false">
-						<!-- <div id="nextPG" class="arrow">→</div> -->
+						<img id="imagePG" class="sometimes-animated"
+						 	src="<?php echo $currentPG["pathImmaginePG"];?>" 
+							alt="Immagine Personaggio" draggable="false">
 					</div>
 					<hr>
 					<footer>
@@ -139,7 +140,8 @@ if(isset($_SESSION["message"])){
 							</p>
 						</div>
 						<div class="element-pic">
-							<img id="elementPic" draggable="false" src="<?php echo $currentPG["pathImmagine"];?>" alt="Element Pic">
+							<img id="elementPic" draggable="false" src="<?php echo $currentPG["pathImmagine"];?>" alt="Element Pic"
+							title="<?php echo $currentPG["elemento"]?>">
     	        		</div>
 						<div class="dodge-box">
 							<p>Schivata</p>
@@ -161,7 +163,8 @@ if(isset($_SESSION["message"])){
 						<div class="element-pic">
     	            		<img id="prevalePic" draggable="false"
 							src="<?php echo $prevalenceImg["prevaleSu"];?>"
-							alt="Immagine Prevale su">
+							alt="Immagine Prevale su <?php echo $currentPG["prevaleSu"]?>"
+							title="<?php echo $currentPG["prevaleSu"]?>">
     	        		</div>
 					</div>
 					<div class="prevalence-block prevailed">
@@ -169,7 +172,8 @@ if(isset($_SESSION["message"])){
 						<div class="element-pic">
     	            		<img id="prevalsoPic" draggable="false"
 							src="<?php echo $prevalenceImg["prevalsoDa"];?>"
-							alt="Immagine Prevalso da">
+							alt="Immagine Prevalso da <?php echo $currentPG["prevalsoDa"]?>"
+							title="<?php echo $currentPG["prevalsoDa"]?>">
     	        		</div>
 					</div>
 				</div>

@@ -83,7 +83,7 @@ try{
 catch(Exception $e){
     $errorType = $e->getMessage();
     $login = [
-        'message' => ERROR_TYPES[$errorType] ?? $errorType,
+        'message' => ERROR_TYPES[$errorType] ?? ERROR_TYPES['default'],
         'errorcode' => $e->getCode(),
         'isLogin' => $isLogin
     ];

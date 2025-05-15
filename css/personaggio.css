@@ -179,8 +179,6 @@ body{
 }
 
 .stats-section input[type="number"] {
-  	-webkit-appearance: textfield;
-  	-moz-appearance: textfield;
   	appearance: textfield;
   	width: 60%;
   	height: auto;
@@ -291,6 +289,11 @@ body{
 }
 .character-choose img{
 	width: 75%;
+	transition: transform 0.3s ease-in-out;
+}
+
+.character-choose img.always-animated, .character-choose img.sometimes-animated:hover{
+	animation: idleWait 2s ease-in-out infinite;
 }
 
 .character-box hr{
@@ -485,11 +488,12 @@ body{
     z-index: 1000;
     opacity: 0;
     visibility: hidden;
+	transform: translate(-50%, -50%);
     transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
 }
 
 .context-menu img{
-	transition: transform 0.3 ease;
+	transition: transform 0.3s ease;
 }
 .context-menu img:hover{
 	animation: tilt 0.6s ease;

@@ -42,6 +42,7 @@ if(isset($_SESSION["createPGError"])){
 	<title>Titles</title>
 	<link rel="stylesheet" href="css/style.css">
 	<link rel="stylesheet" href="css/personaggio.css">
+	<link rel="stylesheet" href="css/pgAnimations.css">
 	<script type="module" src="js/creazionePersonaggio.js"></script>
 	<script>
 		const createPGError = <?php echo json_encode($message)?>;
@@ -88,7 +89,7 @@ if(isset($_SESSION["createPGError"])){
 					<input type="text" name="PG-name" id="PG-name" placeholder="Nome" pattern="^[a-zA-Z][a-zA-Z]{2,9}$" required autocomplete="off" title="Inserisci il nome del Personaggio: Dalle 3 alle 15 lettere, con la prima maiuscola">
 					<div class="character-choose">
 						<div id="prevPG" class="arrow">←</div>
-						<img id="imagePG" src="" alt="" draggable="false">
+						<img id="imagePG" class="always-animated" src="" alt="" draggable="false">
 						<div id="nextPG" class="arrow">→</div>
 					</div>
 					<hr>
@@ -99,7 +100,7 @@ if(isset($_SESSION["createPGError"])){
 						</div>
 						<div class="element-pic">
 							<input type="radio" value="" name="element" id="element" checked hidden>
-							<img id="elementPic" draggable="false" src="" alt="Element Pic">
+							<img id="elementPic" draggable="false" src="" alt="">
     	        		</div>
 						<div class="dodge-box">
 							<p>Schivata</p>

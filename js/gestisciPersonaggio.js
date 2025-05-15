@@ -175,13 +175,17 @@ function setEquimpent(arma = null, armatura = null, zaino = null){
 		img.src = arma.PathImmagine;
 		img.alt = arma.Descrizione;
 		img.title = arma.Nome;
-		img.addEventListener("contextmenu", (e) => {
-			addRemoveMenu(e, arma.ID);
-		});
+		// img.addEventListener("contextmenu", (e) => {
+		// 	addRemoveMenu(e, arma.ID);
+		// });
 		
 		while(space.childElementCount)
 			space.removeChild(space.firstChild);
 		space.appendChild(img);
+		space.addEventListener("click",(e) => {
+			addRemoveMenu(e, arma.ID);
+			e.stopPropagation();
+		});
 	}
 	if(armatura !== null){
 		space = document.getElementById("armatura");
@@ -191,13 +195,17 @@ function setEquimpent(arma = null, armatura = null, zaino = null){
 		img.src = armatura.PathImmagine;
 		img.alt = armatura.Descrizione;
 		img.title = armatura.Nome;
-		img.addEventListener("contextmenu",(e) => {
-			addRemoveMenu(e, armatura.ID);
-		});
+		// img.addEventListener("contextmenu",(e) => {
+		// 	addRemoveMenu(e, armatura.ID);
+		// });
 		
 		while(space.childElementCount)
 			space.removeChild(space.firstChild);
 		space.appendChild(img);
+		space.addEventListener("click",(e) => {
+			addRemoveMenu(e, armatura.ID);
+			e.stopPropagation();
+		});
 	}
 	if(zaino !== null){
 		zaino.forEach((item, index) => {
@@ -208,23 +216,29 @@ function setEquimpent(arma = null, armatura = null, zaino = null){
 			img.src = item.PathImmagine;
 			img.alt = item.Descrizione;
 			img.title = item.Nome;
-			img.addEventListener("contextmenu",(e) => {
-			addRemoveMenu(e, item.ID);
-		});
+			// img.addEventListener("contextmenu",(e) => {
+			// 	addRemoveMenu(e, item.ID);
+			// });
 
 			while(space.childElementCount)
 				space.removeChild(space.firstChild);
 			space.appendChild(img);
+			space.addEventListener("click",(e) => {
+				addRemoveMenu(e, item.ID);
+				e.stopPropagation();
+			});
 		});
 	}
 
 	space = document.querySelectorAll(".item-slot.bag-item");
 	space.forEach(item => {
-		item.addEventListener("click", (e) => {
-			const id = String(e.target.id).split("-")[0];
-			console.log(id);
-			showInventory(false, true, id);
-		})
+		if(!item.childElementCount){
+			item.addEventListener("click", (e) => {
+				const id = String(e.target.id).split("-")[0];
+				console.log(id);
+				showInventory(false, true, id);
+			});
+		}
 	})
 }
 

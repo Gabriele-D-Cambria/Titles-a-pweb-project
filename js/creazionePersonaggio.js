@@ -100,7 +100,10 @@ function setPG(personaggio) {
 
 	document.getElementById("element").value = personaggio.Nome;
 
-	document.getElementById("elementPic").src = personaggio.PathImmagine;
+	const pic = document.getElementById("elementPic");
+	pic.src = personaggio.PathImmagine;
+	pic.alt = `Elemento ${personaggio.Nome}`;
+	pic.title = `${personaggio.Nome}`;
 
 	document.getElementById("damage").innerText = costantiPersonaggi.DAMAGE_LOOKUP[forza];
 
@@ -110,9 +113,11 @@ function setPG(personaggio) {
 	let prevaleIndex = listaPersonaggi.findIndex(element => element.Nome === personaggio.PrevaleSu);
 	img.src = listaPersonaggi[prevaleIndex].PathImmagine;
 	img.alt = `Prevale su ${personaggio.PrevaleSu}`;
+	img.title = `${personaggio.PrevaleSu}`;
 	
 	img = document.getElementById("prevalsoPic");
 	prevaleIndex = listaPersonaggi.findIndex(element => element.Nome === personaggio.PrevalsoDa);
 	img.src = listaPersonaggi[prevaleIndex].PathImmagine;
 	img.alt = `Prevalso da ${personaggio.PrevalsoDa}`;
+	img.title = `${personaggio.PrevalsoDa}`;
 }
