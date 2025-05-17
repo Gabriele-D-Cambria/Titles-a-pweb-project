@@ -1,0 +1,123 @@
+body{
+	padding: 0px !important;
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+}
+
+main{
+	position: relative;
+	box-sizing: border-box;
+	display: grid;
+	grid-template-columns: 5fr 2fr;
+	grid-template-rows: 86vh;
+	align-items: center;
+	justify-items: center;
+	height: 86vh;
+
+	background-color: #7A918D;
+}
+
+#imageContainer{
+	width: 100%;
+	height: 100%;
+	padding: 5vh 0vw 5vh 2vw;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0px;
+	position:relative;
+}
+
+#svgImage{
+	box-sizing: border-box;
+	border:solid 5pt white;
+	border-radius: 15pt;
+	width: 100%;
+	object-fit: cover;
+
+}
+
+
+.background-image{
+	width: 100%;
+	aspect-ratio: 16 / 9;
+}
+
+.actionSection{
+	position: relative;
+	box-sizing: border-box;
+	height: 100%;
+	width: 100%;
+	padding: 1vh 1vw;
+}
+
+.action-block{
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: 0.5fr 2fr 1fr;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+}
+
+.timer-section{
+	width: 80%;
+	height: 80%;
+	background-color: #1e6f62;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	align-self:	center;
+	justify-self: center;
+
+	border-radius: 15pt;
+	font-size: xx-large;
+
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+
+}
+
+#attackBtn{
+	align-self: center;
+	justify-self: center;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 80%;
+	aspect-ratio: 3 / 2;
+	border: ridge 10pt white;
+	box-shadow: inset 0px 0px 5px black;
+
+	background-color: #414E4C;
+
+	font-size: 5vh;
+	transition: all 0.5s ease-in-out;
+}
+
+#attackBtn:hover{
+	font-size: 6vh;
+}
+
+
+#attackBtn.attacco{
+	text-shadow:
+        -1px -1px 150px darkred,
+         1px -1px 150px darkred,
+        -1px  1px 150px darkred,
+         1px  1px 150px darkred;
+}
+#attackBtn.attacco:hover{
+	text-shadow:
+        -1px -1px 10px darkred,
+         1px -1px 10px darkred,
+        -1px  1px 10px darkred,
+         1px  1px 10px darkred;
+}
+
+.selected-item{
+	outline: solid 3pt rgba(46, 204, 112, 1);
+    outline-offset: -3pt;
+}

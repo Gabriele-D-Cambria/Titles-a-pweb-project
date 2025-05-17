@@ -152,7 +152,7 @@ if(isset($_SESSION["message"])){
 						</div>
 					</footer>
 				</div>
-				<form class="play-box" method="POST" action="">
+				<form class="play-box" method="POST" action="php/prepareGame.php">
 					<button type="submit">Gioca</button>
 					<button id="backToDash">Home</button>
 				</form>
