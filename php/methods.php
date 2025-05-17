@@ -144,10 +144,10 @@ function getUserData($username){
 /**
  * Recupera l'invetario di un'account dal database
  * @param int $accountID ID dell'account
- * @param array $filter array contenente i tipi degli oggetti che vogliamo recuperare
+ * @param array|null $filter array contenente i tipi degli oggetti che vogliamo recuperare
  * @return array contenente gli item nell'inventario e la loro quantità
  */
-function getInventory($accountID, $filter){
+function getInventory($accountID, $filter = null){
     $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
     if($conn->connect_error){
         apiError(500, "Connessione al database fallita: " . $conn->connect_error);
