@@ -571,7 +571,7 @@ class Personaggio{
     }
     /**
      * Funzione privata che si occupa di equipaggiare un'arma e, eventualmente, aggiornare il database
-     * @param mysqli &$connectionDB connessione al database passare per riferimento
+     * @param mysqli $connectionDB connessione al database passare per riferimento
      * @param int|null $armaId id dell'arma da equipaggiare o `null` se si vuole rimuovere
      * @param boolean $updateDB Indica se aggiornare o meno il database con aggiornamento del campo. (Default `true`)
      * @return void
@@ -641,7 +641,7 @@ class Personaggio{
     }
     /**
      * Funzione privata che si occupa di equipaggiare un'armatura e, eventualmente, aggiornare il database
-     * @param mysqli &$connectionDB connessione al database passare per riferimento
+     * @param mysqli $connectionDB connessione al database passare per riferimento
      * @param int|null $armaturaId id dell'armatura da equipaggiare o `null` se si vuole rimuovere
      * @param boolean $updateDB Indica se aggiornare o meno il database con aggiornamento del campo. (Default `true`)
      * @return void
@@ -707,8 +707,8 @@ class Personaggio{
     }
 
     /**
-     * Funzione privata che si occupa di aggiungere un `Item` allo zaino, eventualmente aggiornando il database
-     * @param mysqli &$connectionDB connessione al database passare per riferimento
+     * Funzione privata che si occupa di aggiungere un `Item` allo zaino se presente nell'Inventario di `$this->owner`, eventualmente aggiornando il database
+     * @param mysqli $connectionDB connessione al database passare per riferimento
      * @param int $itemId id dell'`Item` da equipaggiare
      * @param boolean $updateDB Indica se aggiornare o meno il database con aggiornamento del campo. (Default `true`)
      * @return void
@@ -757,6 +757,14 @@ class Personaggio{
             if($zainoStmt) $zainoStmt->close();
         }
     }
+
+    /**
+     * Funzione privata che si occupa di rimuovere un `Item` allo zaino se presente, eventualmente aggiornando il database
+     * @param mysqli $connectionDB connessione al database passata per riferimento
+     * @param int $itemId id dell'`Item` da rimuovere
+     * @param boolean $updateDB Indica se aggiornare o meno il database con aggiornamento del campo. (Default `true`)
+     * @return void
+     */
     private function removeFromZaino(&$connectionDB, $itemId, $updateDB = true){
         $itemStmt = null;
         $zainoStmt = null;
@@ -861,8 +869,17 @@ class Personaggio{
             ]
         ];
     }
+
+    /**
+     * Funzione che recupera dal database le immagini dei tipi salvati in `$this->prevaleSu` e `$this->prevasoDa`
+     * @throws Exception se ci sono problemi di comunicazione con il database
+     * @return array Array contenente le due immagini nei campi "prevaleSu" e "prevalsoDa"
+     */
     public function getImmaginiPrevalenza(){
         $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+        if($connectionDB->connect_error){
+            throw new Exception("Connessione al database fallita: ". $connectionDB->connect_error, 500);
+        }
 
         $stmt = null;
         try {
@@ -872,7 +889,7 @@ class Personaggio{
             $stmt = $connectionDB->prepare($sql);
             $stmt->bind_param("ss", $this->prevaleSu, $this->prevalsoDa);
             if(!$stmt->execute()){
-                throw new Error("Errore nel recupero: " . $stmt->error);
+                throw new Exception("Errore nel recupero: " . $stmt->error);
             }
             $result = $stmt->get_result();
             $output = $result->fetch_assoc();
@@ -931,18 +948,45 @@ class Personaggio{
     /**
      * Aggiunge il danno al personaggio
      * @param int $damage quantità di danno subito
-     * @return bool se true indica che il personaggio è morto
+     * @return int quantità di danno effettivamente subito calcolato come differenza con la protezione danno
      */
-    public function takeDamage($damage){
-        $this->tmp_PF -= $damage;
-        return $this->tmp_PF <= 0;
+    private function takeDamage($damage){
+        $totalDamage = $damage + $this->protezioneDanno;
+        $this->tmp_PF -= $totalDamage;
+        return $totalDamage;
     }
 
-    // FIXME: da rivedere forse con l'utilizzo oggetti
+    /**
+     * Effettua del danno ad un altro personaggio considerando tutte le meccaniche di elemento e allineamento armi/armature.
+     * @param Personaggio $P Il personaggio da attaccare.
+     * @return array Un array contenente l'esito dell'attacco, con le chiavi:
+     *               - "colpito": `bool`, indica se l'attacco ha colpito.
+     *               - "dannoInflitto": `int`, la quantità di danno inflitto.
+     */
+    public function attack(&$P){
+        $prevalgo = $this->prevaleSu === $P->elemento;
+
+        $damageToDeal = $this->damage + ($prevalgo? 1 : 0);
+        $dodgingChanceP = ($P->dodgingChance / ($prevalgo? 2 : 1)) % 100;
+        $randomNumber = random_int(1, 100);
+
+        $esito = [
+            'colpito' => false,
+            'dannoInflitto' => 0,
+        ];
+
+        if($randomNumber >= $dodgingChanceP){
+            $esito['colpito'] = true;
+            $esito['dannoInflitto'] = $P->takeDamage($damageToDeal);
+        }
+        
+        return $esito;
+    }
+
     /**
      * Cura il personaggio
      * @param int $amount valore di cura del personaggio
-     * @return bool se true indica che il personaggio ha guadagnato dei PF, altrimenti indica che il personaggio aveva già la vita al massimo
+     * @return bool se `true` indica che il personaggio ha guadagnato dei PF, altrimenti indica che il personaggio aveva già la vita al massimo
      */
     public function heal($amount){
         if($this->PF == $this->tmp_PF)
@@ -1000,6 +1044,14 @@ class Personaggio{
     public function useItem($itemId){
         // TODO
     }
+
+    /**
+     * Funzione che permette di equipaggiare un Oggetto al personaggio se presente nell'inventario di `$this->owner`.
+     * A seconda del tipo dell'oggetto viene assegnata come `arma`, `armatura` o viene inserita in `$this->zaino` se vi è ancora spazio
+     * @param int $itemId id dell'oggetto da inserire nell'inventario
+     * @throws Exception per problemi con la comunicazione con il database, se `$this->owner` non possiede l'oggetto o se l'oggetto è di tipo `box`
+     * @return bool 'true' se l'àaggiunta viene effettuata correttamente.
+     */
     public function equipItem($itemId){
         $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
         if($connectionDB->connect_error){
@@ -1074,6 +1126,13 @@ class Personaggio{
             if($inventoryStmt)   $inventoryStmt->close();
         }
     }
+
+    /**
+     * Rimuove un'`item` dagli oggetti equipaggiati (arma, armatura o dallo zaino) e lo inserisce nell'inventario di `$this->owner`
+     * @param int $itemId id dell'oggetto da inserire nell'inventario
+     * @throws Exception per problemi con 
+     * @return bool
+     */
     public function unequipItem($itemId){
         $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
         if($connectionDB->connect_error){
@@ -1084,19 +1143,28 @@ class Personaggio{
         $inventoryStmt = null;
 
         try{
+
+            $found = false;
             if($this->arma && $itemId === $this->arma['ID']){
+                $found = true;
                 $this->setArma($connectionDB, null);
             }
             else if($this->armatura && $itemId === $this->armatura['ID']){
+                $found = true;
                 $this->setArmatura($connectionDB, null);
             }
             else{
                 foreach($this->zaino as $item){
                     if($itemId === $item['ID']){
+                        $found = true;
                         $this->removeFromZaino($connectionDB, $itemId);
                         break;
                     }
                 }
+            }
+
+            if(!$found){
+                throw new Exception("Il personaggio " . $this->nome . "non ha questo oggetto equipaggiato!", 400);
             }
 
 
@@ -1230,7 +1298,7 @@ class Personaggio{
  * deve essere presente nel database.
  *
  * @param string $element Il nome dell'elemento di cui recuperare le informazioni. Deve corrispondere a un record nel database.
- * @param mysqli &$conn Un riferimento alla connessione MySQLi attiva.
+ * @param mysqli $conn Un riferimento alla connessione MySQLi attiva.
  *
  * @return array Un array associativo contenente le informazioni dell'elemento se l'operazione ha successo, oppure un messaggio di errore
  *               con la seguente struttura:

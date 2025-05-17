@@ -24,6 +24,7 @@ body>header {
     color: white;
     padding: 5px 20px;
     box-sizing: border-box;
+    height: 14vh;
 }
 
 button{

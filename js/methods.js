@@ -472,7 +472,7 @@ export function generateInfo(id, item = null, hasIt = true, equipment = false){
                     break;
                 case "armatura":
                     modificatore = "ProtezioneDanno";
-                    txt = "Classe Armatura";
+                    txt = "Protezione Danno";
                     break;
                 default:
                     modificatore = "RecuperoVita";

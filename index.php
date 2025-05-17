@@ -21,13 +21,13 @@ if(isset($_SESSION["message"])){
 <html lang="it">
 <head>
     <base href="http://localhost/cambria_672642/">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/index.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Titles</title>
     <link rel="icon" href="images/icon.svg" type="image/svg+xml" sizes="16x16" >
-    <script type="module" src="js/index.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/index.css">
+    <script type="module" src="js/index.js"></script>
     <script>
         const loginError = <?php echo json_encode($loginError); ?>;
         const message = <?php echo json_encode($message)?>;
