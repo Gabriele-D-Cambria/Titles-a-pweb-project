@@ -1,85 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
-    <base href="http://localhost/cambria_672642/">
+    <!-- <base href="http://localhost/cambria_672642/"> -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/menu.css">
+    <link rel="stylesheet" href="css/personaggio.css">
     <title>Document</title>
+    <style>
+        body{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: wheat;
+        }
+        *{
+            color: black;
+        }
+    </style>
 </head>
 <body>
-    <div class="module" style="visibility: visible; opacity: 1;">
-        <!--? Default Page -->        
-        <!-- <div class="menu-page">
-            <div class="menu-space"><p id="changeUsr">Cambia Username</p></div>
-            <div class="menu-space"><p id="changePwd">Cambia Password</p></div>
-            <div class="menu-space"><p id="deleteAccount">Elimina Account</p></div>
+    <div class="stats-block FOR">
+        <div class="FOR-points-block">
+            <div id="lessFOR" class="clickable">-</div>
+            <input id="FOR" type="number" id="FOR" id="FOR-amount" value="5" readonly>
+            <div id="moreFOR" class="clickable">+</div>
         </div>
-        -->
-        <!--? Cambio Username  -->
-        
-        <!-- <div class="username-page">
-            <div class="menu-space header">
-                <h2>Username Attuale:</h2>
-                <p>Ciccio</p>
-            </div>
-            <div class="menu-space">
-                <form class="username" action="php/API/fammi.php" method="POST">
-                    <label>Nuovo Username:</label>
-                    <input type="text" name="username" id="username" required="" pattern="^[a-zA-Z][a-zA-Z0-9_.]{2,9}$" title="Deve iniziare con una lettera e avere tra 3 e 10 caratteri (lettere, punti o underscore)." placeholder="User.0_" autocomplete="off">
-                    <button>Conferma</button>
-                    <button>Annulla</button>
-                </form>
-            </div>
-        </div> -->
-
-        <!--? Cambio Password -->
-        <!-- <div class="password-page">
-            <div class="menu-space header">
-                <h2>Cambio Password</h2>
-            </div>
-            <div class="menu-space">
-                <form class="password" action="php/API/fammi.php" method="POST">
-                    <label>Nuova Password:</label>
-                    <div class="password-container">
-                        <input type="password" name="password" id="password" required="" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&amp;])[A-Za-z\d@$!%*?&amp;]{8,15}$" title="Deve contenere almeno 8 caratteri, una lettera maiuscola, una minuscola, un numero e un carattere speciale." placeholder="Password">
-                        <button type="button" class="toggle-password">Mostra</button>
-                    </div>
-                    <label>Conferma Password:</label>
-                    <div class="password-container">
-                        <input type="text" name="confirmPassword" id="confirmPassword" required="" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&amp;])[A-Za-z\d@$!%*?&amp;]{8,15}$" title="Deve essere uguale alla password." placeholder="Conferma" class="invalid">
-                        <button type="button" class="toggle-password">Mostra</button>
-                    </div>
-                    <button>Conferma</button>
-                    <button>Annulla</button>
-                </form>
-            </div>
-        </div> -->
-
-        <!--? Delete Page -->        
-        <div class="delete-page">
-            <div class="menu-space header">
-                <h2>Stai Eliminando l'account</h2>
-                <p>Sei sicuro?</p>
-            </div>
-            <div class="menu-space">
-                <form action="" method="post">
-                    <input type="checkbox" name="deleteCheck" id="deleteCheck" value="true" checked hidden>
-                    <p>Eliminando l'account <b>perderai in maniera definitiva tutti i tuoi progressi</b>, sei sicuro di volerlo fare?</p>
-                    <aside class="button-holder">
-                        <label>Conferma con Password:</label>
-                        <div class="password-container">
-                            <input type="password" name="password" id="password" required="" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&amp;])[A-Za-z\d@$!%*?&amp;]{8,15}$" title="Deve contenere almeno 8 caratteri, una lettera maiuscola, una minuscola, un numero e un carattere speciale." placeholder="Password">
-                            <button type="button" class="toggle-password">Mostra</button>
-                        </div>
-                        <button id="submit" type="submit">Elimina</button>
-                        <button id="backToMenu">Annulla</button>
-                    </aside>
-                </form>
-            </div>
-        </div>
-       
+        <p>FOR</p>
     </div>
+    </div>
+    <script>
+            document.getElementById("FOR").stepUp();
+            document.getElementById("FOR").stepDown();
+    </script>
 </body>
 </html>

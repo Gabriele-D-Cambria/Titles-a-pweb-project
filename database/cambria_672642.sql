@@ -8,30 +8,40 @@ CREATE TABLE Account (
     Username VARCHAR(50) COLLATE utf8_bin NOT NULL UNIQUE,
     Password VARCHAR(255) COLLATE utf8_bin NOT NULL,
     Monete INT NOT NULL DEFAULT 10,
-    RefreshNegozio DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    RefreshNegozio DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ImmagineProfilo VARCHAR(255) COLLATE utf8_bin NOT NULL DEFAULT "images/pics/default.svg"
 );
 
 CREATE TABLE Element(
-	Nome VARCHAR(50) NOT NULL PRIMARY KEY
+    Nome VARCHAR(50) NOT NULL PRIMARY KEY,
+    PathImmagine VARCHAR(255) COLLATE utf8_bin DEFAULT NULL,
+    PathImmaginePG VARCHAR(255) COLLATE utf8_bin DEFAULT NULL,
+    ModificatoreFor INT DEFAULT 0,
+    ModificatoreDes INT DEFAULT 0,
+    ModificatorePF INT DEFAULT 0,
+    PrevaleSu VARCHAR(50) DEFAULT NULL,
+    PrevalsoDa VARCHAR(50) DEFAULT NULL,
+    FOREIGN KEY (PrevaleSu) REFERENCES Element(Nome) ON DELETE SET NULL,
+    FOREIGN KEY (PrevalsoDa) REFERENCES Element(Nome) ON DELETE SET NULL
 );
 
 CREATE TABLE ItemType(
-	Nome VARCHAR(50) NOT NULL PRIMARY KEY
+    Nome VARCHAR(50) NOT NULL PRIMARY KEY
 );
 
 CREATE TABLE Item (
     ID INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    Nome VARCHAR(100) COLLATE utf8_bin NOT NULL,
+    Nome VARCHAR(100) COLLATE utf8_bin NOT NULL UNIQUE,
     Descrizione VARCHAR(60) COLLATE utf8_bin NOT NULL,
     Elemento VARCHAR(50),
     PathImmagine VARCHAR(255) COLLATE utf8_bin DEFAULT NULL,
     Tipologia VARCHAR(50) NOT NULL,
     Costo INT NOT NULL,
     Danno INT DEFAULT 0,
-    Armatura INT DEFAULT 0,
+    ProtezioneDanno INT DEFAULT 0,
     RecuperoVita INT DEFAULT 0,
     ModificatoreFor INT DEFAULT 0,
-    ModificatoreDex INT DEFAULT 0,
+    ModificatoreDes INT DEFAULT 0,
 	FOREIGN KEY (Elemento) REFERENCES Element(Nome),
 	FOREIGN KEY (Tipologia) REFERENCES ItemType(Nome)
 );
@@ -48,10 +58,10 @@ CREATE TABLE Inventario (
 CREATE TABLE Personaggi (
     Nome VARCHAR(100) COLLATE utf8_bin NOT NULL,
     Proprietario INT NOT NULL,
+    Elemento VARCHAR(50) NOT NULL,
     Forza INT NOT NULL,
     Destrezza INT NOT NULL,
     PuntiVita INT NOT NULL DEFAULT 25,
-    Elemento VARCHAR(50) NOT NULL,
     Armatura INT DEFAULT NULL,     -- Riferimento all'ID dell'armatura equipaggiata
     Arma INT DEFAULT NULL,		 -- Riferimento all'ID dell'arma equipaggiata
     Livello INT NOT NULL DEFAULT 1,
@@ -213,8 +223,8 @@ BEGIN
     IF NEW.Livello < 1 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Livello deve essere >= 1';
     END IF;
-    IF NEW.PuntiExp < 0 OR NEW.PuntiExp > 100 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'PuntiExp deve essere tra 0 e 100';
+    IF NEW.PuntiExp < 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'PuntiExp deve essere >= 100';
     END IF;
     IF NEW.PuntiUpgrade < 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'PuntiUpgrade deve essere >= 0';
@@ -230,5 +240,66 @@ BEGIN
     SELECT NEW.ID, 15, 1;
 END;
 //
+
+CREATE TRIGGER trg_zaino_check
+BEFORE INSERT ON Zaino
+FOR EACH ROW
+BEGIN
+    DECLARE tipologia_invalid BOOLEAN;
+
+    SELECT COUNT(*) > 0 INTO tipologia_invalid
+    FROM Item
+    WHERE ID = NEW.Oggetto AND Tipologia IN ('arma', 'armatura', 'box');
+
+    IF tipologia_invalid THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Tipologia non valida per Zaino (arma, armatura, box non consentiti)';
+    END IF;
+END;
+//
+
+CREATE TRIGGER trg_zaino_update_check
+BEFORE UPDATE ON Zaino
+FOR EACH ROW
+BEGIN
+    DECLARE tipologia_invalid BOOLEAN;
+
+    SELECT COUNT(*) > 0 INTO tipologia_invalid
+    FROM Item
+    WHERE ID = NEW.Oggetto AND Tipologia IN ('arma', 'armatura', 'box');
+
+    IF tipologia_invalid THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Tipologia non valida per Zaino (arma, armatura, box non consentiti)';
+    END IF;
+END;
+//
+
+CREATE TRIGGER trg_personaggi_exp_update_for_lvl_up
+BEFORE UPDATE ON Personaggi
+FOR EACH ROW
+BEGIN
+    DECLARE proprietario_id INT;
+    DECLARE livelli_guadagnati INT;
+
+    IF NEW.PuntiExp >= 100 THEN
+        SET livelli_guadagnati =  NEW.PuntiExp DIV 100;
+
+        SET NEW.PuntiExp = NEW.PuntiExp % 100;
+        SET NEW.Livello = NEW.Livello + livelli_guadagnati;
+        SET NEW.PuntiUpgrade = NEW.PuntiUpgrade + (3 * livelli_guadagnati);
+
+        SET proprietario_id = NEW.Proprietario;
+
+        UPDATE Account
+        SET Monete = Monete + (40 * livelli_guadagnati)
+        WHERE ID = proprietario_id;
+
+
+        INSERT INTO Inventario (Proprietario, Oggetto, Quantita)
+        VALUES (proprietario_id, 15, livelli_guadagnati)
+        ON DUPLICATE KEY UPDATE Quantita = Quantita + livelli_guadagnati;
+    END IF;
+END;
+//
+
 
 DELIMITER ;

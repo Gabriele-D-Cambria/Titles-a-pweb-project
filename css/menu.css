@@ -1,4 +1,4 @@
-.menu-page, .username-page, .password-page, .delete-page{
+.menu-page, .image-page, .username-page, .password-page, .delete-page{
     aspect-ratio: 1/1;
     height: 60%;
 
@@ -13,11 +13,11 @@
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
-.menu-page *, .username-page *, .password-page *, .delete-page *{
+.menu-page *, .image-page *, .username-page *, .password-page *, .delete-page *{
     margin: 0;
 }
 
-.menu-page p, .username-page p, .password-page p, .delete-page p{
+.menu-page p, .image-page p, .username-page p, .password-page p, .delete-page p{
     display: flex;
     justify-content: center;
     align-items: center;
@@ -38,7 +38,7 @@
     border-bottom: none;
 }
 
-.menu-page #changeUsr, .menu-page #changePwd{
+.menu-page :not(#deleteAccount){
     color: #e0e0e0;
     transition: transform ease-in-out;
 }
@@ -46,16 +46,16 @@
     color: red;
     transition: transform ease-in-out;
 }
-.menu-page #changeUsr:hover, .menu-page #changePwd:hover, .menu-page #deleteAccount:hover{
+.menu-page p:hover{
     transform: scale(1.25);
     cursor: pointer;
 }
 
-.username-page{
-    grid-template-rows: 1fr 2fr;
+.username-page, .image-page{
+    grid-template-rows: 1fr 3fr;
 }
 
-.username-page .header, .delete-page .header{
+.image-page .header, .username-page .header, .delete-page .header{
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -63,7 +63,7 @@
     color: #e0e0e0;
 }
 
-.username-page .header *, .delete-page p{
+.image-page *, .username-page .header *, .delete-page p{
     color: #e0e0e0;
     margin: 0;
     text-align: center;
@@ -91,6 +91,43 @@
     justify-content: space-between;
     align-items: center;
 }
+
+.menu-space form .choose-box{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    row-gap: 10px;
+    width: 100%;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
+    align-items: center;
+}
+
+.image-option {
+    display: inline-block;
+    cursor: pointer;
+}
+.image-option img {
+    height: auto;
+    border: solid 1px transparent;
+}
+
+.image-page input[type="radio"]{
+    display: none;
+}
+
+.image-page label img {
+    cursor: pointer;
+}
+
+.image-page input[type="radio"]:checked + label img {
+    border-radius: 100%;
+    border: solid 1px rgba(46, 204, 113, 1);
+    box-shadow: 0 0 15px rgba(46, 204, 113, 1);
+}
+
 
 .menu-space form>*{
     flex: 0 0 45%;

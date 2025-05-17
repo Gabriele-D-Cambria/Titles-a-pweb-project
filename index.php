@@ -27,16 +27,17 @@ if(isset($_SESSION["message"])){
 <html lang="it">
 <head>
     <base href="<?php echo $_SESSION["path"];?>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titles</title>
+    <link rel="icon" href="images/icon.svg" type="image/svg+xml" sizes="16x16" >
+    <meta charset="UTF-8">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/index.css">
     <script type="module" src="js/index.js"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
         const loginError = <?php echo json_encode($loginError); ?>;
         const message = <?php echo json_encode($message)?>;
     </script>
-    <title>Titles</title>
 </head>
 <body>
     <header>
@@ -62,11 +63,15 @@ if(isset($_SESSION["message"])){
             <p>
                 Testo da mettere
                 <!-- TODO: testo per i comandi -->
+                <!-- TODO: sistema i messaggi dove ERROR_TYPES[$errorType] ?? $errorType con il default message -->
             </p>
         </div>
 
     </section>
-    <div id="loginModule" class="module">
-    </div>
+    <footer class="footer">
+        <a href="documentazione.html"> Documentazione HTML</a>
+        <p>Creato da <i>Gabriele Domenico Cambria - mat. 672642</i></p>
+    </footer>
+    <div id="loginModule" class="module"></div>
 </body>
 </html>

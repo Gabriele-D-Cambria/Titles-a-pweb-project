@@ -28,7 +28,7 @@ img.clickable {
 #coin-count{
     font-size: xx-large;
     font-weight: bold;
-    font-family: cursive;
+    font-family: "Comic Sans MS", sans-serif;
 
 }
 
@@ -92,33 +92,6 @@ img.clickable {
     justify-content: space-around;
 }
 
-.character-list{
-    min-width: fit-content;
-    width: 40%;
-    height: 15em;
-    background-color: rgba(243, 218, 116, 0.75);
-    border: solid 2pt #845913;
-    border-radius: 15px;
-    display: grid;
-    overflow-y: auto;
-}
-
-.character-item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-bottom: 1px solid #845913;
-}
-
-#add-character {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(216, 177, 86, 0.5);
-    cursor: pointer;
-    border-top: 1px solid #845913;
-}
-
 .button-container{
     display: flex;
     flex-direction: column;
@@ -173,3 +146,89 @@ img.clickable {
     background-color: rgb(38, 127, 186);
     transform: scale(1.05);
 }
+
+/**** Personaggi ****/
+
+.character-list{
+    min-width: fit-content;
+    width: 40%;
+    height: 15em;
+    background-color: rgba(243, 218, 116, 0.75);
+    border: solid 2pt #845913;
+    border-radius: 15px;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(5, 1fr);
+    overflow-y: auto;
+}
+
+.character-item{
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #845913;
+    padding: 0px 10px;
+}
+
+.character-item p{
+    margin: 0px;
+}
+
+.character-item:last-child{
+    border-bottom: none;
+}
+
+.pg-info-block{
+    width: 25%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 15%;
+}
+
+.pg-info-block img{
+    height: 2.8em;
+}
+
+.pg-name-box{
+    font-size: x-large;
+}
+
+.pg-lvl-block{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: fit-content;
+    padding: 0px 10px;
+    row-gap: 3px;
+}
+
+.pg-exp-bar{
+    height: 2px;
+    width: 100%;
+    background-color: white;
+    padding: 0px;
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-start;
+}
+.pg-exp-points{
+    height: 100%;
+    width: 100%;
+    background-color: rgb(100, 149, 237);
+}
+
+#add-character {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(216, 177, 86, 0.5);
+    cursor: pointer;
+    border-top: 1px solid #845913;
+}
+

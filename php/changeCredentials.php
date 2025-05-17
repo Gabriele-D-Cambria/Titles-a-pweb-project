@@ -11,10 +11,11 @@ if (!isset($_SESSION['account'])) {
 }
 
 $account = unserialize($_SESSION['account']);
+$accountId = $account->getId();
 
 $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
 if($conn->connect_error){
-	terminateChangeError("connection_failed");
+	terminateChangeError("connection_failed", 500);
 }
 
 $logout = true;
@@ -31,12 +32,12 @@ try{
 		$errorType = validateInputs($newUsername, VALID_PASSWORD, VALID_PASSWORD);
 
 		if(!empty($errorType)){
-			throw new Exception($errorType);
+			throw new Exception($errorType, 400);
 		}
 
 		// Verifico non sia uguale a quello attuale
 		if($newUsername === $account->getUsername()){
-			throw new Exception("username_same_as_current");
+			throw new Exception("username_same_as_current", 400);
 		}
 
 		$sqlCheck = "SELECT ID
@@ -46,21 +47,21 @@ try{
 		$stmtCheck = $conn->prepare($sqlCheck);
 		$stmtCheck->bind_param("s", $newUsername);
 		if(!$stmtCheck->execute()){
-			throw new Exception($stmtCheck->error);
+			throw new Exception($stmtCheck->error, $stmtCheck->errno);
 		}
 		$result = $stmtCheck->get_result();
 
 		if($result->num_rows > 0){
-			throw new Exception("username_taken");
+			throw new Exception("username_taken", 400);
 		}
 
 
 		$sqlUpdate = "UPDATE Account SET Username = ? WHERE ID = ?";
 
 		$stmtUpdate = $conn->prepare($sqlUpdate);
-		$stmtUpdate->bind_param("si", $newUsername, $account->getId());
+		$stmtUpdate->bind_param("si", $newUsername, $accountId);
 		if(!$stmtUpdate->execute()){
-			throw new Exception($stmtUpdate->error);
+			throw new Exception($stmtUpdate->error, $stmtUpdate->errno);
 		}
 
 		$account->updateUsername($newUsername);
@@ -74,7 +75,7 @@ try{
 		$errorType = validateInputs(VALID_USERNAME, $newPassword, $confirmPassword);
 
 		if(!empty($errorType)){
-			throw new Exception($errorType);
+			throw new Exception($errorType, 400);
 		}
 
 		// Verifico non sia uguale a quella attuale
@@ -83,7 +84,7 @@ try{
 					 WHERE ID = ?";
 
 		$stmtCheck = $conn->prepare($sqlCheck);
-		$stmtCheck->bind_param('i', $account->getId());
+		$stmtCheck->bind_param('i', $accountId);
 		if(!$stmtCheck->execute()){
 			throw new Exception($stmtCheck->error);
 		}
@@ -92,17 +93,17 @@ try{
 		$currentPassword = $result->fetch_assoc();
 
 		if(password_verify($newPassword, $currentPassword["Password"])){
-			terminateChangeError("password_same_as_current");
+			terminateChangeError("password_same_as_current", 400);
 		}
 
 		$hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
 
 		$sqlUpdate = "UPDATE Account SET Password = ? WHERE ID = ?";
 		$stmtUpdate = $conn->prepare($sqlUpdate);
-		$stmtUpdate->bind_param('si', $hashedPassword, $account->getId());
+		$stmtUpdate->bind_param('si', $hashedPassword, $accountId);
 
 		if(!$stmtUpdate->execute()){
-			throw new Exception($stmtUpdate->error);
+			throw new Exception($stmtUpdate->error, $stmtUpdate->errno);
 		}
 
 		$message = "Password aggiornata correttamente. \n Effettuare nuovamente il login";
@@ -115,7 +116,7 @@ try{
 		$errorType = validateInputs(VALID_USERNAME, $password, $password);
 
 		if(!empty($errorType)){
-			throw new Exception($errorType);
+			throw new Exception($errorType, 400);
 		}
 
 		$sqlCheck = "SELECT Password
@@ -123,7 +124,7 @@ try{
 					 WHERE ID = ?";
 
 		$stmtCheck = $conn->prepare($sqlCheck);
-		$stmtCheck->bind_param('i', $account->getId());
+		$stmtCheck->bind_param('i', $accountId);
 		if(!$stmtCheck->execute()){
 			throw new Exception($stmtCheck->error);
 		}
@@ -132,20 +133,50 @@ try{
 		$currentPassword = $result->fetch_assoc();
 
 		if(!password_verify($password, $currentPassword["Password"])){
-			terminateChangeError("wrong_password_on_delete");
+			terminateChangeError("wrong_password_on_delete", 400);
 		}
-		
+
 		$sqlDelete = "DELETE FROM Account WHERE ID = ?";
 		$stmtDelete = $conn->prepare($sqlDelete);
-		$stmtDelete->bind_param('i', $account->getId());
+		$stmtDelete->bind_param('i', $accountId);
 		if (!$stmtDelete->execute()) {
 			throw new Exception($stmtDelete->error);
 		}
 
 		$message = "Account eliminato con successo";
 	}
+	else if(isset($_POST['newPic'])){
+		$logout = false;
+		$newPath = $_POST['newPic'];
+		
+		$sql = "SELECT ImmagineProfilo
+				FROM Account
+				WHERE ID = ?";
+		$stmtCheck = $conn->prepare($sql);
+		$stmtCheck->bind_param("s", $accountId);
+		if(!$stmtCheck->execute()){
+			throw new Exception($stmtCheck->error, $stmtCheck->errno);
+		}
+
+		$result = $stmtCheck->get_result();
+		$currentPath = $result->fetch_assoc();
+		if($currentPath['ImmagineProfilo'] === $newPath){
+			throw new Exception('image_same_as_current', 400);
+		}
+
+		$sqlUpdate = "UPDATE Account SET ImmagineProfilo = ? WHERE ID = ?";
+		
+		$stmtUpdate = $conn->prepare($sqlUpdate);
+		$stmtUpdate->bind_param("si", $newPath, $accountId);
+		if(!$stmtUpdate->execute()){
+			throw new Exception($stmtUpdate->error, $stmtUpdate->errno);
+		}
+
+		$account->updateImmagineProfilo($newPath);
+		$message = "Immagine cambiata con successo!";
+	}
 	else{
-		throw new Exception("invalid_param");
+		throw new Exception("invalid_param", 400);
 	}
 
 	$_SESSION['account'] = serialize($account);
@@ -154,7 +185,7 @@ try{
 }
 catch(Exception $e){
 	$conn->rollback();
-	terminateChangeError($e->getMessage());
+	terminateChangeError($e->getMessage(), $e->getCode());
 }
 finally{
 	if($stmtCheck)	$stmtCheck->close();
@@ -163,12 +194,16 @@ finally{
 }
 
 
-function terminateChangeError($errorType){
+function terminateChangeError($errorType, $errorCode){
 	error_log($errorType);
 
 	$errorMessage = ERROR_TYPES[$errorType] ?? "Errore Sconosciuto";
-	$_SESSION['message'] = $errorMessage;
 	
+	$_SESSION['errorMessage'] = [
+		"message" => $errorMessage,
+		"errorCode" => $errorCode
+	];
+
 	header("Location: dashboard.php");
 	exit();
 }

@@ -5,7 +5,6 @@ require_once "methods.php";
 
 if(!isset($_SERVER['REQUEST_METHOD']) || $_SERVER["REQUEST_METHOD"] !== "POST"){
     pageError("403");
-    exit;
 }
 
 $username = $_POST["username"] ?? '';
@@ -84,16 +83,16 @@ try{
 catch(Exception $e){
     $errorType = $e->getMessage();
     $login = [
-        'message' => ERROR_TYPES[$errorType] ?? $errorType,
+        'message' => ERROR_TYPES[$errorType] ?? ERROR_TYPES['default'],
         'errorcode' => $e->getCode(),
         'isLogin' => $isLogin
     ];
 
     $_SESSION['loginError'] = $login;
 
-    error_log("Errore login [" .$login['code'] ."]: " . $login['message']);
+    error_log("Errore login [" .$login['errorcode'] ."]: " . $login['message']);
 
-    http_response_code($login['code']);
+    http_response_code($login['errorcode']);
     header("Location: ../index.php");
     exit;
 }
@@ -105,7 +104,7 @@ finally{
 
 
 function startSession($username){
-$account = getData($username);
+$account = getUserData($username);
 $_SESSION['account'] = serialize($account);
 
 header("Location: dashboard.php");

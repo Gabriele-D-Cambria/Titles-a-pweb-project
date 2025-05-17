@@ -1,0 +1,65 @@
+@keyframes schivata {
+	0% {
+	width: 200px;
+	height: 300px;
+	transform: translate(0, 0);
+	}
+	25% {
+	width: 150px;
+	height: 300px;
+	object-fit: fill;
+	transform: translate(-20px, 0);
+	}
+	50% {
+	/* width: 200px; */
+	height: 300px;
+	transform: translate(20px, 0);
+	}
+	75% {
+	/* width: 180px; */
+	height: 300px;
+	transform: translate(-20px, 0);
+	}
+	100% {
+	/* width: 200px; */
+	height: 300px;
+	transform: translate(0, 0);
+	}
+}
+
+@keyframes attacco {
+	0% {
+	width: 200px;
+	height: 300px;
+	transform: translate(0, 0);
+	}
+	50% {
+	width: 250px;
+	height: 350px;
+	object-fit: fill;
+	transform: translate(+20px, -20px);
+	}
+	100% {
+	/* width: 200px; */
+	height: 300px;
+	transform: translate(0, 0);
+	}
+}
+
+@keyframes idleWait {
+	0% {
+        transform: translateY(0vh);
+    }
+    25% {
+        transform: translateY(-1vh);
+    }
+    50% {
+        transform: translateY(1vh);
+    }
+    75% {
+        transform: translateY(-1vh);
+    }
+    100% {
+        transform: translateY(0vh);
+    }
+}

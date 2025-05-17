@@ -70,6 +70,11 @@
     display: block;
     aspect-ratio: 1 / 1;
     width: 80%;
+    transition: transform 0.15s ease-in-out;
+}
+
+.shop-slot img:hover{
+    transform: scale(1.1);
 }
 
 .shop-slot div{

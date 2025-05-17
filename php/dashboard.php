@@ -17,19 +17,30 @@ if(isset($_SESSION["message"])){
     unset($_SESSION["message"]);
 }
 
+$errorMessage = null;
+if(isset($_SESSION["errorMessage"])){
+    $errorMessage = $_SESSION["errorMessage"];
+    unset($_SESSION["errorMessage"]);
+}
+
 $account = unserialize($_SESSION['account']);
 $user = $account->getAll();
 
-// $user["personaggi"][] = 1;
 $characterList = "";
-foreach ($user["personaggi"] as $character){
-    $characterList .= '<div class="character-item">';
-    $characterList .= "Personaggio che sborra\n";
-    $characterList .= '</div>';
+foreach ($user["personaggi"] as $i => $character){
+    $PG = $character->getAll();
+    $characterList .= "<div id='" . $i ."' class='character-item' data-id='". $PG["nome"]."'>\n";
+    $characterList .= "<div class='pg-info-block'>\n<img src='". $PG["pathImmagine"] ."' alt='Immagine Personaggio'>\n";
+    $characterList .= "<p class='pg-name-box'>" . $PG["nome"] . "</p>\n</div>\n";
+    $characterList .= "<div class='pg-lvl-block'>\n";
+    $characterList .= "<p class='pg-lvl-info'>Livello: " .$PG['livello'] ."</p>\n";
+    $characterList .= "<div class='pg-exp-bar'>\n<div class='pg-exp-points' style='width: ". $PG['exp'] . "%'>";
+    $characterList .= "</div>\n</div>";
+    $characterList .= "</div>\n</div>";
 }
 
 $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI)? 
-'<div id="add-character">Aggiungi un personaggio</div>':
+'<div id="add-character" style="grid-row: span '. 5 - count($user["personaggi"]).'">Aggiungi un personaggio</div>':
 " ";
             
 ?>
@@ -40,6 +51,8 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
     <base href="<?php echo $_SESSION["path"]?>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titles - Dashboard</title>
+    <link rel="icon" href="images/icon.svg" type="image/svg+xml" sizes="16x16" >
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/inventory.css">
@@ -49,8 +62,8 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
     <script>
         const USERNAME = "<?php echo $user["username"]?>";
         const message = <?php echo json_encode($message)?>;
+        const errorMessage = <?php echo json_encode($errorMessage)?>;
     </script>
-    <title>Dashboard</title>
 </head>
 <body>
     <header>
@@ -62,17 +75,17 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
         </aside>
     </header>
     <div class="top-section">
-        <img id="menu" src="images/menu.svg" alt="menu item" class="clickable">
+        <img draggable="false" id="menu" src="images/menu.svg" alt="menu item" class="clickable">
         <div class="user-info">
             <div class="user-pic">
-                <img src="images/profilepic.svg" alt="Profile Pic">
+                <img id="userPic" draggable="false" src="<?php echo $user['immagineProfilo']; ?>" alt="Profile Pic">
             </div>
             <div class="username-box">
                 <p><?php echo $user['username'];?></p>
             </div>
     </div> 
         <div class="coin-display">
-            <img src="images/coin.svg" alt="coin image">
+            <img draggable="false" src="images/coin.svg" alt="coin image">
             <span id="coin-count"><?php echo $user['monete']; ?></span>
         </div>
     </div>
@@ -83,11 +96,11 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
         </aside>
         <aside class="button-container">
             <div id="inventory-btn" class="button inventory-button">
-                <img src="images/inventoryPic.svg" alt="Immagine Inventario">
+                <img draggable="false" src="images/inventoryPic.svg" alt="Immagine Inventario">
                 <p>Inventario</p>
             </div> 
             <div id="shop-btn" class="button shop-button">
-                <img src="images/shopPic.svg" alt="Immagine Shop">
+                <img draggable="false" src="images/shopPic.svg" alt="Immagine Shop">
                 <p>Negozio</p>
             </div> 
         </aside>
