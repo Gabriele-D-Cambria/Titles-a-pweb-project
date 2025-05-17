@@ -1,6 +1,9 @@
 <?php
     session_start();
-    require_once('methods.php');
+    session_unset();
+    session_destroy();
+
+    require_once 'methods.php';
 
     if(!isset($_SESSION["path"])){
         $_SESSION["path"] = setPath();

@@ -1,7 +1,7 @@
 <?php
-session_start();
-
 require_once "../methods.php";
+
+session_start();
 
 if(!isset($_SESSION["account"])){
 	apiError(401);

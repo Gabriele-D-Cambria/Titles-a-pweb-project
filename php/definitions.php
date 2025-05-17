@@ -1,21 +1,73 @@
 <?php
+if (basename($_SERVER['PHP_SELF']) === 'definitions.php') {
+    pageError(403);
+}
 
 define("CONN_STRING", "mysql:host=localhost;dbname=lista_iscritti");
 define("DATABASE", "cambria_672642");
 define("DB_HOST", "localhost");
 define("DB_USER", "root");
 define("DB_PWD", "");
+
 define('USERNAME_PATTERN', "/^[a-zA-Z][a-zA-Z0-9_.]{2,9}$/");
+define("VALID_USERNAME", "User.0_");
 
 //? source: https://stackoverflow.com/questions/19605150/regex-for-password-must-contain-at-least-eight-characters-at-least-one-number-a
 define('PASSWORD_PATTERN', "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,15}$/");
 //? endsource
+define("VALID_PASSWORD", "Password1!");
 
+define('ERROR_TYPES', [
+    'invalid_username'          => "Username non valido. Deve iniziare con una lettera e avere tra 3 e 10 caratteri.",
+    'username_taken'            => "Username già esistente.",
+    'username_same_as_current'  => "Stai già utilizzando questo username.",
+    'username_not_found'        => "L'username non esiste.",
+    'invalid_password'          => "Password non valida. Deve contenere almeno 8 caratteri e non più di 15, una lettera maiuscola, una minuscola, un numero e un carattere speciale.",
+    'password_mismatch'         => "Le password non corrispondono.",
+    'wrong_password'            => "Password errata, ritenta.",
+    'wrong_password_on_delete'  => "Password errata.\nAccount non eliminato.",
+    'password_same_as_current'  => "La nuova password non deve essere uguale a quella attuale.",
+    'registration_failed'       => "Registrazione fallita. Riprova.",
+    'connection_failed'         => "Il server non è al momento disponibile.\nRiprovare tra un po'.",
+    'invalid_param'             => "I parametri forniti non sono corretti.",
+    'update_failed'             => "C'è stato un problema durante l'aggiornamento.\nRiprova tra un po'."
+]);
+
+/**
+ * Quantità minima di monete delle box comuni
+ */
 define("MIN_COIN_COMMON", 5);
+
+/**
+ * Quantità massima di monete delle box comuni
+ */
 define("MAX_COIN_COMMON", 10);
+
+/**
+ * Quantità minima di monete delle box rare
+ */
 define("MIN_COIN_RARE", 15);
+
+/**
+ * Quantità massima di monete delle box rare
+ */
 define("MAX_COIN_RARE", 20);
+
+/**
+ * Numero massimo di Item diversi in un inventario
+ */
 define("MAX_ITEMS", value: 40);
+
+/**
+ * Numero massimo di Item diversi in un negozio
+ */
+define("MAX_SHOP_ITEMS", 10);
+
+/**
+ * Intervallo temporale del refresh del negozio
+ */
+define('SHOP_TIMER_RESET_SECONDS', value: 3*60);
+
 
 /**
  * Informazioni sull'account con riferimento ai personaggi
@@ -27,11 +79,13 @@ class Account{
     private $username;
     private $monete;
     private $personaggi = [];
+    private $shopRefresh;
 
-    public function __construct($id, $username, $monete){
+    public function __construct($id, $username, $monete, $shopRefresh){
         $this->id = $id;
         $this->username = $username;
         $this->monete = $monete;
+        $this->shopRefresh = $shopRefresh;
     }
 
     public function getId() {
@@ -45,6 +99,9 @@ class Account{
     public function getMonete() {
         return $this->monete;
     }
+    public function getShopRefresh() {
+        return $this->shopRefresh;
+    }
 
     public function getPersonaggi() {
         return $this->personaggi;
@@ -55,27 +112,56 @@ class Account{
             'id' => $this->id,
             'username' => $this->username,
             'monete' => $this->monete,
-            'personaggi' => $this->personaggi
+            'personaggi' => $this->personaggi,
+            'shopRefresh' => $this->shopRefresh
         ];
     }
 
     /**
      * Modifica la quantità di monete del personaggio
-     * @param bool $spending se true indica che si sta spendendo, altrimenti che si stà guadagnando
-     * @param int $amount indica il quantitativo di monete utilizzate
-     * @return bool Se true la funzione ha avuto effetto correttamente; false indica che la quantità di monete è inferiore a quella necessaria per comprare l'oggetto.
+     * @param bool $spending se true indica che si sta spendendo, altrimenti che si sta guadagnando
+     * @param int $amount indica il quantitativo di monete
+     * @return bool Se true la funzione ha avuto effetto correttamente; false indica che '$amount' inteso come spesa è maggiore delle monete attualmente presenti nell'account
      */
     public function modifyCoins($spending, $amount){
+        if($amount < 0)
+            $amount = -$amount;
         if($spending){
-            if($this->monete < $amount){
+            if($this->monete < $amount)
                 return false;
-            }
             $this->monete -= $amount;
         }
         else{
             $this->monete += $amount;
         }
         return true;
+    }
+
+    /**
+     * Aggiorna shopRefresh
+     * @param DateTime $newTime nuovo Datetime, successivo al Datetime attuale
+     * @return bool esito dell'aggiornamento
+     */
+    public function updateShopTimer($newTime){
+        if($this->shopRefresh <= $newTime){
+            $this->shopRefresh = $newTime;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Aggiorna l'username
+     * @param string $newUsername nuovo username, diverso da quello attuale
+     * @return bool esito dell'operazione
+     */
+    public function updateUsername($newUsername){
+        if($this->username !== $newUsername){
+            $this->username = $newUsername;
+            return true;
+        }
+
+        return false;
     }
 
     /**

@@ -1,13 +1,25 @@
 <?php
-    session_start();
 
-    require_once "./php/methods.php";
+session_start();
 
-    if(!isset($_SESSION["path"])){
-        $_SESSION["path"] = setPath();
-    }
-    $error = isset($_GET["error"]) ? $_GET["error"] : null;
-    $isLogin = isset($_GET["isLogin"]) ? ($_GET["isLogin"] === 'true' || $_GET["isLogin"] === '1') : null;
+require_once "./php/methods.php";
+
+if(!isset($_SESSION["path"])){
+    $_SESSION["path"] = setPath();
+}
+
+$message = null;
+$loginError = null;
+
+if(isset($_SESSION["loginError"])){
+    $loginError = $_SESSION["loginError"];
+    unset($_SESSION["loginError"]);
+}
+
+if(isset($_SESSION["message"])){
+    $message = $_SESSION["message"];
+    unset($_SESSION["message"]);
+}
 ?>
 
 
@@ -15,14 +27,14 @@
 <html lang="it">
 <head>
     <base href="<?php echo $_SESSION["path"];?>">
-    <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/index.css">
     <script type="module" src="js/index.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
-        const error = "<?php echo $error; ?>";
-        const isLogin = <?php echo json_encode($isLogin); ?>;
+        const loginError = <?php echo json_encode($loginError); ?>;
+        const message = <?php echo json_encode($message)?>;
     </script>
     <title>Titles</title>
 </head>

@@ -37,7 +37,6 @@ button:hover, button:focus{
 button:disabled {
     background-color: #444;
     color: #888;
-    /* border: 1px solid #666; */
     cursor: default;
     opacity: 0.6;
     box-shadow: none;
@@ -57,6 +56,10 @@ a:hover{
     color: #3498db;
 }
 
+*.caricamento{
+    cursor: progress !important;
+}
+
 .module {
     display: flex;
     position: fixed;
@@ -73,9 +76,79 @@ a:hover{
     transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
 }
 
-.module.show{
+.show{
     opacity: 1;
     visibility: visible;
+}
+
+.module p, .module figure *, .module table *{
+    color: black;
+}
+.module form label {
+    display: block;
+    color: #e0e0e0;
+}
+
+.module form input[type="text"],
+.module form input[type="password"] {
+    width: fit-content;
+    padding: 10px;
+    border-radius: 5px;
+    color: #e0e0e0;
+}
+
+.module form input#username:invalid,
+.module form input#password:invalid,
+.module form input.invalid {
+    border: 1px solid #e74c3c;
+    background-color: rgba(231, 76, 60, 0.1);
+    box-shadow: 0 0 5px rgba(231, 76, 60, 0.5);
+}
+
+.module form input#username:valid,
+.module form input#password:valid,
+.module form input.valid{
+    border: 1px solid #2ecc71;
+    background-color: rgba(46, 204, 113, 0.1);
+    box-shadow: 0 0 5px rgba(46, 204, 113, 0.5);
+}
+
+
+.password-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-container input[type="password"],
+.password-container input[type="text"]{
+    flex: 1;
+    margin: 0;
+    line-height: 1;
+}
+
+.password-container .toggle-password {
+    position: absolute;
+    right: 10px;
+    padding: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #2980b9;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    box-shadow: none;
+}
+
+.password-container .toggle-password:hover {
+    color: #3498db;
+    text-shadow:
+        -1px -1px 0 #1e1e1e,
+         1px -1px 0 #1e1e1e,
+        -1px  1px 0 #1e1e1e,
+         1px  1px 0 #1e1e1e;
 }
 
 
@@ -90,10 +163,15 @@ a:hover{
     padding: 10px 20px;
     border-radius: 5px;
     z-index: 1000;
+    text-align: center;
     transition: opacity 1s ease, transform 1s ease;
 }
 
-
+.messaggio.errore{
+    background-color: rgb(214, 49, 31);
+    text-align: center;
+    font-weight: bold;
+}
 
 /* 
 Orange Elements

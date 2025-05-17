@@ -1,5 +1,9 @@
 <?php
+if (basename($_SERVER['PHP_SELF']) === 'methods.php') {
+    pageError(403);
+}
 
+ini_set("display_errors", "0");
 require_once "definitions.php";
 
 /**
@@ -19,6 +23,71 @@ function setPath(){
 }
 
 
+/**
+ * Funzione che reindirizza un errore
+ * @param string $errorCode codice di errore da passare alla "errorPage.php"
+ * @param string $prefix path che porta alla "errorPage.php"
+ * @return never
+ */
+function pageError($errorCode, $prefix = ""){
+    header("Location: ". $prefix ."errorPage.php/?error_code=". $errorCode);
+    exit();
+}
+
+/**
+ * Funzione che reindirizza un errore di un'API
+ * @param int $errorCode Codice di errore HTTP (default: 500)
+ * @param string|null $message Messaggio di errore personalizzato (default: null)
+ * @return never
+ */
+function apiError($errorCode = 500, $message = null) {
+    if ($message === null) {
+        $message = match ($errorCode) {
+            400 => "Richiesta non valida",
+            401 => "Non autorizzato",
+            403 => "Accesso negato",
+            404 => "Risorsa non trovata",
+            500 => "Errore interno del server",
+            default => "Errore Sconosciuto"
+        };
+    }
+
+    error_log("Errore API [" .$errorCode ."]: " .$message);
+
+    http_response_code($errorCode);
+    echo json_encode([
+        "error" => true,
+        "code" => $errorCode,
+        "message" => $message
+    ]);
+    exit();
+}
+
+/**
+ * Valida gli input dell'utente per i campi username, password e confermaPassword
+ * @param string|null $username Username da validare.
+ * @param string|null $password Password da Validare.
+ * @param string|null $confirmPassword Conferma Password da Validare.
+ * 
+ * @return string Restituisce una stringa se la validazione fallisce:
+ *      - "invalid_username" se $username non corrisponde all'USERNAME_PATTERN
+ *      - "invalid_password" se $password non corrisponde al PASSWORD_PATTERN
+ *      - "password_mismatch" se $confirmPassword non corrisponde a $password.
+ * Se tutti gli input sono validi restituisce una stringa vuota.
+ */
+function validateInputs($username, $password, $confirmPassword){
+    if(is_null($username) || !preg_match(USERNAME_PATTERN, $username))
+        return "invalid_username";
+
+    if(is_null($username) || !preg_match(PASSWORD_PATTERN, $password))
+        return "invalid_password";
+
+    if(!empty($confirmPassword) && $confirmPassword !== $password)
+            return "password_mismatch";
+
+    return '';
+}
+
 
 /**
  * Ritorna un elemento Account dato un username
@@ -26,387 +95,726 @@ function setPath(){
  * @param mixed $conn : connessione da utilizzare
  * @return Account|null
  */
-function getData($username, $conn = null){
-    if(!isset($conn)){
-        $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
-        if($conn->connect_error){
-            pageError('500');
+function getData($username){
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+    if($conn->connect_error)
+        apiError(500, "Connessione al database fallita: " . $conn->connect_error);
+
+    $stmt = null;
+    $stmtPersonaggi = null;
+
+    try {
+        $sql = "SELECT ID, Username, Monete, RefreshNegozio
+                FROM Account
+                WHERE Username = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('s', $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if($result->num_rows > 0){
+            $row = $result->fetch_assoc();
+            $dateTime = new DateTime($row['RefreshNegozio']);
+            $user = new Account($row['ID'], $row['Username'], $row['Monete'], $dateTime);
+
+            $sqlPersonaggi = "SELECT *
+                              FROM Personaggi
+                              WHERE Proprietario = ?";
+            $stmtPersonaggi = $conn->prepare($sqlPersonaggi);
+            $stmtPersonaggi->bind_param('i', $row["ID"]);
+            $stmtPersonaggi->execute();
+            $resultPersonaggi = $stmtPersonaggi->get_result();
+
+            while($personaggioRow = $resultPersonaggi->fetch_assoc()){
+                $personaggio = new Personaggio(
+                    $personaggioRow['Nome'],
+                    $row['ID'],
+                    $personaggioRow['Forza'],
+                    $personaggioRow['Destrezza'],
+                    $personaggioRow['PuntiVita'],
+                    $personaggioRow['Elemento'],
+                    $personaggioRow['Armatura'],
+                    $personaggioRow['Arma'],
+                    $personaggioRow['Livello'],
+                    $personaggioRow['PuntiExp'],
+                    $personaggioRow['PuntiUpgrade']
+                );
+                $user->addPersonaggio($personaggio);
+            }
+            return $user;
+        }
+        else{
+            // Nessun Account trovato
+            return null;
         }
     }
-
-    $stmt = $conn->prepare("SELECT ID, Username, Monete FROM Account WHERE Username = ?");
-    if ($stmt === false) {
-        die('Prepare failed: ' . htmlspecialchars($conn->error));
+    catch (Exception $e) {
+        apiError(500, "Errore in getData: " . $e->getMessage());
     }
-    $stmt->bind_param('s', $username);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $stmt->close();
-
-    if($result->num_rows > 0){
-        $row = $result->fetch_assoc();
-        $user = new Account($row['ID'], $row['Username'], $row['Monete']);
-
-
-        $stmtPersonaggi = $conn->prepare("SELECT * FROM Personaggi WHERE Proprietario = ?;");
-        $stmtPersonaggi->bind_param('i', $row["ID"]);
-        $stmtPersonaggi->execute();
-        $resultPersonaggi = $stmtPersonaggi->get_result();
-        $stmtPersonaggi->close();
-
-        while($personaggioRow = $resultPersonaggi->fetch_assoc()){
-            $personaggio = new Personaggio(
-                $personaggioRow['Nome'],
-                $row['ID'],
-                $personaggioRow['Forza'],
-                $personaggioRow['Destrezza'],
-                $personaggioRow['PuntiVita'],
-                $personaggioRow['Elemento'],
-                $personaggioRow['Armatura'],
-                $personaggioRow['Arma'],
-                $personaggioRow['Livello'],
-                $personaggioRow['PuntiExp'],
-                $personaggioRow['PuntiUpgrade']
-            );
-            $user->addPersonaggio($personaggio);
-        }
-
+    finally{
+        if ($stmt) $stmt->close();
+        if ($stmtPersonaggi) $stmtPersonaggi->close();
         $conn->close();
-        return $user;
-    }
-    else{
-
-        $conn->close();
-        return null;
     }
 }
 
-/**
- * Funzione che reindirizza un errore
- * @param string $errorCode codice di errore da passare alla 'error page.php'
- * @return never
- */
-function pageError($errorCode){
-    header("Location: error page.php/?error_code=". $errorCode);
-    exit();
-}
-
-
-/**
- * Funzione che reindirizza un errore di un API
- * @param string $errorCode codice di errore da passare
- * @return never
- */
-function apiError($errorCode){
-    http_response_code($errorCode);
-    echo json_encode(["errore" => $errorCode]);
-    exit();
-}
-
-/**
- * Funzione che termina la procedura di login riportando un errore tramite GET
- * @param string $errorType indica il tipo di errore
- * @param bool $isLogin indica se l'errore si è effettuato durante il login o il sign-up
- * @return never
- */
-function terminateLogin($errorType, $isLogin){
-    $errorType = urlencode($errorType);
-    $isLogin = urlencode($isLogin);
-
-    header("Location: ../index.php?error=" . $errorType . "&isLogin=". $isLogin);
-    exit();
-}
 
 /**
  * Recupera l'invetario di un'account dal database
  * @param int $accountID ID dell'account
- * @param mysqli $conn connessione | Default : null e la inizializza
  * @return array contenente gli item nell'inventario e la loro quantità
  */
-function getInventory($accountID, $conn = null){
-    if(!isset($conn)){
-        $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
-        if($conn->connect_error){
-            pageError('500');
+function getInventory($accountID){
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+    if($conn->connect_error){
+        apiError(500, "Connessione al database fallita: " . $conn->connect_error);
+    }
+
+    $stmt = null;
+    try{
+        $sql = "SELECT Item.*, Inventario.Quantita
+                FROM Inventario
+                    JOIN Item ON Inventario.Oggetto = Item.ID
+                WHERE Inventario.Proprietario = ?;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $accountID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $output = [];
+        $output["MAX_SIZE"] = MAX_ITEMS;
+        $inventory = [];
+        while($row = $result->fetch_assoc()){
+            $inventory[] = $row;
         }
-    }
 
-    $sql = "SELECT Item.*, Inventario.Quantita
-            FROM Inventario
-                JOIN Item ON Inventario.Oggetto = Item.ID
-            WHERE Inventario.Proprietario = ?;";
-
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $accountID);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $stmt->close();
-    $conn->close();
-
-    $output = [];
-    $output["MAX_SIZE"] = MAX_ITEMS;
-    $inventory = [];
-    while($row = $result->fetch_assoc()){
-        $inventory[] = $row;
-    }
-
-    $output["inventario"] = $inventory;
+        $output["inventario"] = $inventory;
 
     return $output;
+    }
+    catch(Exception $e){
+        apiError(500, "Errore durante il recupero dell'inventario: " . $e->getMessage());
+    }
+    finally {
+        if($stmt)  $stmt->close();
+        $conn->close();
+    }
 }
 
 /**
- * Dato un oggetto in un'account, diminuisco la quantità di uno dell'oggetto. Qualora la rimanente sia 0 lo rimuovo
+ * Diminuisce la quantità di un oggetto nell'inventario di un account. Se la quantità raggiunge 0, l'oggetto viene rimosso.
  * @param int $itemId ID dell'oggetto
- * @param int $accountId id dell'account
- * @param int $itemQuantity quantità attuale dell'oggetto | se non fornita viene recuperata a partire da itemId e accountId
- * @param mysqli &$conn : connessione al server
- * @return int quantità aggiornata
+ * @param int $accountId ID dell'account
+ * @param int|null $currentQuantity Quantità attuale dell'oggetto (se non fornita, viene recuperata dal database)
+ * @param mysqli $conn Connessione al server passata per riferimento
+ * @return int Quantità aggiornata
  */
 function removeOneItem($itemId, $accountId, $currentQuantity, &$conn){
-    if(is_null($currentQuantity)){
-        $sqlQuantity = "SELECT Quantita FROM Inventario WHERE Proprietario = ? AND Oggetto = ?";
-        $stmtQuantity = $conn->prepare($sqlQuantity);
-        $stmtQuantity->bind_param('ii', $accountId, $itemId);
-        $stmtQuantity->execute();
-        $result = $stmtQuantity->get_result();
-        $quantityArr = $result->fetch_assoc();
-        $stmtQuantity->close();
-        $currentQuantity = $quantityArr["Quantita"];
-    }
-    $newQuantity = $currentQuantity - 1;
-    if($newQuantity > 0){
-        $updateSql = "UPDATE Inventario SET Quantita = Quantita - 1 WHERE Oggetto = ? AND Proprietario = ?;";
-        $updateStmt = $conn->prepare($updateSql);
-        $updateStmt->bind_param("ii", $itemId, $accountId);
-        $updateStmt->execute();
-        $updateStmt->close();
-    }
-    else{
-        $deleteSql = "DELETE FROM Inventario WHERE Oggetto = ? AND Proprietario = ?";
-        $deleteStmt = $conn->prepare($deleteSql);
-        $deleteStmt->bind_param("ii", $itemId, $accountId);
-        $deleteStmt->execute();
-        $deleteStmt->close();
-    }
+    if($conn->connect_error)
+        apiError(500, "Connessione al database fallita: " . $conn->connect_error);
 
-    return $newQuantity;
-}
-/**
- * Agguinge uno o più item all'account
- * @param int $itemId id dell'item da aggiungere
- * @param int $accountId id dell'account
- * @param int $quantity quantità da aggiungere
- * @param mysqli $conn riferimento alla connessione al server da usare
- * @return int nuova quantità
- */
-function addOneItem($itemId, $accountId, &$conn){
-    $sqlQuantita = "SELECT Quantita FROM Inventario WHERE Proprietario = ? AND Oggetto = ?";
-    $stmtQuantita = $conn->prepare($sqlQuantita);
-    $stmtQuantita->bind_param('ii', $accountId, $itemId);
-    $stmtQuantita->execute();
-    $result = $stmtQuantita->get_result();
-    $currentQuantityArr = $result->fetch_assoc();
-    $stmtQuantita->close();
-    $currentQuantity = ($currentQuantityArr === null)? 0 : $currentQuantityArr["Quantita"];
+    $stmtQuantity = null;
+    $updateStmt = null;
+    $deleteStmt = null;
 
-    $newQuantity = $currentQuantity + 1;
+    try{
+        if(is_null($currentQuantity)){
+            $sqlQuantity = "SELECT Quantita
+                            FROM Inventario
+                            WHERE Proprietario = ? AND Oggetto = ?";
+            $stmtQuantity = $conn->prepare($sqlQuantity);
+            $stmtQuantity->bind_param('ii', $accountId, $itemId);
+            $stmtQuantity->execute();
+            $result = $stmtQuantity->get_result();
+            $quantityArr = $result->fetch_assoc();
+            if(!$quantityArr){
+                throw new Exception("Oggetto non trovato nell'Inventario");
+            }
 
-    if($newQuantity > 1){
-        $updateSql = "UPDATE Inventario SET Quantita = Quantita + 1 WHERE Oggetto = ? AND Proprietario = ?;";
-        $updateStmt = $conn->prepare($updateSql);
-        $updateStmt->bind_param("ii", $itemId, $accountId);
-        $updateStmt->execute();
-        $updateStmt->close();
+            $currentQuantity = $quantityArr["Quantita"];
+        }
+        $newQuantity = $currentQuantity - 1;
+
+        if($newQuantity > 0){
+            // Aggiorno la quantità
+            $updateSql = "UPDATE Inventario SET Quantita = ? WHERE Oggetto = ? AND Proprietario = ?;";
+            $updateStmt = $conn->prepare($updateSql);
+            $updateStmt->bind_param("iii", $newQuantity, $itemId, $accountId);
+
+            if(!$updateStmt->execute())
+                throw new Exception("Errore nell'aggiornamento della quantità dell'oggetto con ID: ". $itemId . " per l'account: ". $accountId);
+        }
+        else {
+            // Rimuovo l'oggetto dall'inventario
+            $deleteSql = "DELETE FROM Inventario WHERE Oggetto = ? AND Proprietario = ?";
+            $deleteStmt = $conn->prepare($deleteSql);
+            $deleteStmt->bind_param("ii", $itemId, $accountId);
+            if(!$deleteStmt->execute())
+                throw new Exception("Errore nella rimozione dell'oggetto con ID: ". $itemId . " per l'account: ". $accountId);
+
+        }
+
+        return $newQuantity;
     }
-    else{
-        $insertSql = "INSERT INTO Inventario(Proprietario, Oggetto) VALUES (?, ?)";
-        $insertStmt = $conn->prepare($insertSql);
-        $insertStmt->bind_param("ii", $accountId, $itemId);
-        $insertStmt->execute();
-        $insertStmt->close();
+    catch(Exception $e) {
+        apiError(500, "Errore durante la rimozione dell'oggetto:" . $e->getMessage());
     }
-
-    return $newQuantity;
+    finally {
+        if($stmtQuantity)   $stmtQuantity->close();
+        if($updateStmt)     $updateStmt->close();
+        if($deleteStmt)     $deleteStmt->close();
+    }
 }
 
 /**
- * Funzione che aggiorna la quantità di monete nel database
- * @param int $accountId id dell'account
- * @param int $price quantità di monete da aggiungere o togliere
- * @param mysqli $conn connessione da utilizzare per la connessione
+ * Aggiunge uno o più oggetti all'inventario di un account, se c'è spazio disponibile.
+ * @param int $itemId ID dell'oggetto da aggiungere
+ * @param int $accountId ID dell'account
+ * @param mysqli $conn Connessione al server
+ * @return int Quantità aggiornata dell'oggetto, o 0 se l'inserimento non è possibile
  */
-function updateCoins($accountId, $price, &$conn){
-    $guadagno = $price;
-    $updateCoinsSql = "UPDATE Account SET Monete = Monete + ? WHERE ID = ?";
-    $coinsStmt = $conn->prepare($updateCoinsSql);
-    $coinsStmt->bind_param("ii", $guadagno, $accountId);
-    $coinsStmt->execute();
-    return $guadagno;
+function addOneItem($itemId, $accountId, &$conn): int{
+    if($conn->connect_error)
+        apiError(500, "Connessione al database fallita: " . $conn->connect_error);
+
+    $conn->begin_transaction();
+    $stmtCount = null;
+    $stmtQuantita = null;
+    $updateStmt = null;
+    $insertStmt = null;
+
+    try {
+        // Verifico lo spazio disponibile nell'inventario
+        $sqlCount = "SELECT COUNT(*) AS dimensione
+                     FROM Inventario
+                     WHERE Proprietario = ?";
+        $stmtCount = $conn->prepare($sqlCount);
+        $stmtCount->bind_param('i', $accountId);
+        $stmtCount->execute();
+        $result = $stmtCount->get_result();
+        $count= $result->fetch_assoc();
+
+
+        if($count['dimensione'] + 1 == MAX_ITEMS){
+            return 0;
+        }
+
+        // Recupero la quantità attuale dell'oggetto
+        $sqlQuantita = "SELECT Quantita
+                    FROM Inventario
+                    WHERE Proprietario = ? AND Oggetto = ?";
+        $stmtQuantita = $conn->prepare($sqlQuantita);
+        $stmtQuantita->bind_param('ii', $accountId, $itemId);
+        $stmtQuantita->execute();
+        $result = $stmtQuantita->get_result();
+        $currentQuantityArr = $result->fetch_assoc();
+
+        $currentQuantity = $currentQuantityArr? $currentQuantityArr["Quantita"] : 0;
+        $newQuantity = $currentQuantity + 1;
+
+
+        if($currentQuantity > 0){
+            // Oggetto presente, ne aggiorno la quantità
+            $updateSql = "UPDATE Inventario SET Quantita = ? WHERE Oggetto = ? AND Proprietario = ?;";
+            $updateStmt = $conn->prepare($updateSql);
+            $updateStmt->bind_param("iii", $newQuantity, $itemId, $accountId);
+            if(!$updateStmt->execute())
+                throw new Exception("Errore durante l'aggiornamento della quantità dell'oggetto di ID: ". $itemId . " per l'account " . $accountId);
+
+        }
+        else{
+            $insertSql = "INSERT INTO Inventario(Proprietario, Oggetto) VALUES (?, ?)";
+            $insertStmt = $conn->prepare($insertSql);
+            $insertStmt->bind_param("ii", $accountId, $itemId);
+            if(!$insertStmt->execute())
+                throw new Exception("Errore durante l'inserimento dell'oggetto di ID: ". $itemId . " per l'account " . $accountId);
+
+        }
+
+        $conn->commit();
+
+        return $newQuantity;
+    }
+    catch (Exception $e) {
+        $conn->rollback();
+        apiError(500, "Errore durante l'aggiunta dell'oggetto: " . $e->getMessage());
+    }
+    finally {
+        if($stmtCount)      $stmtCount->close();
+        if($stmtQuantita)   $stmtQuantita->close();
+        if($updateStmt)     $updateStmt->close();
+        if($insertStmt)     $insertStmt->close();
+    }
+}
+
+/**
+ * Aggiorna la quantità di monete di un account nel database
+ * @param int $accountId ID dell'account
+ * @param int $amount Quantità di monete da aggiungere o sottrarre
+ * @param mysqli $conn Connessione al database
+ * @return int Restituisce il numero di monete aggiunte o -1 in caso di errore
+ */
+function updateCoins($accountId, $amount, &$conn){
+    if($conn->connect_error)
+        apiError(500, "Connessione al database fallita: " . $conn->connect_error);
+
+    $conn->begin_transaction();
+    $stmt = null;
+
+    try{
+        $updateCoinsSql = "UPDATE Account SET Monete = Monete + ? WHERE ID = ?";
+        $stmt = $conn->prepare($updateCoinsSql);
+        $stmt->bind_param("ii", $amount, $accountId);
+
+        if(!$stmt->execute()){
+            throw new Exception("Errore durante l'aggiornamento delle monete: " . $stmt->error);
+        }
+
+        if($stmt->affected_rows === 0){
+            throw new Exception("Nessuna riga aggiornata. L'account ". $accountId ." potrebbe non esistere");
+        }
+
+        $conn->commit();
+        return $amount;
+    }
+    catch (Exception $e){
+        $conn->rollback();
+        error_log("Errore in updateCoins: " . $e->getMessage());
+        return -1;
+    }
+    finally{
+        if($stmt)  $stmt->close();
+    }
 }
 
 /**
  * Funzione API che vende un oggetto dell'account
- * @param int $itemId id dell'oggetto
- * @param int $accountId id dell'account
+ * @param int $itemId ID dell'oggetto
+ * @param int $accountId ID dell'account
  * @return array{errore: string|array{guadagno: int, rimosso: bool, successo: bool}} contiene informazioni sull'esito della richiesta
  */
 function sellItem($itemId, $accountId){
     $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
-    if($conn->connect_error){
-        apiError('500');
-    }
+    if($conn->connect_error)
+        apiError(500, "Connessione al database fallita: " . $conn->connect_error);
+
     $conn->begin_transaction();
+    $stmt = null;
 
     try{
+        // Recupero l'oggetto dall'Inventario
         $sql = "SELECT I.Quantita, It.Costo
                 FROM Inventario I JOIN Item It ON I.Oggetto = It.ID
                 WHERE I.Oggetto = ? AND I.Proprietario = ?;";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("ii", $itemId, $accountId);
+
         $stmt->execute();
         $result = $stmt->get_result();
         $item = $result->fetch_assoc();
 
-        if(!$item)
-            return ["errore" => "Item not found in inventory."];
+        if(!$item){
+            // Oggetto non nell'inventario
+            $conn->rollback();
+            return ["errore" => "Item non presente nell'Inventario!"];
+        }
 
+        // Rimuovo l'oggetto
         $newQuantity = removeOneItem($itemId, $accountId,$item["Quantita"], $conn);
 
         // Aggiorno le monete ottenute
         $guadagno = updateCoins($accountId, floor($item['Costo'] / 2), $conn);
 
+        if($guadagno === -1){
+            throw new Exception("Errore durante l'aggiornamento delle monete");
+        }
+
         $conn->commit();
-        $esito =  ["successo" => true, "guadagno" => $guadagno, "rimosso" => ($newQuantity === 0)];
+        return [
+            "successo" => true,
+            "guadagno" => $guadagno,
+            "rimosso" => ($newQuantity === 0)
+        ];
     }
     catch(Exception $e){
         $conn->rollback();
-        $esito =  ["errore" => "Fallimento: ". $e->getMessage()];
+        error_log("Errore in sellItem: ". $e->getMessage());
+        return ["errore" => "Fallimento: ". $e->getMessage()];
     }
     finally{
-        $stmt->close();
+        if($stmt)   $stmt->close();
         $conn->close();
     }
 
-    return $esito;
+}
+/**
+ * Funzione API che permette di acquistare un oggetto dal negozio
+ * @param int $itemId ID dell'oggetto da acquistare
+ * @param int $accountId ID dell'account che effettua l'acquisto
+ * @return array Esito dell'acquisto con eventuali dettagli o errori
+ */
+function buyItem($itemId, $accountId){
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+
+    if($conn->connect_error){
+        apiError(500, "Connessione al database fallita: " . $conn->connect_error);
+    }
+
+    $conn->begin_transaction();
+    $stmtInShop = null;
+    $stmtSpesa = null;
+
+    try {
+        // Verifico che l'oggetto sia presente nel negozio
+        $sqlInShop = "SELECT N.Oggetto
+                      FROM Negozio N
+                      WHERE N.Proprietario = ? AND N.Oggetto = ?";
+        $stmtInShop = $conn->prepare($sqlInShop);
+        $stmtInShop->bind_param("ii", $accountId, $itemId);
+        $stmtInShop->execute();
+        $result = $stmtInShop->get_result();
+
+        $item = $result->fetch_assoc();
+
+        if(!$item){
+            $conn->rollback();
+            return ["errore" => "Item non presente nel Negozio!"];
+        }
+
+        // Recupero il costo
+        $sqlGetPrice = "SELECT Costo
+                        FROM Item
+                        WHERE ID = ?";
+        $stmtSpesa = $conn->prepare($sqlGetPrice);
+        $stmtSpesa->bind_param('i', $itemId);
+
+        $stmtSpesa->execute();
+        $result = $stmtSpesa->get_result();
+        $costo = $result->fetch_assoc();
+
+        if(!$costo){
+            throw new Exception("Costo dell'oggetto non trovato.");
+        }
+
+        $spesa = -$costo["Costo"];
+        if(updateCoins($accountId, $spesa, $conn) === -1){
+            throw new Exception("Fondi insufficienti per completare l'acquisto");
+        }
+
+        if(!addOneItem($itemId, $accountId, $conn)){
+            throw new Exception("Spazio insufficente nell'invetario.");
+        }
+
+        $conn->commit();
+        return [
+            "successo" => true,
+            "spesa" => $spesa
+        ];
+
+    } catch (Exception $e) {
+        $conn->rollback();
+        error_log("Errore in buyItem: ". $e->getMessage());
+        return ["errore" => "Fallimento: " . $e->getMessage()];
+    }
+    finally{
+        if($stmtInShop) $stmtInShop->close();
+        if($stmtSpesa)  $stmtSpesa->close();
+        $conn->close();
+    }
 }
 
 /**
  * Funzione che dato un box restituisce un array contenente degli oggetti estratti casualmente secondo delle regole
- * @param array $box : deve avere due campi, id e nome, entrambi riferiti alla box
- * @param mixed $accountId: id dell'account
- * @param mysqli $conn connessione | Default : null e la inizializza
- * @return array{errore: string|array{successo: bool}} array ocntenente l'esito dell'operazione
+ * @param array $box Deve avere due campi: id e nome, entrambi riferiti alla box
+ * @param mixed $accountId: ID dell'account
+ * @return array Esito dell'operazione con eventuali dettagli o errori
  */
-function openBox($box, $accountId, $conn = null){
-    if(!isset($conn)){
-        $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
-        if($conn->connect_error){
-            apiError('500');
+function openBox($box, $accountId){
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+    if($conn->connect_error){
+        apiError(500, "Connessione al database fallita: " . $conn->connect_error);
+    }
+
+    $stmtCount = null;
+    $stmtGetItems = null;
+
+    try{
+        // Verifico lo spazio disponibile nell'inventario
+        $sqlCount = "SELECT COUNT(*) AS conto FROM Inventario WHERE Proprietario = ?";
+        $stmtCount = $conn->prepare($sqlCount);
+        $stmtCount->bind_param('i', $accountId);
+        $stmtCount->execute();
+        $result = $stmtCount->get_result();
+        $count= $result->fetch_assoc();
+
+        if(!$count){
+            throw new Exception("Immpossibile recuperare la dimensione dell'inventario. L'account ". $accountId ." potrebbe non esistere");
         }
-    }
 
-    $sqlCount = "SELECT COUNT(*) AS conto FROM Inventario WHERE Proprietario = ?";
-    $stmtCount = $conn->prepare($sqlCount);
-    $stmtCount->bind_param('i', $accountId);
-    $stmtCount->execute();
-    $result = $stmtCount->get_result();
-    $count= $result->fetch_assoc();
-    $stmtCount->close();
+        $added = ($box["nome"] === "Box Comune")? 3 : 6;
+        if($count["conto"] + $added >= MAX_ITEMS){
+            return ["full" => true];
+        }
 
-    $added = ($box["nome"] === "Box Comune")? 3 : 6;
-    if($count["conto"] + $added >= MAX_ITEMS){
-        $conn->close();
-        $esito = ["full" => true];
-    }
-    else{
 
         $conn->begin_transaction();
 
-        try{
-            $sqlGetItems = "SELECT ID, Tipologia
-                            FROM Item
-                            WHERE Tipologia != 'box'
-                            ORDER BY Tipologia";
+        // Recupero tutti gli oggetti disponibili tranne le box
+        $sqlGetItems = "SELECT ID, Tipologia
+                        FROM Item
+                        WHERE Tipologia != 'box'
+                        ORDER BY Tipologia";
 
-            $stmtGetItems = $conn->prepare($sqlGetItems);
-            $stmtGetItems->execute();
+        $stmtGetItems = $conn->prepare($sqlGetItems);
+        $stmtGetItems->execute();
+        $allItems = $stmtGetItems->get_result();
 
-            $allItems = $stmtGetItems->get_result();
+        $weapons = [];
+        $armors = [];
+        $potions = [];
 
-            $weapons = [];
-            $armors = [];
-            $potions = [];
-
-            while($item = $allItems->fetch_assoc()){
-                switch($item["Tipologia"]){
-                    case 'arma':
-                        $weapons[] = $item["ID"];
-                        break;
-                    case 'armatura':
-                        $armors[] = $item["ID"];
-                        break;
-                    case 'pozione':
-                        $potions[] = $item["ID"];
-                        break;
-                }
+        while($item = $allItems->fetch_assoc()){
+            switch($item["Tipologia"]){
+                case 'arma':
+                    $weapons[] = $item["ID"];
+                    break;
+                case 'armatura':
+                    $armors[] = $item["ID"];
+                    break;
+                case 'pozione':
+                    $potions[] = $item["ID"];
+                    break;
             }
-
-            $output = [];
-            /* Box comuni:
-            * - 5-10 monete
-            * - 2 oggetti tra armi e armature
-            * - 1 pozione
-            */
-            if($box["nome"] === "Box Comune"){
-                $output["coins"] = mt_rand(MIN_COIN_COMMON, MAX_COIN_COMMON);
-                $output[] = $potions[array_rand($potions)];
-
-                $weapAndArms = array_merge($weapons, $armors);
-                $output[] = $weapAndArms[array_rand($weapAndArms)];
-                $output[] = $weapAndArms[array_rand($weapAndArms)];
-            }
-            /* Box Rare:
-            * - 15-20 monete
-            * - 2 armi
-            * - 2 armature
-            * - 2 pozioni
-            */
-            else if($box["nome"] === "Box Rara"){
-                $output["coins"] = mt_rand(MIN_COIN_RARE, MAX_COIN_RARE);
-                $output[] = $weapons[array_rand($weapons)];
-                $output[] = $weapons[array_rand($weapons)];
-                $output[] = $armors[array_rand($armors)];
-                $output[] = $armors[array_rand($armors)];
-                $output[] = $potions[array_rand($potions)];
-                $output[] = $potions[array_rand($potions)];
-            }
-
-            $itemsIDs = [];
-            foreach($output as $key => $itemId){
-                if(is_numeric($key)){
-                    if(addOneItem($itemId, $accountId, $conn))
-                        $itemsIDs[] = $itemId;
-                }
-            }
-
-            $newBoxQuantity = removeOneItem($box["id"], $accountId, null, $conn);
-
-            $esito = ($conn->commit())?
-                    ["successo" => true, "guadagno" => $output["coins"], "rimosso" => ($newBoxQuantity === 0), "itemsID" => $itemsIDs] :
-                    ["errore" => "Fallimento nel commit"];
         }
-        catch(Exception $e){
-            $conn->rollback();
-            $esito = ["errore" => "Fallimento" . $e->getMessage()];
+
+        $output = [];
+        /* Box comuni:
+        * - 5-10 monete
+        * - 2 oggetti tra armi e armature
+        * - 1 pozione
+        */
+        if($box["nome"] === "Box Comune"){
+            $output["coins"] = mt_rand(MIN_COIN_COMMON, MAX_COIN_COMMON);
+            $output[] = $potions[array_rand($potions)];
+            $weapAndArms = array_merge($weapons, $armors);
+            $output[] = $weapAndArms[array_rand($weapAndArms)];
+            $output[] = $weapAndArms[array_rand($weapAndArms)];
         }
-        finally{
-            $stmtGetItems->close();
-            $conn->close();
+        /* Box Rare:
+        * - 15-20 monete
+        * - 2 armi
+        * - 2 armature
+        * - 2 pozioni
+        */
+        else if($box["nome"] === "Box Rara"){
+            $output["coins"] = mt_rand(MIN_COIN_RARE, MAX_COIN_RARE);
+            $output[] = $weapons[array_rand($weapons)];
+            $output[] = $weapons[array_rand($weapons)];
+            $output[] = $armors[array_rand($armors)];
+            $output[] = $armors[array_rand($armors)];
+            $output[] = $potions[array_rand($potions)];
+            $output[] = $potions[array_rand($potions)];
         }
+
+        if(updateCoins($accountId, $output["coins"], $conn) === -1){
+            throw new Exception("Errore nell'aggiornamento delle monete");
+        }
+
+        $itemsIDs = [];
+        foreach($output as $key => $itemId){
+            if(is_numeric($key)){
+                if(addOneItem($itemId, $accountId, $conn))
+                    $itemsIDs[] = $itemId;
+            }
+        }
+
+        // Rimuovo la box
+        $newBoxQuantity = removeOneItem($box["id"], $accountId, null, $conn);
+
+        $conn->commit();
+        return [
+            "successo" => true, 
+            "guadagno" => $output["coins"], 
+            "rimosso"  => ($newBoxQuantity === 0), 
+            "itemsID"  => $itemsIDs
+        ];
     }
-
-    return $esito;
+    catch(Exception $e){
+        $conn->rollback();
+        error_log("Errore in openBox: ". $e->getMessage());
+        return ["errore" => "Fallimento" . $e->getMessage()];
+    }
+    finally{
+        if($stmtCount)      $stmtCount->close();
+        if($stmtGetItems)   $stmtGetItems->close();
+        $conn->close();
+    }
 }
 
-?>
+/**
+ * Funzione che restituisce il negozio di un account, aggiornandolo qualora sia passato sufficente tempo
+ * @param int $accountId ID dell'account
+ * @param DateTime $lastRefresh contiene informazioni relative all'ultimo refresh
+ * @return array contiene gli item presenti nel negozio(con l'eventuale ultimo refresh) e il tempo rimanente al prossimo refresh
+ */
+function getShop($accountId, $lastRefresh){
+    $currentTime = new DateTime("now");
+    $tempoTrascorso = $currentTime->getTimestamp() - $lastRefresh->getTimestamp();
+    if($tempoTrascorso < 0){
+        apiError(400, "Tempo negativo rilevato (". $tempoTrascorso ."): il tempo trascorso non può essere negativo.");
+    }
+
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+    if($conn->connect_error){
+        apiError(500, "Connessione al database fallita: " . $conn->connect_error);
+    }
+
+    $stmtRecupero = null;
+    try{
+        // Recupero gli oggetti nel negozio
+        $sql = "SELECT Item.*
+                FROM Negozio
+                    JOIN Item ON Negozio.Oggetto = Item.ID
+                WHERE Proprietario = ?
+                ORDER BY Item.ID";
+
+        $stmtRecupero = $conn->prepare($sql);
+        $stmtRecupero->bind_param('i', $accountId);
+        $stmtRecupero->execute();
+        $result = $stmtRecupero->get_result();
+
+        $output = [];
+        if($result->num_rows <  MAX_SHOP_ITEMS || $tempoTrascorso >= SHOP_TIMER_RESET_SECONDS){
+            $output = refreshShop($accountId, $currentTime, $conn);
+        }
+        else{
+            while($row = $result->fetch_assoc())
+                $output[] = $row;
+        }
+
+        $remainingTime = getRemainingTime($currentTime, $lastRefresh);
+
+        return [
+            "output" => $output,
+            "remainingTime" => $remainingTime
+        ];
+    }
+    catch(Exception $e){
+        error_log("Errore in getShop: ". $e->getMessage());
+        apiError(500, "Errore durante il recuper del negozio: ". $e->getMessage());
+    }
+    finally{
+        if($stmtRecupero)   $stmtRecupero->close();
+        $conn->close();
+    }
+}
+
+/**
+  * Ricarica gli oggetti del negozio
+ * @param int $id ID dell'account
+ * @param DateTime $currentTime Timestamp dell'aggiornamento
+ * @param mysqli $conn connessione al database passata per riferimento
+ * @return array Contiene gli item attualmente nel negozio e il timestamp dell'aggiornamento
+ */
+function refreshShop($id, $currentTime, &$conn) {
+    if ($conn->connect_error) {
+        apiError(500, "Connessione al database fallita: " . $conn->connect_error);
+    }
+
+    $conn->begin_transaction();
+
+    $stmtUpdate = null;
+    $stmtDelete = null;
+    $stmtItems = null;
+    $stmtInsert = null;
+
+    try {
+        // Aggiornamento del RefreshNegozio
+        $sqlUpdate = "UPDATE Account SET RefreshNegozio = ? WHERE ID = ?";
+        $stmtUpdate = $conn->prepare($sqlUpdate);
+        $formattedTime = $currentTime->format('Y-m-d H:i:s');
+        $stmtUpdate->bind_param('si', $formattedTime, $id);
+        if (!$stmtUpdate->execute())
+            throw new Exception("Errore durante l'aggiornamento del timestamp di RefreshNegozio: " . $stmtUpdate->error);
+
+
+        // Elimino il negozio attuale
+        $sqlDelete = "DELETE FROM Negozio WHERE Proprietario = ?";
+        $stmtDelete = $conn->prepare($sqlDelete);
+        $stmtDelete->bind_param('i', $id);
+        if (!$stmtDelete->execute())
+            throw new Exception("Errore durante l'eliminazione degli oggetti dal negozio: " . $stmtDelete->error);
+
+        // Recupero di MAX_SHOP_ITEMS item casuali
+        $sqlItems = "SELECT * FROM Item ORDER BY RAND() LIMIT ?";
+        $stmtItems = $conn->prepare($sqlItems);
+        $maxItems = MAX_SHOP_ITEMS;
+        $stmtItems->bind_param('i', $maxItems);
+        if (!$stmtItems->execute())
+            throw new Exception("Errore durante il recupero degli oggetti casuali: " . $stmtItems->error);
+        $result = $stmtItems->get_result();
+
+        $newShopItems = [];
+        while ($row = $result->fetch_assoc()) {
+            $newShopItems[] = $row;
+        }
+        
+        // Ordino gli item secondo l'ID, così da avere sempre lo stesso output quando le recupero
+        usort($newShopItems, function($a, $b){
+            return $a['ID'] <=> $b['ID'];
+        });
+        
+        // Inserimento degli Item nel Negozio
+        $sqlInsert = "INSERT INTO Negozio (Proprietario, Oggetto) VALUES (?, ?)";
+        $stmtInsert = $conn->prepare($sqlInsert);
+        foreach ($newShopItems as $item) {
+            $stmtInsert->bind_param('ii', $id, $item['ID']);
+            if (!$stmtInsert->execute())
+                throw new Exception("Errore durante l'inserimento di". $item["ID"] ." nel negozio: " . $stmtInsert->error);
+        }
+
+        $conn->commit();
+        return [
+            "updateTime" => $currentTime,
+            "items" => $newShopItems
+        ];
+    } catch (Exception $e) {
+        $conn->rollback();
+        error_log("Errore in refreshShop: ". $e->getMessage());
+        apiError(500, "Errore durante il refresh del negozio: " . $e->getMessage());
+    }
+    finally{
+        if($stmtUpdate) $stmtUpdate->close();
+        if($stmtDelete) $stmtDelete->close();
+        if($stmtItems)  $stmtItems->close();
+        if($stmtInsert) $stmtInsert->close();
+    }
+}
+
+/**
+ * Calcola il tempo rimanente al refresh del negozio
+ * @param DateTime $currentTime Timestamp di riferimento passato come riferimento
+ * @param DateTime $shopRefresh Timestamp dell'ultimo refresh
+ * @return array Tempo rimanente in minuti e secondi
+ */
+function getRemainingTime(&$currentTime, $shopRefresh) {
+    $passedSeconds = ($currentTime->getTimestamp() - $shopRefresh->getTimestamp()) % SHOP_TIMER_RESET_SECONDS;
+
+    $remainingSeconds = SHOP_TIMER_RESET_SECONDS - $passedSeconds;
+
+    /*
+    * Aggiorno il currentTime in modo "fittizio" per simulare il momento esatto
+    * in cui sarebbe avvenuto l'aggiornamento del negozio, nel caso in cui non ci fossimo mai scollegati.
+    * Risolvo anche il problema dei secondi persi durante la comunicazione con il server.
+    */
+    $currentTime->modify("-". $passedSeconds ." seconds");
+
+    $minutes = intdiv($remainingSeconds, 60);
+    $seconds = $remainingSeconds % 60;
+
+    return [
+        'minutes' => str_pad($minutes, 2, "0", STR_PAD_LEFT),
+        'seconds' => str_pad($seconds, 2, "0", STR_PAD_LEFT)
+    ];
+}

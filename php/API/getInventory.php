@@ -1,7 +1,6 @@
 <?php
-
-session_start();
 require_once "../methods.php";
+session_start();
 
 if(!isset($_SESSION['account'])){
     apiError(401);
@@ -11,7 +10,6 @@ if(!isset($_SESSION['account'])){
 $account = unserialize(($_SESSION['account']));
 $accountId = $account->getId();
 $inventory = getInventory($accountId);
-
 
 header('Content-Type: application/json');
 
