@@ -6,10 +6,14 @@ if (basename($_SERVER['PHP_SELF']) === 'methods.php') {
 ini_set("display_errors", "0");
 require_once "definitions.php";
 
+
+// *** Funzioni che gestiscono Errori *** //
+
+
 /**
  * Funzione che reindirizza un errore
- * @param string $errorCode codice di errore da passare alla "errorPage.php"
- * @param string $prefix path che porta alla "errorPage.php"
+ * @param string $errorCode codice di errore da passare alla `"errorPage.php"`
+ * @param string $prefix path che porta alla `"errorPage.php"` [Default: ""]
  * @return never
  */
 function pageError($errorCode, $prefix = ""){
@@ -19,8 +23,8 @@ function pageError($errorCode, $prefix = ""){
 
 /**
  * Funzione che reindirizza un errore di un'API
- * @param int $errorCode Codice di errore HTTP (default: 500)
- * @param string|null $message Messaggio di errore personalizzato (default: null)
+ * @param int $errorCode Codice di errore HTTP [Default: 500]
+ * @param string|null $message Messaggio di errore personalizzato [Default: null]
  * @return never
  */
 function apiError($errorCode = 500, $message = null) {
@@ -71,14 +75,17 @@ function validateInputs($username, $password, $confirmPassword){
     return '';
 }
 
+/**
+ ** Funzioni di supporto API
+ ** Queste funzioni, in caso di errore, chiamano la funzione `apiError`, restituendo gli errori secondo quello standard
+ */
 
 /**
- * Ritorna un elemento Account dato un username
- * @param mixed $username : username da cercare nel database
- * @param mixed $conn : connessione da utilizzare
- * @return Account|null
+ * Ritorna un elemento `Account` dato un username
+ * @param string $username username da cercare nel database
+ * @return Account|null oggetto `Account` oppure null se non è stato trovato un account con quell'`$username`
  */
-function getData($username){
+function getUserData($username){
     $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
     if($conn->connect_error)
         apiError(500, "Connessione al database fallita: " . $conn->connect_error);
@@ -124,7 +131,7 @@ function getData($username){
         }
     }
     catch (Exception $e) {
-        apiError(500, "Errore in getData: " . $e->getMessage());
+        apiError(500, "Errore in getUserData: " . $e->getMessage());
     }
     finally{
         if ($stmt) $stmt->close();
@@ -252,7 +259,7 @@ function removeOneItem($itemId, $accountId, $currentQuantity, &$conn){
  * Aggiunge uno o più oggetti all'inventario di un account, se c'è spazio disponibile.
  * @param int $itemId ID dell'oggetto da aggiungere
  * @param int $accountId ID dell'account
- * @param mysqli $conn Connessione al server
+ * @param mysqli $conn Connessione al server passata per riferimento
  * @return int Quantità aggiornata dell'oggetto, o 0 se l'inserimento non è possibile
  */
 function addOneItem($itemId, $accountId, &$conn): int{
@@ -333,7 +340,7 @@ function addOneItem($itemId, $accountId, &$conn): int{
  * Aggiorna la quantità di monete di un account nel database
  * @param int $accountId ID dell'account
  * @param int $amount Quantità di monete da aggiungere o sottrarre
- * @param mysqli $conn Connessione al database
+ * @param mysqli $conn Connessione al database passata per riferimento
  * @return int Restituisce il numero di monete aggiunte o -1 in caso di errore
  */
 function updateCoins($accountId, $amount, &$conn){
@@ -803,7 +810,7 @@ function getRemainingTime(&$currentTime, $shopRefresh) {
  * Recupera tutti gli elementi dal database, inclusi i relativi modificatori e percorsi.
  * @return array Ritorna i dati recuperati dal database.
  */
-function getElementPG(){
+function getAllPG(){
     $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
     if($conn->connect_error){
         apiError(500, "Connessione al database fallita: ". $conn->connect_error);
@@ -829,7 +836,7 @@ function getElementPG(){
 
     }
     catch(Exception $e){
-        apiError(500, "Errore nella funzione getElementPG: ". $e->getMessage());
+        apiError(500, "Errore nella funzione getAllPG: ". $e->getMessage());
     }
     finally{
         if($stmt)   $stmt->close();
@@ -839,7 +846,7 @@ function getElementPG(){
 
 /**
  * Recupera dal database tutti i tipi validi
- * @throws \Exception se ci sono problemi con la query
+ * @throws Exception se ci sono problemi con la query
  * @return array contenente tutti gli `ItemTypes` contenuti nel database
  */
 function getItemTypes(){

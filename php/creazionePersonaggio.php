@@ -87,7 +87,7 @@ if(isset($_SESSION["createPGError"])){
 			</div>
 			<div class="character-section">
 				<div class="character-box">
-					<input type="text" name="PG-name" id="PG-name" placeholder="Nome" pattern="^[a-zA-Z][a-zA-Z]{2,9}$" required autocomplete="off" title="Inserisci il nome del Personaggio: Dalle 3 alle 15 lettere, con la prima maiuscola">
+					<input type="text" name="PG-name" id="PG-name" placeholder="Nome" pattern="^[a-zA-Z]{1,9}$" required autocomplete="off" title="Dalle 3 alle 10 lettere">
 					<div class="character-choose">
 						<div id="prevPG" class="arrow">←</div>
 						<img id="imagePG" class="always-animated" src="" alt="" draggable="false">

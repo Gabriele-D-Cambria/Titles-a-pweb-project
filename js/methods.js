@@ -7,6 +7,10 @@ export const patterns = {
     //? endsource
 };
 
+/**
+ * Costante di tempo che identifica quando applicare lo stile di messaggio importante 
+ * @function `showMessage()`
+ */
 export const IMPORTANT_MESSAGE = 4000;
 
 /**
@@ -24,7 +28,7 @@ let openedItems = [];
  */
 let shownItem = null;
 
-/**
+/* *
  * Indica se nel dettaglio è presente una box, necessaria per poterla aprire da tastiera
  */
 export let openBoxSelected = false;
@@ -40,11 +44,74 @@ let shopTimerInterval = null;
 let currentlyOpened = null;
 
 
+// *** Funzioni di supporto alla creazione di elementi HTML ***/
+
+/**
+ * Crea un elemento HTML con le proprietà specificate.
+ * @param {String} type Il tipo dell'elemento (es. "div", "span").
+ * @param {String} className La classe CSS da assegnare all'elemento. [Default `null`]
+ * @param {String} id L'id da assegnare all'elemento. [Default `null`]
+ * @param {String} innerText Il testo da inserire nell'elemento. [Default `null`]
+ * @returns {HTMLElement} L'elemento creato.
+ */
+export function createHTMLElement(type, className = null, id = null, innerText = null){
+    const el = document.createElement(type);
+    if(className)
+        el.classList.add(className);
+    if(id)
+        el.id = id;
+    if(innerText)
+        el.innerText = innerText;
+
+    return el;
+}
+
+/**
+ * Funzione che genera un elemento `<img>`
+ * @param {string} src source dell'immagine
+ * @param {string} alt descrizione dell'immagine
+ * @param {string} title title dell'immaginele dell'immagine
+ * @param {string} id id dell'immagine [Default `null`]
+ * @param {string} classe classe dell'immagine [Default `null`]
+ * @returns {HTMLElement} elemento `<img>` creato
+ */
+export function createHTML_img(src, alt, title = null, id = null, classe = null){
+    const img = document.createElement("img");
+    img.src = src;
+    img.alt = alt;
+    if(title)
+        img.title = title;
+    if(id)
+        img.id = id;
+    if(classe) 
+        img.classList.add(classe);
+
+    return img;
+}
+
+/**
+ * Crea un pulsante con le proprietà specificate.
+ * @param {String} type Il tipo del pulsante (es. "button", "submit").
+ * @param {String} id L'id da assegnare al pulsante.
+ * @param {String} text Il testo da visualizzare sul pulsante.
+ * @param {Function} onClick La funzione da eseguire al click del pulsante.
+ * @returns {HTMLButtonElement} Il pulsante creato.
+ */
+export function createButton(type, id, text, onClick) {
+    const btn = document.createElement("button");
+    btn.type = type;
+    btn.id = id;
+    btn.innerText = text;
+    if (onClick) {
+        btn.addEventListener("click", onClick);
+    }
+    return btn;
+}
+
 
 /**
  * Crea un input per l'username con le relative proprietà e validazioni.
- * @param {String} id - L'id da assegnare all'input.
- * @param {String} labelTxt - Il testo del label associato.
+ * @param {String} labelTxt  Il testo del label associato.
  * @returns {Object} Un oggetto contenente il label e l'input creati.
  */
 export function createUsernameInput(labelTxt){
@@ -71,40 +138,40 @@ export function createUsernameInput(labelTxt){
 
 /**
  * Crea un input per la password con un pulsante per mostrare/nascondere il contenuto.
- * @param {String} labelTxt - Il testo del label associato.
- * @param {Boolean} [isConfirm=false] - Indica se si tratta di un campo di conferma password.
+ * @param {String} labelTxt Il testo del label associato.
+ * @param {Boolean} isConfirm Indica se si tratta di un campo di conferma password [Default `false`].
  * @returns {Object} Un oggetto contenente il label e il contenitore della password.
  */
 export function createPasswordInput(labelTxt, isConfirm = false) {
     const label = document.createElement("label");
-    const passwordContainer = document.createElement("div");
-    const input = document.createElement("input");
-    const toggleBtn = document.createElement("button");
-
+    
     label.for = (isConfirm)? "confirmPassword" : "password";
     label.innerText = labelTxt;
-
+    
+    const passwordContainer = document.createElement("div");
     passwordContainer.classList.add("password-container");
-
+    
+    const input = document.createElement("input");
     input.type = "password";
     input.id = input.name = (isConfirm)? "confirmPassword" : "password";
     input.toggleAttribute("required", true);
     input.pattern = patterns.PASSWORD;
-
+    
     input.title = (isConfirm)? "Deve essere uguale alla password." : "Deve contenere almeno 8 caratteri, una lettera maiuscola, una minuscola, un numero e un carattere speciale.";
-
+    
     input.placeholder = isConfirm ? "Conferma" : "Password";
     input.addEventListener("input", validateForm);
     if(isConfirm)
         input.classList.toggle("invalid", true);
-
+    
     passwordContainer.appendChild(input);
-
+    
+    const toggleBtn = document.createElement("button");
     toggleBtn.type = "button";
     toggleBtn.innerText = "Mostra";
     toggleBtn.classList.add("toggle-password");
     toggleBtn.addEventListener("click", (e) => {
-        hideShow(e.target, isConfirm);
+        hideShowPassword(e.target, isConfirm);
     });
     passwordContainer.appendChild(toggleBtn);
 
@@ -115,26 +182,12 @@ export function createPasswordInput(labelTxt, isConfirm = false) {
 }
 
 /**
- * Crea un pulsante con le proprietà specificate.
- * @param {String} type - Il tipo del pulsante (es. "button", "submit").
- * @param {String} id - L'id da assegnare al pulsante.
- * @param {String} text - Il testo da visualizzare sul pulsante.
- * @param {Function} [onClick] - La funzione da eseguire al click del pulsante.
- * @returns {HTMLButtonElement} Il pulsante creato.
- */
-export function createButton(type, id, text, onClick) {
-    const btn = document.createElement("button");
-    btn.type = type;
-    btn.id = id;
-    btn.innerText = text;
-    if (onClick) {
-        btn.addEventListener("click", onClick);
-    }
-    return btn;
-}
-
-/**
- * Valida i campi del modulo (username, password, conferma password) e abilita/disabilita il pulsante di submit.
+ * Valida i campi del modulo con i seguenti id:
+ * - username,
+ * - password,
+ * - conferma password
+ * 
+ * Se passano i test abilita/disabilita un pulsante con id "submit".
  */
 export function validateForm(){
     let usr = document.getElementById("username");
@@ -168,10 +221,10 @@ export function validateForm(){
 
 /**
  * Mostra o nasconde il contenuto di un campo password.
- * @param {HTMLElement} target - L'elemento che ha generato l'evento (es. pulsante toggle).
- * @param {Boolean} [confirm=false] - Indica se si tratta del campo di conferma password.
+ * @param {HTMLElement} target L'elemento che ha generato l'evento (es. pulsante toggle).
+ * @param {Boolean} confirm Indica se si tratta del campo di conferma password. [Default `false`]
  */
-export function hideShow(target, confirm = false){
+export function hideShowPassword(target, confirm = false){
     let input;
     input = document.getElementById((confirm)? "confirmPassword" : "password");
 
@@ -184,10 +237,14 @@ export function hideShow(target, confirm = false){
     }
 }
 
+
+// *** Funzioni dedicate alla gestione di moduli in overlay *** //
+
+
 /**
  * Mostra un modulo in sovraimpressione.
- * @param {String} id - L'id del modulo da visualizzare.
- * @param {Boolean} [showCoins=false] - Indica se portare in risalto le monete.
+ * @param {String} id L'id del modulo da visualizzare.
+ * @param {Boolean} showCoins Indica se portare in risalto le monete. [Default `false`]
  */
 export function showModule(id, showCoins = false){
     let module = document.getElementById(id);
@@ -200,11 +257,11 @@ export function showModule(id, showCoins = false){
 
 /**
  * Nasconde ed elimina il contenuto di un modulo in sovraimpressione.
- * @param {Event} event - L'evento che ha generato l'azione.
- * @param {String} id - L'id del modulo da rimuovere.
- * @param {Boolean} [override=false] - Indica se ignorare i controlli.
- * @param {Boolean} [showCoins=false] - Indica se rimuovere il focus sulle monete.
- * @returns {Boolean} True se la rimozione ha avuto effetto, altrimenti false.
+ * @param {Event} event L'evento che ha generato l'azione.
+ * @param {String} id L'id del modulo da rimuovere.
+ * @param {Boolean} override Indica se ignorare i controlli. [Default `false`]
+ * @param {Boolean} showCoins Indica se rimuovere il focus sulle monete. [Default `false`]
+ * @returns {Boolean} `true` se la rimozione ha avuto effetto, altrimenti `false`.
  */
 export function closeModule(event, id, override = false, showCoins = false) {
     const module = document.getElementById(id);
@@ -224,19 +281,22 @@ export function closeModule(event, id, override = false, showCoins = false) {
     return false;
 }
 
+
+// *** Funzioni dedicate alla gestione di messaggi e errori *** //
+
+
 /**
  * Mostra un messaggio temporaneo sullo schermo che si rimuove automaticamente dopo 5 secondi.
- * @param {String} messaggio - Il testo del messaggio da visualizzare.
- * @param {Number} showTime - Per quanto tempo il messaggio rimane visibile
+ * @param {String} messaggio Il testo del messaggio da visualizzare.
+ * @param {Number} showTime Per quanto tempo il messaggio rimane visibile [Default `1.5 secondi`]
  */
 export function showMessage(messaggio, showTime = 1500) {
-    let messageContainer = document.createElement("div");
-    messageContainer.id = "messageBox";
-    messageContainer.classList.add("messaggio");
+    const messageContainer = createHTMLElement("div", "messaggio", "messageBox", messaggio);
+    
     if(showTime === IMPORTANT_MESSAGE){
         messageContainer.classList.add("errore");
     }
-    messageContainer.innerText = messaggio;
+
     document.body.appendChild(messageContainer);
 
     setTimeout(() => {
@@ -251,7 +311,7 @@ export function showMessage(messaggio, showTime = 1500) {
 
 /**
  * Gestisce un errore mostrando un messaggio all'utente e registrando l'errore nella console.
- * @param {Object} error - Oggetto JSON che rappresenta l'errore da gestire, deve necessariamente avere i due campi sotto, può averne altri opzionali che non verranno valutati
+ * @param {Object} error Oggetto `JSON` che rappresenta l'errore da gestire, deve **necessariamente** avere almeno questi due campi
  * @param {string} error[].message - Il messaggio descrittivo dell'errore.
  * @param {string|number} error[].errorcode - Il codice identificativo dell'errore.
  */
@@ -260,31 +320,15 @@ export function errorHandler(error){
     console.error(`Errore: ${error.errorcode}: ${error.message}`);
 }
 
-/**
- * Crea un elemento HTML con le proprietà specificate.
- * @param {String} type - Il tipo dell'elemento (es. "div", "span").
- * @param {String} [className] - La classe CSS da assegnare all'elemento.
- * @param {String} [id] - L'id da assegnare all'elemento.
- * @param {String} [innerText] - Il testo da inserire nell'elemento.
- * @returns {HTMLElement} L'elemento creato.
- */
-export function createHTMLElement(type, className, id, innerText){
-    const el = document.createElement(type);
-    if(className)
-        el.classList.add(className);
-    if(id)
-        el.id = id;
-    if(innerText)
-        el.innerText = innerText;
 
-    return el;
-}
+// *** Funzioni dedicate alla gestione dell'inventario e monete *** //
+
 
 /**
- * Mostra l'inventario dell'utente, recuperandolo tramite una richiesta API.
- * @param {Boolean} newItems Indica se evidenziare gli oggetti appena ottenuti
- * @param {Boolean} equipment Indica l'inventario serve per equipaggiare oggetti (`true`) o per la sua gestione (Default: `false`)
- * @param {Array} Array contenente i tipi degli elementi da raccogliere
+ * Mostra l'inventario dell'utente con id `"inventoryModule"`, recuperandolo tramite una richiesta API.
+ * @param {Boolean} newItems Indica se evidenziare gli oggetti appena ottenuti [Default `false`]
+ * @param {Boolean} equipment Indica l'inventario serve per equipaggiare oggetti (`true`) o per la sua gestione (`false`)[Default `false`]
+ * @param {Array|null} filterObj filtro contenente i tipi degli oggetti da recuperare tramite API [Default `null`]
  */
 export function showInventory(newItems = false, equipment = false, filterObj = null) {
     if (currentlyOpened !== null && currentlyOpened !== "inventoryModule")
@@ -363,42 +407,34 @@ export function showInventory(newItems = false, equipment = false, filterObj = n
 
 /**
  * Crea uno slot per un oggetto dell'inventario.
- * @param {Object} item - L'oggetto dell'inventario.
- * @param {Number} id - L'id dello slot.
- * @param {Boolean} newItems - Indica se evidenziare gli oggetti appena ottenuti.
+ * @param {Object} item L'oggetto dell'inventario.
+ * @param {Number} id L'id dello slot.
+ * @param {Boolean} newItems Indica se evidenziare gli oggetti appena ottenuti.
  * @returns {HTMLElement} Lo slot creato.
  */
 export function createItemSlot(item, id, newItems) {
-    const space = document.createElement("div");
-    space.classList.add("item-slot");
-    space.id = id;
+    const space = createHTMLElement("div", "item-slot", id);
 
     if (newItems && openedItems.includes(item.ID)) {
         space.classList.add("newItem");
     }
 
-    const img = createHTMLElement("img");
-    img.id = `img-${id}`;
-    img.src = item.PathImmagine;
-    img.alt = item.Descrizione;
+    const img = createHTML_img(item.PathImmagine, item.Descrizione, item.Nome, `img-${id}`);
     space.appendChild(img);
 
-    const count = createHTMLElement("div");
-    count.classList.add("item-count");
-    count.id = `ic-${id}`;
-    count.innerText = item.Quantita;
+    const count = createHTMLElement("div", "item-count", `ic-${id}`, item.Quantita);
     space.appendChild(count);
 
     return space;
 }
 
 /**
- * Genera un elemento HTML aside contenente le informazioni di un oggetto.
- * @param {String} id ID da assegnare all'aside
- * @param {Array} item Oggetto per il quale generare le informazioni (`null` se assente)
- * @param {Boolean} hasIt Indica se l'oggetto è già di proprietà dell'utente (Default: `true`)
- * @param {Boolean} equipment Qualora `hasIt = true`, sancisce se l'oggetto deve essere equipaggiato (`true`) oppure va venduto (Default: `false`)
- * @returns {HTMLElement} Elemento HTML aside contenente le informazioni
+ * Genera un elemento HTML `<aside>` contenente le informazioni di un oggetto.
+ * @param {String} id Id da assegnare all'aside
+ * @param {Array|null} item Oggetto per il quale generare le informazioni. Se si vuole generare un elemento senza oggetto inserire `null`. [Default `null`]
+ * @param {Boolean} hasIt Indica se l'oggetto è già di proprietà dell'utente o deve essere acquistato [Default `true`]
+ * @param {Boolean} equipment Qualora `hasIt === true`, sancisce se l'oggetto deve essere equipaggiato (`true`) oppure va venduto `false` [Default `false`]
+ * @returns {HTMLElement} Elemento HTML `<aside>` contenente le informazioni
  */
 export function generateInfo(id, item = null, hasIt = true, equipment = false){
     shownItem = item;
@@ -429,10 +465,7 @@ export function generateInfo(id, item = null, hasIt = true, equipment = false){
 
         el = document.createElement("figure");
 
-        const img = document.createElement("img");
-        img.src = item.PathImmagine;
-        img.alt = item.Descrizione;
-
+        const img = createHTML_img(item.PathImmagine, item.Descrizione);
         el.appendChild(img);
 
         p = document.createElement("figcaption");
@@ -449,11 +482,7 @@ export function generateInfo(id, item = null, hasIt = true, equipment = false){
         el = document.createElement("div");
 
         if(hasIt && item.Tipologia === "box"){
-            const open = document.createElement("button");
-            open.id = "open";
-            open.innerText = "Apri";
-
-            open.addEventListener("click", openBox);
+            const open = createButton("button", "open", "Apri", openBox);
             openBoxSelected = true;
 
             el.appendChild(open);
@@ -516,33 +545,21 @@ export function generateInfo(id, item = null, hasIt = true, equipment = false){
 
         el = document.createElement("footer");
 
-        let btn = document.createElement("button");
-        if(hasIt){
-            if(equipment){
-                btn.id = "equip-btn";
-                btn.innerText = "Equipaggia";
-                btn.addEventListener("click", equipItem);
-            }
-            else{
-                btn.id = "sell-btn";
-                btn.innerText = "Vendi: " + Math.floor(item.Costo / 2) + "🪙";
-                btn.addEventListener("click", sellItem);
-            }
-        }
-        else{
-            btn.id = "buy-btn";
-            btn.innerText = "Compra: " + item.Costo + "🪙";
-            btn.addEventListener("click", buyItem);
-        }
+        let btn = null;
+        btn = (hasIt)? 
+            ((equipment)?
+                createButton("button", "equip-btn", "Equipaggia", equipItem):
+                createButton("button", "sell-btn", "Vendi: " + Math.floor(item.Costo / 2) + "🪙", sellItem)
+            ):
+            createButton("button", "buy-btn", "Compra: " + item.Costo + "🪙", buyItem);
 
         el.appendChild(btn);
-        btn = document.createElement("button");
-        btn.innerText = "Chiudi";
-        btn.addEventListener("click", () => {
+        btn = createButton("button", "" ,"Chiudi", () => {
             let info = generateInfo(id);
             changeItemInfo(info);
             shownItem = null;
         });
+        
         el.appendChild(btn);
 
         container.appendChild(el);
@@ -552,7 +569,7 @@ export function generateInfo(id, item = null, hasIt = true, equipment = false){
 }
 
 /**
- * Aggiorna la sezione dettagli del modulo attualmente aperto con i dettagli di un oggetto selezionato.
+ * Aggiorna la sezione dettagli del modulo attualmente aperto `currentlyOpened` con i dettagli di un oggetto selezionato.
  * @param {HTMLElement} info Elemento HTML contenente le nuove informazioni dell'oggetto
  */
 export function changeItemInfo(info){
@@ -565,7 +582,7 @@ export function changeItemInfo(info){
 }
 
 /**
- * Effettua una richiesta API per vendere un oggetto selezionato.
+ * Se `currentlyOpened === inventoryModule`, e `shownItem !== null` effettua una richiesta API per vendere `showItem`
  */
 function sellItem(){
     if(currentlyOpened !== "inventoryModule"){
@@ -608,7 +625,7 @@ function sellItem(){
 }
 
 /**
- * Aggiorna il contatore delle monete dell'utente.
+ * Aggiorna il contatore delle monete dell'utente con id `"coin-count"`.
  * @param {Number} amount Quantità di monete da aggiungere o sottrarre
  */
 export function updateCoins(amount){
@@ -617,7 +634,7 @@ export function updateCoins(amount){
 }
 
 /**
- * Effettua una richiesta API per aprire una box e recuperare i nuovi oggetti.
+ * Se `currentlyOpened === inventoryModule` e `shownItem.Tipologia === "box"`, allora effettua una richiesta API per aprire la box e recuperare i nuovi oggetti.
  */
 export function openBox(){
     if(currentlyOpened !== "inventoryModule")
@@ -668,8 +685,8 @@ export function openBox(){
  * Chiude un modulo sopraelevato (overlay) dal DOM.
  * @param {Event} event Evento generatore
  * @param {String} id ID del modulo da rimuovere
- * @param {Boolean} overload Indica se effettuare il controllo sull'evento
- * @param {Boolean} coins Indica se è presente il counter di monete da rimuovere o meno.
+ * @param {Boolean} overload Indica se effettuare il controllo sull'evento [Default `false`]
+ * @param {Boolean} coins Indica se è presente il counter di monete da rimuovere o meno. [Default `true`]
  */
 export function closeModuleEvent(event, id, overload = false, coins = true) {
     if (moduleListener === null || currentlyOpened !== id)
@@ -691,8 +708,11 @@ export function closeModuleEvent(event, id, overload = false, coins = true) {
 }
 
 
+// *** Funzioni dedicate al menu perosnalizzazione Account *** //
+
+
 /**
- * Mostra il menu principale con le opzioni per cambiare username, cambiare password o eliminare l'account.
+ * Mostra il menu principale con id `"menuModule"` con le opzioni per cambiare username, cambiare password o eliminare l'account.
  */
 export function showMenu() {
     if (currentlyOpened !== null && currentlyOpened !== "menuModule") {
@@ -732,9 +752,7 @@ export function showMenu() {
         const div = document.createElement("div");
         div.classList.add("menu-space");
 
-        const p = document.createElement("p");
-        p.id = option.id;
-        p.innerText = option.text;
+        const p = createHTMLElement("p", null, option.id, option.text);
         p.addEventListener("click", option.action);
         div.appendChild(p);
         page.appendChild(div);
@@ -1000,9 +1018,7 @@ function changeImage(){
                 tmp = document.createElement("label");
                 tmp.setAttribute('for', `pic-${index}`)
 
-                const img = document.createElement("img");
-                img.src = imagePath;
-                img.alt = `Pic ${imageName}`;
+                const img = createHTML_img(imagePath, `Pic ${imageName}`);
                 img.draggable = false;
 
                 tmp.appendChild(img);
@@ -1033,33 +1049,12 @@ function changeImage(){
         });
 }
 
-/**
- * Funzione di supporto per creare uno slot negozio per un oggetto.
- * @param {Array} item Oggetto da visualizzare
- * @param {Number} id Indice da assegnare all'oggetto
- * @returns {HTMLElement} Elemento HTML rappresentante lo slot dell'oggetto nel negozio
- */
-function createShopSlot(item, id){
-    const space = document.createElement("div");
-    space.classList.add("shop-slot");
-    space.id = id;
 
-    const img = document.createElement("img");
-    img.id = `img-${id}`;
-    img.src = item.PathImmagine;
-    img.alt = item.Descrizione;
-    space.appendChild(img);
+// *** Funzioni dedicate alla gestione dell'inventario  *** //
 
-    const caption = document.createElement("div");
-    caption.id = `cap-${id}`;
-    caption.innerText = `${item.Costo}🪙`;
-    space.appendChild(caption);
-
-    return space;
-}
 
 /**
- * Mostra il negozio dell'utente, recuperandolo tramite una richiesta API.
+ * Mostra il negozio dell'utente con id `"shopModule"`, recuperando le informazioni tramite richiesta API.
  */
 export function showShop(){
     if(currentlyOpened !== null && currentlyOpened !== "shopModule")
@@ -1093,15 +1088,9 @@ export function showShop(){
             let el = document.createElement("header");
             el.classList.add("timer-container");
 
-            const p = document.createElement("p");
-            p.classList.add("timer");
-            p.innerText = `Prossimo Refresh \u2003 - \u2003`
+            const p = createHTMLElement("p", "timer", "", `Prossimo Refresh \u2003 - \u2003`);
 
-            const span = document.createElement("span");
-            span.id = "timer";
-
-            span.innerText =  `${remainingTime.minutes}:${remainingTime.seconds}`;
-
+            const span = createHTMLElement("span", "", "timer", `${remainingTime.minutes}:${remainingTime.seconds}`);
             shopTimerInterval = setInterval(updateShopTimer, 1000);
 
             p.appendChild(span);
@@ -1150,35 +1139,25 @@ export function showShop(){
 }
 
 /**
- * Aggiorna il timer del negozio, mostrando il tempo rimanente al prossimo refresh.
+ * Funzione di supporto per creare uno slot negozio per un oggetto.
+ * @param {Array} item Oggetto da visualizzare
+ * @param {Number} id Indice da assegnare all'oggetto
+ * @returns {HTMLElement} Elemento HTML rappresentante lo slot dell'oggetto nel negozio
  */
-function updateShopTimer(){
-    const span = document.getElementById("timer");
-    if(span === null){
-        clearInterval(shopTimerInterval);
-        shopTimerInterval = null;
-        return;
-    }
-    let [minutes, seconds] = span.innerText.split(":").map(Number);
-    if(minutes === 0 && seconds === 0){
-        clearInterval(shopTimerInterval);
-        showShop();
-        return;
-    }
-    else {
-        if(seconds === 0){
-            --minutes;
-            seconds = 59;
-        }
-        else{
-            --seconds;
-        }
-        span.innerText = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-    }
+function createShopSlot(item, id){
+    const space = createHTMLElement("div", "shop-slot", id);
+
+    const img = createHTML_img(item.PathImmagine, item.Descrizione, item.Nome, `img-${id}`);
+    space.appendChild(img);
+
+    const caption = createHTMLElement("div", null, `cap-${id}`, `${item.Costo}🪙`);
+    space.appendChild(caption);
+
+    return space;
 }
 
 /**
- * Effettua una richiesta API per acquistare un oggetto selezionato dal negozio.
+ * Se `currentlyOpened === "shopModule"` e `shownItem!== null`, effettua una richiesta API per acquistare l'oggetto `shownItem`
  */
 function buyItem(){
     if(currentlyOpened !== "shopModule"){
@@ -1216,6 +1195,42 @@ function buyItem(){
     });
 }
 
+/**
+ * Aggiorna il timer con id `"timer"`
+ */
+function updateShopTimer(){
+    const span = document.getElementById("timer");
+    if(span === null){
+        if(shopTimerInterval !== null){
+            clearInterval(shopTimerInterval);
+            shopTimerInterval = null;
+        }
+        return;
+    }
+    let [minutes, seconds] = span.innerText.split(":").map(Number);
+    if(minutes === 0 && seconds === 0){
+        clearInterval(shopTimerInterval);
+        showShop();
+        return;
+    }
+    else {
+        if(seconds === 0){
+            --minutes;
+            seconds = 59;
+        }
+        else{
+            --seconds;
+        }
+        span.innerText = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
+}
+
+
+// *** Funzioni dedicate alla gestione del Personaggio  *** //
+
+/**
+ * Mostra la schermata di eliminazione Personaggio con id `"deleteModule"`.
+ */
 export function createDeleteBox(){
     if(currentlyOpened !== null && currentlyOpened !== "deleteModule"){
         return;
@@ -1296,8 +1311,14 @@ export function createDeleteBox(){
     window.addEventListener("click", moduleListener);
 }
 
+/**
+ * Funzione che, se `shownItem !== null`, effettua una richiesta API per equipaggiare l'item al personaggio di riferimento
+ */
 function equipItem(){
-    console.log(shownItem);
+    if(!shownItem){
+        showMessage("Nessun Oggetto da Equipaggiare");
+        return;
+    }
     const formData = new FormData();
     formData.append("itemId", Number(shownItem.ID));
 

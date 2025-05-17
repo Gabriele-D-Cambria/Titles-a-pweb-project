@@ -6,7 +6,7 @@ if(!isset($_SESSION['account'])){
 	apiError(401);
 }
 
-$personaggi = getElementPG();
+$personaggi = getAllPG();
 
 $costanti = [
 	"DEFAULT_PF" 	  => Personaggio::DEFAULT_PF,

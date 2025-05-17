@@ -37,6 +37,11 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 });
 
+/**
+ * Funzione che controlla la validità del tag di input che la chiama.
+ * Se valido abilita il pulsante con id `"createPG"`
+ * @param {Event} e evento che genera la chiamata
+ */
 function checkValidity(e){
 	let invalid = false;
 
@@ -48,8 +53,11 @@ function checkValidity(e){
 
 }
 
+/**
+ * Funzione che effettua una richiesta API per recuperare dal server le informazioni riguardo a tutti i personaggi selezionabili
+ */
 function getPersonaggi(){
-	fetch("php/API/getElementPG.php")
+	fetch("php/API/getAllPG.php")
 		.then(response => response.json())
 		.then(data =>{
 			if(data.error !== undefined && data.error){

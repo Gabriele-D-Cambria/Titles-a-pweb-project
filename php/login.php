@@ -104,7 +104,7 @@ finally{
 
 
 function startSession($username){
-$account = getData($username);
+$account = getUserData($username);
 $_SESSION['account'] = serialize($account);
 
 header("Location: dashboard.php");

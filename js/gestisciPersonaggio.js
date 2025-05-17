@@ -1,6 +1,6 @@
 "use strict";
 
-import {showMessage, errorHandler, showInventory, createDeleteBox} from "./methods.js";
+import {showMessage, errorHandler, showInventory, createDeleteBox, createHTMLElement, createHTML_img} from "./methods.js";
 
 let usedPU = {
 	PF: 0,
@@ -170,11 +170,8 @@ function setEquimpent(arma = null, armatura = null, zaino = null, elementi = nul
 	if(arma !== null){
 		space = document.getElementById("arma");
 		
-		img = document.createElement("img");
-		img.id = "arma-img";
-		img.src = arma.PathImmagine;
-		img.alt = arma.Descrizione;
-		img.title = arma.Nome;
+		img = createHTML_img(arma.PathImmagine, arma.Descrizione, arma.Nome, "arma-img");
+
 		if(arma.Elemento === elementi['elementoPG']){
 			space.classList.add("allineato");
 			img.title += " - Allineato (+1 danni effettuati)";
@@ -183,9 +180,6 @@ function setEquimpent(arma = null, armatura = null, zaino = null, elementi = nul
 			space.classList.add("opposto");
 			img.title += ` - Opposto (prevalenza anche su ${elementi['elementoPG']})`;
 		}
-		// img.addEventListener("contextmenu", (e) => {
-		// 	addRemoveMenu(e, arma.ID);
-		// });
 		
 		while(space.childElementCount)
 			space.removeChild(space.firstChild);
@@ -198,11 +192,7 @@ function setEquimpent(arma = null, armatura = null, zaino = null, elementi = nul
 	if(armatura !== null){
 		space = document.getElementById("armatura");
 	
-		img = document.createElement("img");
-		img.id = "armatura-img";
-		img.src = armatura.PathImmagine;
-		img.alt = armatura.Descrizione;
-		img.title = armatura.Nome;
+		img = createHTML_img(armatura.PathImmagine, armatura.Descrizione, armatura.Nome, "armatura-img");
 
 		if(armatura.Elemento === elementi['elementoPG']){
 			space.classList.add("allineato");
@@ -212,9 +202,6 @@ function setEquimpent(arma = null, armatura = null, zaino = null, elementi = nul
 			space.classList.add("opposto");
 			img.title += ` - Opposto (Non sei più prevalso da ${elementi['prevalsoDa']})`;
 		}
-		// img.addEventListener("contextmenu",(e) => {
-		// 	addRemoveMenu(e, armatura.ID);
-		// });
 		
 		while(space.childElementCount)
 			space.removeChild(space.firstChild);
@@ -228,14 +215,7 @@ function setEquimpent(arma = null, armatura = null, zaino = null, elementi = nul
 		zaino.forEach((item, index) => {
 			space = document.getElementById(`obj_${index}`);
 			
-			img = document.createElement("img");
-			img.id = `obj_${index}-img`;
-			img.src = item.PathImmagine;
-			img.alt = item.Descrizione;
-			img.title = item.Nome;
-			// img.addEventListener("contextmenu",(e) => {
-			// 	addRemoveMenu(e, item.ID);
-			// });
+			img = createHTML_img(item.PathImmagine, item.Descrizione, item.Nome, `obj_${index}-img`);
 
 			while(space.childElementCount)
 				space.removeChild(space.firstChild);
@@ -269,10 +249,7 @@ function addRemoveMenu(e, itemId){
 	menu.style.display = "block";
 	
 
-	const img = document.createElement("img");
-	img.src = "images/trash.svg";
-	img.alt = "Rimuovi l'Item";
-	img.title = "Clicca l'immagine per rimuovere l'oggetto da questo personaggio";
+	const img = createHTML_img("images/trash.svg", "Rimuovi l'Item", "Clicca l'immagine per rimuovere l'oggetto da questo personaggio");
 	img.addEventListener("click", () =>{
 		const formData = new FormData();
 		
