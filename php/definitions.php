@@ -1127,35 +1127,24 @@ class Personaggio{
 
         $stmt = null;
         try {
-            // Prepare the update query
             $query = "UPDATE Personaggi SET
                         Forza = ?,
                         Destrezza = ?,
                         PuntiVita = ?,
-                        Armatura = ?,
-                        Arma = ?,
                         Livello = ?,
                         PuntiExp = ?,
-                        PuntiUpgrade = ?
-                      WHERE Nome = ? AND Proprietario = ?";
+                        PuntiUpgrade = ? WHERE Nome = ? AND Proprietario = ?";
 
             $stmt = $connectionDB->prepare($query);
             if (!$stmt) {
                 return false;
             }
 
-            $stmt->bind_param('iiiiiiiisi',
-                $this->FOR,
-                $this->DES,
-                $this->PF,
-                $this->armatura,
-                $this->arma,
-                $this->livello,
-                $this->exp,
-                $this->puntiUpgrade,
-                $this->nome,
-                $this->owner
-            );
+            $types = 'iiiiiisi';
+            $params = [$this->FOR, $this->DES, $this->PF, $this->livello, $this->exp, $this->puntiUpgrade, $this->nome, $this->owner];
+
+
+            $stmt->bind_param($types,...$params);
 
             return $stmt->execute();
         }
