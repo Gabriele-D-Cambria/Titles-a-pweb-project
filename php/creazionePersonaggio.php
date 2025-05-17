@@ -14,6 +14,10 @@ if (!isset($_SERVER['HTTP_REFERER']) ||
 	exit;
 }
 
+if(!isset($_SESSION["path"])){
+    $_SESSION["path"] = setPath();
+}
+
 
 $account = unserialize($_SESSION['account']);
 
@@ -36,7 +40,7 @@ if(isset($_SESSION["createPGError"])){
 <!DOCTYPE html>
 <html lang="it">
 <head>
-	<base href="http://localhost/cambria_672642/">
+    <base href="<?php echo $_SESSION["path"];?>">
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Titles</title>

@@ -13,6 +13,10 @@ if(!isset($_SESSION['account']) || !isset($_SESSION['currentPG_nome'])){
 	pageError(401);
 }
 
+if(!isset($_SESSION["path"])){
+    $_SESSION["path"] = setPath();
+}
+
 $account = unserialize($_SESSION['account']);
 $personaggi = $account->getPersonaggi();
 
@@ -43,7 +47,7 @@ if(isset($_SESSION["message"])){
 <!DOCTYPE html>
 <html lang="it">
 <head>
-	<base href="http://localhost/cambria_672642/">
+    <base href="<?php echo $_SESSION["path"];?>">
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="icon" href="images/icon.svg" type="image/svg+xml" sizes="16x16" >
