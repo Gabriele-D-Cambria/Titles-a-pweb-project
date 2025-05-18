@@ -89,7 +89,11 @@ CREATE TABLE Combattimenti (
     Giocatore1_Proprietario INT NOT NULL,
     Giocatore2_Nome VARCHAR(100) COLLATE utf8_bin NOT NULL,
     Giocatore2_Proprietario INT NOT NULL,
-    Vittoria_Giocatore1 BOOLEAN NOT NULL,	    -- Riferito a Giocatore1
+    Terminata BOOLEAN NOT NULL DEFAULT 0,
+    Vittoria_Giocatore1 BOOLEAN DEFAULT NULL,
+    Turno_Giocatore1 BOOLEAN DEFAULT 0,
+    TempoRimanente INT DEFAULT 60,
+    StatoBattaglia JSON DEFAULT NULL,
     Data DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
     PRIMARY KEY (Giocatore1_Proprietario, Giocatore2_Proprietario, Data),
     FOREIGN KEY (Giocatore1_Nome, Giocatore1_Proprietario) REFERENCES Personaggi(Nome, Proprietario) ON DELETE CASCADE,
@@ -301,5 +305,40 @@ BEGIN
 END;
 //
 
+CREATE TRIGGER trg_combattimenti_terminata_check
+BEFORE UPDATE ON Combattimenti
+FOR EACH ROW
+BEGIN
+    IF NEW.Terminata = 1 AND NEW.Vittoria_Giocatore1 IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Devi specificare il vincitore quando la battaglia è terminata';
+    END IF;
+END;
+//
+
+CREATE TRIGGER before_insert_Combattimenti
+BEFORE INSERT ON Combattimenti
+FOR EACH ROW
+BEGIN
+    IF NEW.Vittoria_Giocatore1 IS NULL THEN
+        IF NEW.Turno_Giocatore1 IS NULL OR NEW.TempoRimanente IS NULL OR NEW.StatoBattaglia IS NULL THEN
+            SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = 'Turno_Giocatore1, TempoRimanente e StatoBattaglia non possono essere NULL se Vittoria_Giocatore1 è NULL';
+        END IF;
+    END IF;
+END; 
+//
+
+CREATE TRIGGER before_update_Combattimenti
+BEFORE UPDATE ON Combattimenti
+FOR EACH ROW
+BEGIN
+    IF NEW.Vittoria_Giocatore1 IS NULL THEN
+        IF NEW.Turno_Giocatore1 IS NULL OR NEW.TempoRimanente IS NULL OR NEW.StatoBattaglia IS NULL THEN
+            SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = 'Turno_Giocatore1, TempoRimanente e StatoBattaglia non possono essere NULL se Vittoria_Giocatore1 è NULL';
+        END IF;
+    END IF;
+END; 
+//
 
 DELIMITER ;

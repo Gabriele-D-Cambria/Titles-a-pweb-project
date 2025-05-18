@@ -55,7 +55,7 @@ function apiError($errorCode = 500, $message = null) {
  * @param string|null $username Username da validare.
  * @param string|null $password Password da Validare.
  * @param string|null $confirmPassword Conferma Password da Validare.
- * 
+ *
  * @return string Restituisce una stringa se la validazione fallisce:
  *      - "invalid_username" se $username non corrisponde all'USERNAME_PATTERN
  *      - "invalid_password" se $password non corrisponde al PASSWORD_PATTERN
@@ -173,7 +173,7 @@ function getInventory($accountID, $filter = null){
                 continue;
             }
             $inventory[] = $row;
-            
+
         }
 
         $output["inventario"] = $inventory;
@@ -621,9 +621,9 @@ function openBox($box, $accountId){
 
         $conn->commit();
         return [
-            "successo" => true, 
-            "guadagno" => $output["coins"], 
-            "rimosso"  => ($newBoxQuantity === 0), 
+            "successo" => true,
+            "guadagno" => $output["coins"],
+            "rimosso"  => ($newBoxQuantity === 0),
             "itemsID"  => $itemsIDs
         ];
     }
@@ -746,12 +746,12 @@ function refreshShop($id, $currentTime, &$conn) {
         while ($row = $result->fetch_assoc()) {
             $newShopItems[] = $row;
         }
-        
+
         // Ordino gli item secondo l'ID, così da avere sempre lo stesso output quando le recupero
         usort($newShopItems, function($a, $b){
             return $a['ID'] <=> $b['ID'];
         });
-        
+
         // Inserimento degli Item nel Negozio
         $sqlInsert = "INSERT INTO Negozio (Proprietario, Oggetto) VALUES (?, ?)";
         $stmtInsert = $conn->prepare($sqlInsert);
@@ -831,7 +831,7 @@ function getAllPG(){
         $output = [];
         while($row = $result->fetch_assoc())
             $output[] = $row;
-    
+
         return $output;
 
     }
@@ -870,7 +870,7 @@ function getItemTypes(){
         $output = [];
         while($row = $result->fetch_assoc())
             $output[] = $row['Nome'];
-    
+
         return $output;
 
     }
@@ -879,6 +879,41 @@ function getItemTypes(){
     }
     finally{
         if($stmt)   $stmt->close();
+        $conn->close();
+    }
+}
+
+/**
+ * Funzione che seleziona un personaggio tra gli account non online al momento
+ * @param int $accountToAvoid id dell'account che inizializza la battaglia, ergo quello dal quale non prendere i personaggi
+ * @return Personaggio personaggio estratto
+ */
+function getRandomPG($accountIdToAvoid){
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+    if($conn->connect_error){
+        pageError(500, "Connessione al database fallita: " . $conn->connect_error);
+    }
+
+    $stmt = null;
+    try {
+        $sql = "SELECT Nome, Proprietario, Elemento
+                FROM Personaggi
+                WHERE Proprietario <> ?
+                ORDER BY RAND() LIMIT 1";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('i', $accountIdToAvoid);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        if(!$row){
+            pageError(404, "Nessun avversario disponibile al momento!");
+        }
+        $randomPG = new Personaggio($row["Nome"], $row['Proprietario'], null);
+        
+        return $randomPG;
+    }
+    finally {
+        if($stmt) $stmt->close();
         $conn->close();
     }
 }

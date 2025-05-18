@@ -40,7 +40,6 @@ function configurePage(){
 			if(PG.error !== undefined && PG.error){
 				throw PG;
 			}
-			console.log(PG);
 			if(PG.puntiUpgrade > 0)
 				setUpgradePointsPrivileges(PG);
 			

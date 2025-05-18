@@ -359,10 +359,11 @@ class Personaggio{
     const DEFAULT_FOR_DES = 0;
     const ZAINO_SIZE = 3;       // 3 + arma + armatura
 
+    const DEFAULT_TURN_TIME = 60;
     private $pathImmagine;
     private $pathImmaginePG;
     private $nome;
-    private $owner;
+    private $proprietario;
     private $FOR;
     private $currentFOR;
     private $damage;
@@ -391,13 +392,13 @@ class Personaggio{
      *
      * @param string $nome Nome del personaggio.
      * @param int $proprietarioId ID del proprietario del personaggio.
-     * @param string $elemento Elemento associato al personaggio.
+     * @param string $elemento Elemento associato al personaggio. Viene preso in considerazione solo se il personaggio deve essere effettivamente creato, altrimenti è ignorato
      * @throws Exception Se il proprietario non esiste o se si verifica un errore durante l'inserimento o il recupero dei dati.
      */
-    public function __construct($nome, $proprietarioId, $elemento){
+    public function __construct($nome, $proprietarioId, $elemento = null){
         $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
 
-        $ownerStmt = null;
+        $proprietarioStmt = null;
         $personaggioStmt = null;
         $zainoStmt = null;
 
@@ -408,16 +409,16 @@ class Personaggio{
             $connectionDB->begin_transaction();
 
             // Verifico se il proprietario esiste
-            $ownerCheckQuery = "SELECT * FROM Account WHERE ID = ?";
-            $ownerStmt = $connectionDB->prepare($ownerCheckQuery);
+            $proprietarioCheckQuery = "SELECT * FROM Account WHERE ID = ?";
+            $proprietarioStmt = $connectionDB->prepare($proprietarioCheckQuery);
             if (!is_numeric($proprietarioId)) {
                 $connectionDB->rollback();
                 throw new Exception("Proprietario non esistente", 400);
             }
 
-            $ownerStmt->bind_param('i', $proprietarioId);
-            $ownerStmt->execute();
-            $result = $ownerStmt->get_result();
+            $proprietarioStmt->bind_param('i', $proprietarioId);
+            $proprietarioStmt->execute();
+            $result = $proprietarioStmt->get_result();
 
             if ($result->num_rows === 0) {
                 $connectionDB->rollback();
@@ -441,7 +442,7 @@ class Personaggio{
                 $this->pathImmagine    = $personaggioData['PathImmagine'];
                 $this->pathImmaginePG  = $personaggioData['PathImmaginePG'];
                 $this->nome            = $personaggioData['Nome'];
-                $this->owner           = $personaggioData['Proprietario'];
+                $this->proprietario    = $personaggioData['Proprietario'];
                 $this->FOR             = $personaggioData['Forza'];
                 $this->DES             = $personaggioData['Destrezza'];
                 $this->PF              = $personaggioData['PuntiVita'];
@@ -475,7 +476,7 @@ class Personaggio{
                                 JOIN Item I ON Z.Oggetto = I.ID
                              WHERE Z.Personaggio = ? AND Z.Proprietario = ?";
                 $zainoStmt = $connectionDB->prepare($sqlZaino);
-                $zainoStmt->bind_param("si", $this->nome, $this->owner);
+                $zainoStmt->bind_param("si", $this->nome, $this->proprietario);
 
                 $zainoStmt->execute();
                 $zainoResult = $zainoStmt->get_result();
@@ -502,7 +503,7 @@ class Personaggio{
                 $this->pathImmagine    = $elementInfo['PathImmagine'];
                 $this->pathImmaginePG  = $elementInfo['PathImmaginePG'];
                 $this->nome            = $nome;
-                $this->owner           = $proprietarioId;
+                $this->proprietario           = $proprietarioId;
                 $this->FOR             = self::DEFAULT_FOR_DES + $elementInfo["ModificatoreFor"];
                 $this->DES             = self::DEFAULT_FOR_DES + $elementInfo["ModificatoreDes"];
                 $this->PF              = self::DEFAULT_PF + $elementInfo["ModificatorePF"];
@@ -526,7 +527,7 @@ class Personaggio{
                 $insertStmt = $connectionDB->prepare($insertQuery);
                 $insertStmt->bind_param('siiiisi',
                      $this->nome,
-                    $this->owner,
+                    $this->proprietario,
                            $this->FOR,
                            $this->DES,
                            $this->PF,
@@ -545,13 +546,42 @@ class Personaggio{
             $connectionDB->commit();
         }
         finally {
-            if ($ownerStmt)         $ownerStmt->close();
+            if ($proprietarioStmt)         $proprietarioStmt->close();
             if ($personaggioStmt)   $personaggioStmt->close();
             if ($zainoStmt)         $zainoStmt->close();
             $connectionDB->close();
         }
     }
 
+    /**
+     * Funzione che crea un personaggio a partire dai dati dell'array
+     * @param array $data array contenente tutti i dati;
+     * @return Personaggio
+     */
+    public static function fromArray($data) {
+        $pg = new Personaggio($data['nome'], $data['proprietario'], $data['elemento']);
+        $pg->FOR = $data['FOR'];
+        $pg->currentFOR = $data['currentFOR'];
+        $pg->damage = $data['damage'];
+        $pg->DES = $data['DES'];
+        $pg->currentDES = $data['currentDES'];
+        $pg->dodgingChance = $data['dodgingChance'];
+        $pg->PF = $data['PF'];
+        $pg->tmp_PF = $data['temp_PF'];
+        $pg->elemento = $data['elemento'];
+        $pg->prevaleSu = $data['prevaleSu'];
+        $pg->prevalsoDa = $data['prevalsoDa'];
+        $pg->armatura = $data['armatura'];
+        $pg->arma = $data['arma'];
+        $pg->zaino = $data['zaino'];
+        $pg->livello = $data['livello'];
+        $pg->exp = $data['exp'];
+        $pg->puntiUpgrade = $data['puntiUpgrade'];
+        $pg->pathImmagine = $data['pathImmagine'];
+        $pg->pathImmaginePG = $data['pathImmaginePG'];
+        $pg->protezioneDanno = $data['protezioneDanno'];
+        return $pg;
+    }
     /**
      * Funzione per aggiornare le statistiche del personaggio
      * @return void
@@ -588,12 +618,12 @@ class Personaggio{
                 if ($armaId === null) {
                     $sqlUpdate = "UPDATE Personaggi SET Arma = NULL WHERE Nome = ? AND Proprietario = ?";
                     $updateStmt = $connectionDB->prepare($sqlUpdate);
-                    $updateStmt->bind_param("si", $this->nome, $this->owner);
+                    $updateStmt->bind_param("si", $this->nome, $this->proprietario);
                 }
                 else {
                     $sqlUpdate = "UPDATE Personaggi SET Arma = ? WHERE Nome = ? AND Proprietario = ?";
                     $updateStmt = $connectionDB->prepare($sqlUpdate);
-                    $updateStmt->bind_param("isi", $armaId, $this->nome, $this->owner);
+                    $updateStmt->bind_param("isi", $armaId, $this->nome, $this->proprietario);
                 }
                 if(!$updateStmt->execute()){
                     throw new Exception("Errore durante l'equipaggiamento dell'arma", $updateStmt->errno);
@@ -601,7 +631,7 @@ class Personaggio{
             }
 
             if ($this->arma) {
-                addToInventario($connectionDB, $this->owner, $this->arma['ID']);
+                addToInventario($connectionDB, $this->proprietario, $this->arma['ID']);
                 $this->currentFOR -= $this->arma['ModificatoreFor'];
                 $this->currentDES -= $this->arma['ModificatoreDes'];
                 $this->arma = null;
@@ -658,11 +688,11 @@ class Personaggio{
                 if ($armaturaId === null) {
                     $sqlUpdate = "UPDATE Personaggi SET Armatura = NULL WHERE Nome = ? AND Proprietario = ?";
                     $updateStmt = $connectionDB->prepare($sqlUpdate);
-                    $updateStmt->bind_param("si", $this->nome, $this->owner);
+                    $updateStmt->bind_param("si", $this->nome, $this->proprietario);
                 } else {
                     $sqlUpdate = "UPDATE Personaggi SET Armatura = ? WHERE Nome = ? AND Proprietario = ?";
                     $updateStmt = $connectionDB->prepare($sqlUpdate);
-                    $updateStmt->bind_param("isi", $armaturaId, $this->nome, $this->owner);
+                    $updateStmt->bind_param("isi", $armaturaId, $this->nome, $this->proprietario);
                 }
                 if(!$updateStmt->execute()){
                     throw new Exception("Errore durante l'equipaggiamento dell'arma", $updateStmt->errno);
@@ -670,7 +700,7 @@ class Personaggio{
             }
 
             if ($this->armatura) {
-                addToInventario($connectionDB, $this->owner, $this->armatura['ID']);
+                addToInventario($connectionDB, $this->proprietario, $this->armatura['ID']);
                 $this->currentFOR -= $this->armatura['ModificatoreFor'];
                 $this->currentDES -= $this->armatura['ModificatoreDes'];
                 $this->armatura = null;
@@ -707,7 +737,7 @@ class Personaggio{
     }
 
     /**
-     * Funzione privata che si occupa di aggiungere un `Item` allo zaino se presente nell'Inventario di `$this->owner`, eventualmente aggiornando il database
+     * Funzione privata che si occupa di aggiungere un `Item` allo zaino se presente nell'Inventario di `$this->proprietario`, eventualmente aggiornando il database
      * @param mysqli $connectionDB connessione al database passare per riferimento
      * @param int $itemId id dell'`Item` da equipaggiare
      * @param boolean $updateDB Indica se aggiornare o meno il database con aggiornamento del campo. (Default `true`)
@@ -729,7 +759,7 @@ class Personaggio{
 
                 $zainoStmt = $connectionDB->prepare($sqlZaino);
 
-                $zainoStmt->bind_param('sii', $this->nome, $this->owner, $itemId);
+                $zainoStmt->bind_param('sii', $this->nome, $this->proprietario, $itemId);
                 if(!$zainoStmt->execute()){
                     throw new Exception("Problemi durante l'aggiornamento dello zaino di ". $this->nome ." dell'oggetto " . $itemId, 400);
                 }
@@ -793,13 +823,13 @@ class Personaggio{
 
                 $zainoStmt = $connectionDB->prepare($sqlZaino);
 
-                $zainoStmt->bind_param('sii', $this->nome, $this->owner, $itemId);
+                $zainoStmt->bind_param('sii', $this->nome, $this->proprietario, $itemId);
                 if(!$zainoStmt->execute()){
                     throw new Exception("Problemi durante la rimozione dallo zaino di ". $this->nome ." dell'oggetto " . $itemId, 400);
                 }
             }
 
-            addToInventario($connectionDB, $this->owner, $itemId);
+            addToInventario($connectionDB, $this->proprietario, $itemId);
             unset($this->zaino[$found[0]]);
             $this->zaino = array_values($this->zaino);
         }
@@ -814,7 +844,7 @@ class Personaggio{
         return $this->nome;
     }
     public function getProprietario(): int{
-        return $this->owner;
+        return $this->proprietario;
     }
     public function getElemento(): string{
         return $this->elemento;
@@ -822,7 +852,7 @@ class Personaggio{
     public function getAll() {
         return [
             'nome'            => $this->nome,
-            'owner'           => $this->owner,
+            'proprietario'           => $this->proprietario,
             'FOR'             => $this->FOR,
             'currentFOR'      => $this->currentFOR,
             'damage'          => $this->damage,
@@ -922,11 +952,11 @@ class Personaggio{
             $sql = "UPDATE Personaggi SET PuntiExp = ? WHERE Nome = ? AND Proprietario = ?";
 
             $stmt = $connectionDB->prepare($sql);
-            $stmt->bind_param("isi", $this->exp, $this->nome, $this->owner);
+            $stmt->bind_param("isi", $this->exp, $this->nome, $this->proprietario);
 
             if(!$stmt->execute()){
                 $this->exp -= $amount;
-                throw new Exception("Errore nell'aggiornamento dei punti esperienza di " . $this->nome . " (proprietario" . $this->owner .")");
+                throw new Exception("Errore nell'aggiornamento dei punti esperienza di " . $this->nome . " (proprietario" . $this->proprietario .")");
             }
 
             if($this->exp >= self::MAX_EXP){
@@ -1046,10 +1076,10 @@ class Personaggio{
     }
 
     /**
-     * Funzione che permette di equipaggiare un Oggetto al personaggio se presente nell'inventario di `$this->owner`.
+     * Funzione che permette di equipaggiare un Oggetto al personaggio se presente nell'inventario di `$this->proprietario`.
      * A seconda del tipo dell'oggetto viene assegnata come `arma`, `armatura` o viene inserita in `$this->zaino` se vi è ancora spazio
      * @param int $itemId id dell'oggetto da inserire nell'inventario
-     * @throws Exception per problemi con la comunicazione con il database, se `$this->owner` non possiede l'oggetto o se l'oggetto è di tipo `box`
+     * @throws Exception per problemi con la comunicazione con il database, se `$this->proprietario` non possiede l'oggetto o se l'oggetto è di tipo `box`
      * @return bool 'true' se l'àaggiunta viene effettuata correttamente.
      */
     public function equipItem($itemId){
@@ -1066,7 +1096,7 @@ class Personaggio{
                             JOIN Item ON Inventario.Oggetto = Item.ID
                           WHERE Inventario.Proprietario = ? AND Inventario.Oggetto = ?";
             $searchStmt = $connectionDB->prepare($sqlSearch);
-            $searchStmt->bind_param('ii', $this->owner, $itemId);
+            $searchStmt->bind_param('ii', $this->proprietario, $itemId);
             $searchStmt->execute();
             $result = $searchStmt->get_result();
 
@@ -1087,17 +1117,17 @@ class Personaggio{
             if($newQuantity > 0){
                 $inventorySql = "UPDATE Inventario SET Quantita = ? WHERE Oggetto = ? AND Proprietario = ?;";
                 $inventoryStmt = $connectionDB->prepare($inventorySql);
-                $inventoryStmt->bind_param("iii", $newQuantity, $itemId, $this->owner);
+                $inventoryStmt->bind_param("iii", $newQuantity, $itemId, $this->proprietario);
 
                 if(!$inventoryStmt->execute())
-                    throw new Exception("Errore nell'aggiornamento della quantità dell'oggetto con ID: ". $itemId . ", per l'account: ". $this->owner . ", durante l'equipaggiamento al personaggio '" . $this->nome . "'");
+                    throw new Exception("Errore nell'aggiornamento della quantità dell'oggetto con ID: ". $itemId . ", per l'account: ". $this->proprietario . ", durante l'equipaggiamento al personaggio '" . $this->nome . "'");
             }
             else {
                 $inventorySql = "DELETE FROM Inventario WHERE Oggetto = ? AND Proprietario = ?";
                 $inventoryStmt = $connectionDB->prepare($inventorySql);
-                $inventoryStmt->bind_param("ii", $itemId, $this->owner);
+                $inventoryStmt->bind_param("ii", $itemId, $this->proprietario);
                 if(!$inventoryStmt->execute())
-                    throw new Exception("Errore nella rimozione dell'oggetto con ID: ". $itemId . " per l'account: ". $this->owner. ", durante l'equipaggiamento al personaggio '" . $this->nome . "'");
+                    throw new Exception("Errore nella rimozione dell'oggetto con ID: ". $itemId . " per l'account: ". $this->proprietario. ", durante l'equipaggiamento al personaggio '" . $this->nome . "'");
 
             }
 
@@ -1128,7 +1158,7 @@ class Personaggio{
     }
 
     /**
-     * Rimuove un'`item` dagli oggetti equipaggiati (arma, armatura o dallo zaino) e lo inserisce nell'inventario di `$this->owner`
+     * Rimuove un'`item` dagli oggetti equipaggiati (arma, armatura o dallo zaino) e lo inserisce nell'inventario di `$this->proprietario`
      * @param int $itemId id dell'oggetto da inserire nell'inventario
      * @throws Exception per problemi con 
      * @return bool
@@ -1183,6 +1213,106 @@ class Personaggio{
     }
 
     /**
+     * Funzione che controlla se è presente una battaglia in corso per questo personaggio
+     * @return array|null L'array contiene informazioni sulla battaglia, altrimenti `null`
+     */
+    public function getBattagliaInCorso() {
+        $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+        if($conn->connect_error){
+            throw new Exception("Connessione al database fallita: " . $conn->connect_error, 500);
+        }
+        
+        $stmt = null;
+        try {
+            $sql = "SELECT * 
+                    FROM Combattimenti 
+                    WHERE Giocatore1_Nome = ? AND Giocatore1_Proprietario = ? AND Terminata = 0
+                    ORDER BY Data DESC LIMIT 1";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('si', $this->nome, $this->proprietario);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if($result && $result->num_rows > 0){
+                return $result->fetch_assoc();
+            }
+            return null;
+        } 
+        finally {
+            if($stmt) $stmt->close();
+            $conn->close();
+        }
+    }
+
+    /**
+     * Crea un'istanza del combattimento all'interno del DB e la restituisce
+     * @param Personaggio $avversario riferimento al personaggio da affrontare
+     * @throws Exception se ci sono problemi di connessione al database
+     * @return array già formattato, pronto per poter essere usato come "battaglia"
+     */
+    public function creaCombattimento(&$avversario){
+        $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+        if($conn->connect_error){
+            throw new Exception("Connessione al database fallita: " . $conn->connect_error, 500);
+        }
+        $conn->begin_transaction();
+        $stmt = null;
+        $selectStmt = null;
+        try {
+            $sql = "INSERT INTO Combattimenti 
+                (Giocatore1_Nome, Giocatore1_Proprietario, Giocatore2_Nome, Giocatore2_Proprietario, Turno_Giocatore1, StatoBattaglia)
+                VALUES (?, ?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($sql);            
+
+            $nomeAvversario = $avversario->getNome();
+            $proprietarioAvversario = $avversario->getProprietario();
+            $turno = random_int(0, 9) % 2;
+            $statoBattaglia = [
+                "pg1" => $this->getAll(),
+                "pg2" => $avversario->getAll()
+            ];
+            $statoBattagliaJson = json_encode($statoBattaglia);
+
+            $vars = [$this->nome,
+                $this->proprietario,
+                $nomeAvversario,
+                $proprietarioAvversario,
+                $turno,
+                $statoBattagliaJson];
+            error_log(print_r($vars, true));
+            $stmt->bind_param('sisiis', ...$vars);
+            if(!$stmt->execute()){
+                throw new Exception("Errore durante la creazione del combattimento: " . $stmt->error, 500);
+            }
+
+            $sqlSelect = "SELECT * 
+                          FROM Combattimenti 
+                          WHERE Giocatore1_Nome = ? AND Giocatore1_Proprietario = ? 
+                            AND Giocatore2_Nome = ? AND Giocatore2_Proprietario = ? 
+                            AND Terminata = 0";
+
+            $selectStmt = $conn->prepare($sqlSelect);
+            $selectStmt->bind_param('sisi', $this->nome, $this->proprietario, $nomeAvversario, $proprietarioAvversario);
+            if(!$selectStmt->execute())
+                throw new Exception("Errore durante il recupero del combattimento", 500);
+
+            $result = $selectStmt->get_result();
+            $battaglia = $result->fetch_assoc();
+
+            $conn->commit();
+            return $battaglia;
+        } 
+        catch(Exception $e){
+            $conn->rollback();
+            throw new Exception($e->getMessage(), $e->getCode());
+        }
+        finally {
+            if($stmt)       $stmt->close();
+            if($selectStmt) $selectStmt->close();
+            $conn->close();
+        }
+    }
+
+    /**
      * Aggiorna i dati del personaggio nel database
      * @return bool true se l'aggiornamento è avvenuto con successo, false altrimenti
      */
@@ -1209,7 +1339,7 @@ class Personaggio{
             }
 
             $types = 'iiiiiisi';
-            $params = [$this->FOR, $this->DES, $this->PF, $this->livello, $this->exp, $this->puntiUpgrade, $this->nome, $this->owner];
+            $params = [$this->FOR, $this->DES, $this->PF, $this->livello, $this->exp, $this->puntiUpgrade, $this->nome, $this->proprietario];
 
 
             $stmt->bind_param($types,...$params);
@@ -1244,22 +1374,22 @@ class Personaggio{
 
             $stmt->bind_param('si',
                 $this->nome,
-                $this->owner
+                $this->proprietario
             );
 
             if($stmt->execute()){
                 if($this->arma)
-                    addToInventario($connectionDB, $this->owner, $this->arma['ID']);
+                    addToInventario($connectionDB, $this->proprietario, $this->arma['ID']);
                 if($this->armatura)
-                    addToInventario($connectionDB, $this->owner, $this->armatura['ID']);
+                    addToInventario($connectionDB, $this->proprietario, $this->armatura['ID']);
                 foreach($this->zaino as $item){
-                    addToInventario($connectionDB, $this->owner, $item['ID']);
+                    addToInventario($connectionDB, $this->proprietario, $item['ID']);
                 }
                 $this->protezioneDanno = null;
                 $this->pathImmagine    = null;
                 $this->pathImmaginePG  = null;
                 $this->nome            = null;
-                $this->owner           = null;
+                $this->proprietario           = null;
                 $this->FOR             = null;
                 $this->currentFOR      = null;
                 $this->DES             = null;
