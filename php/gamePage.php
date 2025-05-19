@@ -6,7 +6,17 @@ if(!isset($_SESSION['account']) || !isset($_SESSION['currentPG_nome'])){
 	pageError(401);
 }
 
+$message= null;
+if(isset($_SESSION['message'])){
+	$message = $_SESSION['message'];
+	unset($_SESSION['message']);
+}
 
+$errorMessage= null;
+if(isset($_SESSION['errorMessage'])){
+	$errorMessage = $_SESSION['errorMessage'];
+	unset($_SESSION['errorMessage']);
+}
 ?>
 
 <!DOCTYPE html>
@@ -21,6 +31,10 @@ if(!isset($_SESSION['account']) || !isset($_SESSION['currentPG_nome'])){
 	<link rel="stylesheet" href="css/personaggio.css">
 	<link rel="stylesheet" href="css/inventory.css">
 	<script type="module" src="js/gamePage.js"></script>
+	<script>
+		const message = <?php echo json_encode($message)?>;
+		const errorMessage = <?php echo json_encode($errorMessage)?>;
+	</script>
 	<meta charset="UTF-8">
 </head>
 <body>

@@ -24,6 +24,11 @@ document.addEventListener("DOMContentLoaded", () => {
 		})
 		.catch(error => errorHandler(error));
 	
+		if(message)
+			showMessage(message);
+		
+		if(errorMessage)
+			errorHandler(errorMessage);
 });
 
 
