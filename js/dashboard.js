@@ -68,7 +68,7 @@ function openCharacter(characterName) {
     formData.append("pg", characterName);
 
     document.body.classList.add("caricamento");
-    fetch("php/gestisciPersonaggio.php", {
+    fetch("./gestisciPersonaggio.php", {
         method: "POST",
         body: formData,
     })

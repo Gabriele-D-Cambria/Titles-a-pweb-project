@@ -9,7 +9,6 @@ require_once "definitions.php";
 
 // *** Funzioni che gestiscono Errori *** //
 
-
 /**
  * Funzione che reindirizza un errore
  * @param string $errorCode codice di errore da passare alla `"errorPage.php"`

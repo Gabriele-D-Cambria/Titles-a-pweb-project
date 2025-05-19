@@ -68,7 +68,7 @@ export function createHTMLElement(type, className = null, id = null, innerText =
 
 /**
  * Funzione che genera un elemento `<img>`
- * @param {string} src source dell'immagine
+ * @param {string} src source dell'immagine. Verrà inserito `"./../" + src` per raggiugere correttamente le immagini
  * @param {string} alt descrizione dell'immagine
  * @param {string} title title dell'immaginele dell'immagine
  * @param {string} id id dell'immagine [Default `null`]
@@ -77,7 +77,7 @@ export function createHTMLElement(type, className = null, id = null, innerText =
  */
 export function createHTML_img(src, alt, title = null, id = null, classe = null){
     const img = document.createElement("img");
-    img.src = src;
+    img.src = "./../" + src;
     img.alt = alt;
     if(title)
         img.title = title;
@@ -341,7 +341,7 @@ export function showInventory(newItems = false, equipment = false, filterObj = n
     formData.append("filter", JSON.stringify(filterObj));
 
     document.body.classList.add("caricamento");
-    fetch('php/API/getInventory.php', {
+    fetch('API/getInventory.php', {
         method: "POST",
         body: formData,
     })
@@ -594,7 +594,7 @@ function sellItem(){
         return;
     }
     document.body.classList.add("caricamento");
-    fetch('php/API/sellItem.php', {
+    fetch('API/sellItem.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -646,7 +646,7 @@ export function openBox(){
     }
 
     document.body.classList.add("caricamento");
-    fetch("php/API/openBox.php", {
+    fetch("API/openBox.php", {
         method: "POST",
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -968,7 +968,7 @@ function changeImage(){
 
     const module = document.getElementById("menuModule");
     document.body.classList.add("caricamento");
-    fetch('php/API/getElementPics.php')
+    fetch('API/getElementPics.php')
         .then(risposta => risposta.json())
         .then(images => {
             document.body.classList.remove("caricamento");
@@ -1069,7 +1069,7 @@ export function showShop(){
     }
 
     document.body.classList.add("caricamento");
-    fetch('php/API/getShopItems.php')
+    fetch('API/getShopItems.php')
         .then(response => response.json())
         .then(risposta => {
             document.body.classList.remove("caricamento");
@@ -1169,7 +1169,7 @@ function buyItem(){
         return;
     }
     document.body.classList.add("caricamento");
-    fetch('php/API/buyItem.php', {
+    fetch('API/buyItem.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -1322,7 +1322,7 @@ function equipItem(){
     const formData = new FormData();
     formData.append("itemId", Number(shownItem.ID));
 
-    fetch("php/API/togglePGItem.php", {
+    fetch("API/togglePGItem.php", {
         method: "POST",
         body: formData
     })

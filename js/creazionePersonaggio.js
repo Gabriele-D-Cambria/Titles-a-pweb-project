@@ -1,6 +1,6 @@
 "use strict";
 
-import {showMessage, errorHandler, IMPORTANT_MESSAGE} from "./methods.js";
+import {showMessage, errorHandler, IMPORTANT_MESSAGE, createHTML_img} from "./methods.js";
 
 let listaPersonaggi = null;
 let idCurrentPG = null;
@@ -8,7 +8,7 @@ let costantiPersonaggi = null;
 
 document.addEventListener("DOMContentLoaded", () => {
 	document.getElementById("backToDash").addEventListener("click", ()=>{
-		window.location.href = "./php/dashboard.php";
+		window.location.href = "./dashboard.php";
 	});
 
 	document.getElementById("prevPG").addEventListener("click", () =>{
@@ -57,7 +57,7 @@ function checkValidity(e){
  * Funzione che effettua una richiesta API per recuperare dal server le informazioni riguardo a tutti i personaggi selezionabili
  */
 function getPersonaggi(){
-	fetch("php/API/getAllPG.php")
+	fetch("API/getAllPG.php")
 		.then(response => response.json())
 		.then(data =>{
 			if(data.error !== undefined && data.error){
@@ -103,7 +103,7 @@ function setPG(personaggio) {
 
 	let img = document.getElementById("imagePG");
 
-	img.src = personaggio.PathImmaginePG;
+	img.src = "./../" + personaggio.PathImmaginePG;
 	img.alt = `Personaggio ${personaggio.Nome}`;
 
 	document.getElementById("element").value = personaggio.Nome;
@@ -119,13 +119,13 @@ function setPG(personaggio) {
 
 	img = document.getElementById("prevalePic");
 	let prevaleIndex = listaPersonaggi.findIndex(element => element.Nome === personaggio.PrevaleSu);
-	img.src = listaPersonaggi[prevaleIndex].PathImmagine;
+	img.src = "./../" + listaPersonaggi[prevaleIndex].PathImmagine;
 	img.alt = `Prevale su ${personaggio.PrevaleSu}`;
 	img.title = `${personaggio.PrevaleSu}`;
 	
 	img = document.getElementById("prevalsoPic");
 	prevaleIndex = listaPersonaggi.findIndex(element => element.Nome === personaggio.PrevalsoDa);
-	img.src = listaPersonaggi[prevaleIndex].PathImmagine;
+	img.src = "./../" + listaPersonaggi[prevaleIndex].PathImmagine;
 	img.alt = `Prevalso da ${personaggio.PrevalsoDa}`;
 	img.title = `${personaggio.PrevalsoDa}`;
 }

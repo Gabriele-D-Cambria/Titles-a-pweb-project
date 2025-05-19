@@ -2,6 +2,8 @@
 
 session_start();
 
+require_once "./php/methods.php";
+
 $message = null;
 $loginError = null;
 
@@ -20,7 +22,6 @@ if(isset($_SESSION["message"])){
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <base href="http://localhost/cambria_672642/">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Titles</title>
     <link rel="icon" href="images/icon.svg" type="image/svg+xml" sizes="16x16" >
