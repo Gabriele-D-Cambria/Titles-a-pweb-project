@@ -47,7 +47,7 @@ export function centerSvgElement(svgDoc, idToCenter, idReference, vertical = tru
  * Inserisce un'immagine SVG all'interno di un rettangolo, applicando una clipPath se presente.
  * @param {SVGSVGElement} svgDoc - Il nodo SVG principale.
  * @param {string} rectId - id del rettangolo di riferimento.
- * @param {string} imgHref - percorso dell'immagine da inserire.
+ * @param {string} imgHref - percorso dell'immagine da inserire. Viene salvato come `"./../" + imgHref`
  * @param {string} clipPathId - id della clipPath da applicare (opzionale).
  * @param {Object} [imgAttrs] - attributi aggiuntivi da applicare all'image (opzionale).
  */
@@ -63,7 +63,7 @@ export function insertClippedImage(svgDoc, rectId, imgHref, clipPathId, imgAttrs
     }
 
     const img = document.createElementNS(svgNamespace, "image");
-    img.setAttribute("href", imgHref);
+    img.setAttribute("href", "./../" + imgHref);
     img.setAttribute("x", rect.getAttribute("x"));
     img.setAttribute("y", rect.getAttribute("y"));
     img.setAttribute("width", rect.getAttribute("width"));

@@ -4,7 +4,7 @@ import {showMessage, errorHandler, createHTML_img} from "./methods.js"
 import { centerSvgElement, insertClippedImage } from "./svgMethods.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-	fetch('php/API/getGameInfo.php')
+	fetch('./API/getGameInfo.php')
 		.then(response => response.json())
 		.then(data => {
 			console.log(data);
@@ -33,12 +33,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 function setArenaPG(PG1, PG2){
-	fetch('images/arena.svg')
+	fetch('./../images/arena.svg')
         .then(response => response.text())
         .then(svg => {
             document.getElementById('imageContainer').innerHTML = svg;
-			document.getElementById('tuoPG').setAttribute("href", PG1.pathImmaginePG);
-			document.getElementById('enemyPG').setAttribute("href", PG2.pathImmaginePG);
+			document.getElementById('tuoPG').setAttribute("href", "./../" + PG1.pathImmaginePG);
+			document.getElementById('enemyPG').setAttribute("href", "./../" + PG2.pathImmaginePG);
 
 
 			const svgDoc = document.querySelector('svg');
