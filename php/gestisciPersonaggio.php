@@ -13,10 +13,6 @@ if(!isset($_SESSION['account']) || !isset($_SESSION['currentPG_nome'])){
 	pageError(401);
 }
 
-if(!isset($_SESSION["path"])){
-    $_SESSION["path"] = setPath();
-}
-
 $account = unserialize($_SESSION['account']);
 $personaggi = $account->getPersonaggi();
 
@@ -47,17 +43,16 @@ if(isset($_SESSION["message"])){
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <base href="<?php echo $_SESSION["path"];?>">
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="icon" href="images/icon.svg" type="image/svg+xml" sizes="16x16" >
+	<link rel="icon" href="./../images/icon.svg" type="image/svg+xml" sizes="16x16" >
 	<title>Titles</title>
-	<link rel="stylesheet" href="css/style.css">
-	<link rel="stylesheet" href="css/menu.css">
-	<link rel="stylesheet" href="css/personaggio.css">
-	<link rel="stylesheet" href="css/inventory.css">
-	<link rel="stylesheet" href="css/pgAnimations.css">
-	<script type="module" src="js/gestisciPersonaggio.js"></script>
+	<link rel="stylesheet" href="./../css/style.css">
+	<link rel="stylesheet" href="./../css/menu.css">
+	<link rel="stylesheet" href="./../css/personaggio.css">
+	<link rel="stylesheet" href="./../css/inventory.css">
+	<link rel="stylesheet" href="./../css/pgAnimations.css">
+	<script type="module" src="./../js/gestisciPersonaggio.js"></script>
 	<script>
 		const errorMessage = <?php echo json_encode($errorMessage)?>;
 		const message = <?php echo json_encode($message)?>;
@@ -67,14 +62,14 @@ if(isset($_SESSION["message"])){
 	<header>
         <h1><i>Titles</i></h1>
         <div>
-            <form action="php/logout.php" method="POST">
+            <form action="logout.php" method="POST">
                 <button type="submit">Logout</button>
             </form>
         </aside>
     </header>
 	<main class="main-section">
 		<div class="page-box">
-			<form class="stats-section" action="php/handlePG.php" method="POST">
+			<form class="stats-section" action="./handlePG.php" method="POST">
 				<input type="radio" name="upgrade" checked hidden>
 				<div class="lvl-block">
 					<p class="lvl-info">Livello <span id="user-lvl">
@@ -130,10 +125,10 @@ if(isset($_SESSION["message"])){
 			<div class="character-section">
 				<div class="character-box">
 					<input type="text" name="PG-name" id="PG-name" value="<?php echo $currentPG["nome"];?>" disabled>
-					<img id="deletePG" src="images/trash.svg" alt="Elimina Personaggio" title="Elimina Personaggio">
+					<img id="deletePG" src="./../images/trash.svg" alt="Elimina Personaggio" title="Elimina Personaggio">
 					<div class="character-choose">
 						<img id="imagePG" class="sometimes-animated"
-						 	src="<?php echo $currentPG["pathImmaginePG"];?>" 
+						 	src="./../<?php echo $currentPG["pathImmaginePG"];?>" 
 							alt="Immagine Personaggio" draggable="false">
 					</div>
 					<hr>
@@ -145,7 +140,7 @@ if(isset($_SESSION["message"])){
 							</p>
 						</div>
 						<div class="element-pic">
-							<img id="elementPic" draggable="false" src="<?php echo $currentPG["pathImmagine"];?>" alt="Element Pic"
+							<img id="elementPic" draggable="false" src="./../<?php echo $currentPG["pathImmagine"];?>" alt="Element Pic"
 							title="<?php echo $currentPG["elemento"]?>">
     	        		</div>
 						<div class="dodge-box">
@@ -167,7 +162,7 @@ if(isset($_SESSION["message"])){
 						<p title="Il danno inflitto su questo elemento aumenta di 1 punto">Prevale</p>
 						<div class="element-pic">
     	            		<img id="prevalePic" draggable="false"
-							src="<?php echo $prevalenceImg["prevaleSu"];?>"
+							src="./../<?php echo $prevalenceImg["prevaleSu"];?>"
 							alt="Immagine Prevale su <?php echo $currentPG["prevaleSu"]?>"
 							title="<?php echo $currentPG["prevaleSu"]?>">
     	        		</div>
@@ -176,7 +171,7 @@ if(isset($_SESSION["message"])){
 						<p title="La probabilità di schivare contro questo elemento è dimezzata">Prevalso</p>
 						<div class="element-pic">
     	            		<img id="prevalsoPic" draggable="false"
-							src="<?php echo $prevalenceImg["prevalsoDa"];?>"
+							src="./../<?php echo $prevalenceImg["prevalsoDa"];?>"
 							alt="Immagine Prevalso da <?php echo $currentPG["prevalsoDa"]?>"
 							title="<?php echo $currentPG["prevalsoDa"]?>">
     	        		</div>

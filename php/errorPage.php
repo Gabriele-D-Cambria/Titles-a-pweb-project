@@ -5,10 +5,6 @@
 
     require_once 'methods.php';
 
-    if(!isset($_SESSION["path"])){
-        $_SESSION["path"] = setPath();
-    }
-
     if(!isset($_GET['error_code'])){
         pageError("403");
     }
@@ -39,13 +35,12 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <base href="<?php echo $_SESSION["path"]?>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $title?></title>
-    <link rel="icon" href="images/icon.svg" type="image/svg+xml" sizes="16x16" >
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/errorPage.css">
+    <link rel="icon" href="./../images/icon.svg" type="image/svg+xml" sizes="16x16" >
+    <link rel="stylesheet" href="./../css/style.css">
+    <link rel="stylesheet" href="./../css/errorPage.css">
 </head>
 <body>
     <header style="flex-direction:column">
@@ -54,7 +49,7 @@
     <div class="dialog-message">
         <main>
             <p><?php echo $paragrafo?></p>
-            <a href="index.php"><button><?php echo $bottone?></button></a>
+            <a href="./../index.php"><button><?php echo $bottone?></button></a>
         </main>
     </div>
 </body>

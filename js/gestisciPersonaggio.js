@@ -11,7 +11,7 @@ let usedPU = {
 document.addEventListener("DOMContentLoaded", () =>{
 	document.getElementById("backToDash").addEventListener("click", (e)=>{
 		e.preventDefault();
-		window.location.href = "./php/dashboard.php";
+		window.location.href = "./dashboard.php";
 	});
 	document.getElementById("deletePG").addEventListener("click", createDeleteBox);
 	
@@ -34,7 +34,7 @@ document.addEventListener("click", () => {
 
 
 function configurePage(){
-	fetch("php/API/getCurrentPGinfos.php")
+	fetch("API/getCurrentPGinfos.php")
 		.then(response => response.json())
 		.then(PG => {
 			if(PG.error !== undefined && PG.error){
@@ -255,7 +255,7 @@ function addRemoveMenu(e, itemId){
 		
 		formData.append("itemId_remove", JSON.stringify(itemId));
 
-		fetch("php/API/togglePGItem.php", {
+		fetch("API/togglePGItem.php", {
 			method: "POST",
 			body: formData,
 		})

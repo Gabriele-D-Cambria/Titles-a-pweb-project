@@ -14,11 +14,6 @@ if (!isset($_SERVER['HTTP_REFERER']) ||
 	exit;
 }
 
-if(!isset($_SESSION["path"])){
-    $_SESSION["path"] = setPath();
-}
-
-
 $account = unserialize($_SESSION['account']);
 
 if(count($account->getPersonaggi()) === Account::MAX_NUM_PERSONAGGI){
@@ -40,15 +35,14 @@ if(isset($_SESSION["createPGError"])){
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <base href="<?php echo $_SESSION["path"];?>">
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Titles</title>
-    <link rel="icon" href="images/icon.svg" type="image/svg+xml" sizes="16x16" >
-	<link rel="stylesheet" href="css/style.css">
-	<link rel="stylesheet" href="css/personaggio.css">
-	<link rel="stylesheet" href="css/pgAnimations.css">
-	<script type="module" src="js/creazionePersonaggio.js"></script>
+    <link rel="icon" href="./../images/icon.svg" type="image/svg+xml" sizes="16x16" >
+	<link rel="stylesheet" href="./../css/style.css">
+	<link rel="stylesheet" href="./../css/personaggio.css">
+	<link rel="stylesheet" href="./../css/pgAnimations.css">
+	<script type="module" src="./../js/creazionePersonaggio.js"></script>
 	<script>
 		const createPGError = <?php echo json_encode($message)?>;
 	</script>
@@ -57,13 +51,13 @@ if(isset($_SESSION["createPGError"])){
 	<header>
         <h1><i>Titles</i></h1>
         <div>
-            <form action="php/logout.php" method="POST">
+            <form action="logout.php" method="POST">
                 <button type="submit">Logout</button>
             </form>
         </aside>
     </header>
 	<main class="main-section">
-		<form class="page-box" action="php/handlePG.php" method="POST">
+		<form class="page-box" action="handlePG.php" method="POST">
 			<div class="stats-section">
 				<div class="lvl-block">
 					<p class="lvl-info">Livello <span id="user-lvl">1</span></p>
