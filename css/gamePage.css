@@ -80,7 +80,7 @@ main{
 
 }
 
-#attackBtn{
+#actionBtn{
 	align-self: center;
 	justify-self: center;
 	display: flex;
@@ -94,27 +94,42 @@ main{
 	background-color: #414E4C;
 
 	font-size: 5vh;
-	transition: all 0.5s ease-in-out;
+	transition: font-size 0.5s ease-in-out, text-shadow 0.5s ease-in-out;
 }
 
-#attackBtn:hover{
+#actionBtn:hover:not(:disabled){
 	font-size: 6vh;
 }
 
 
-#attackBtn.attacco{
+#actionBtn:not(:disabled).attacco{
 	text-shadow:
         -1px -1px 150px darkred,
          1px -1px 150px darkred,
         -1px  1px 150px darkred,
          1px  1px 150px darkred;
 }
-#attackBtn.attacco:hover{
+#actionBtn:not(:disabled).attacco:hover{
 	text-shadow:
         -1px -1px 10px darkred,
          1px -1px 10px darkred,
         -1px  1px 10px darkred,
          1px  1px 10px darkred;
+}
+
+#actionBtn:not(:disabled).oggetto{
+	text-shadow:
+        -1px -1px 150px darkgreen,
+         1px -1px 150px darkgreen,
+        -1px  1px 150px darkgreen,
+         1px  1px 150px darkgreen;
+}
+#actionBtn:not(:disabled).oggetto:hover{
+	text-shadow:
+        -1px -1px 10px darkgreen,
+         1px -1px 10px darkgreen,
+        -1px  1px 10px darkgreen,
+         1px  1px 10px darkgreen;
 }
 
 .selected-item{

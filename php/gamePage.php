@@ -50,7 +50,10 @@ if(isset($_SESSION['errorMessage'])){
 				<div class="timer-section">
 					<span id="timer">00:00</span>
 				</div>
-				<button id="attackBtn" class="attacco">Attacca</button>
+				<input type="radio" name="usingObj" id="input-obj_0" value="0" disabled hidden>
+				<input type="radio" name="usingObj" id="input-obj_1" value="1" disabled hidden>
+				<input type="radio" name="usingObj" id="input-obj_2" value="2" disabled hidden>
+				<button id="actionBtn" class="" disabled></button>
 				<div class="bag-section">
 					<div class="item-container">
 						<div id="obj_0" class="item-slot bag-item">
@@ -61,7 +64,7 @@ if(isset($_SESSION['errorMessage'])){
 						</div>
 					</div>
 					<div class="item-container">
-						<div id="obj_2" class="item-slot bag-item selected-item">
+						<div id="obj_2" class="item-slot bag-item">
 						</div>
 					</div>
 				</div>

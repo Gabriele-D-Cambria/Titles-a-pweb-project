@@ -1,5 +1,8 @@
 "use strict";
 
+import { Timer } from "./definitions.js";
+
+
 export const patterns = {
     USERNAME : "^[a-zA-Z][a-zA-Z0-9_.]{2,9}$",
     //? source: https://stackoverflow.com/questions/19605150/regex-for-password-must-contain-at-least-eight-characters-at-least-one-number-a
@@ -36,7 +39,7 @@ export let openBoxSelected = false;
 /**
  * Timer del negozio
  */
-let shopTimerInterval = null;
+let shopTimer = null;
 
 /**
  * Contiene l'id del modulo aperto in un determinato momento
@@ -44,7 +47,7 @@ let shopTimerInterval = null;
 let currentlyOpened = null;
 
 
-// *** Funzioni di supporto alla creazione di elementi HTML ***/
+// *** Funzioni di supporto alla creazione/gestione di elementi HTML ***/
 
 /**
  * Crea un elemento HTML con le proprietà specificate.
@@ -699,9 +702,9 @@ export function closeModuleEvent(event, id, overload = false, coins = true) {
         openBoxSelected = false;
         shownItem = null;
         currentlyOpened = null;
-        if (shopTimerInterval !== null) {
-            clearInterval(shopTimerInterval);
-            shopTimerInterval = null;
+        if (shopTimer !== null) {
+            shopTimer.clearTimer();
+            shopTimer = null;
         }
         closeModule(null, id, true, coins);
     }
@@ -1063,9 +1066,9 @@ export function showShop(){
     currentlyOpened = module.id;
     
     shownItem = null;
-    if(shopTimerInterval !== null){
-        clearInterval(shopTimerInterval);
-        shopTimerInterval = null;
+    if(shopTimer !== null){
+        shopTimer.clearTimer();
+        shopTimer = null;
     }
 
     document.body.classList.add("caricamento");
@@ -1091,7 +1094,8 @@ export function showShop(){
             const p = createHTMLElement("p", "timer", "", `Prossimo Refresh \u2003 - \u2003`);
 
             const span = createHTMLElement("span", "", "timer", `${remainingTime.minutes}:${remainingTime.seconds}`);
-            shopTimerInterval = setInterval(updateShopTimer, 1000);
+            
+            shopTimer = new Timer(showShop, 1000);
 
             p.appendChild(span);
             el.appendChild(p);
@@ -1193,36 +1197,6 @@ function buyItem(){
         errorHandler(error);
         return;
     });
-}
-
-/**
- * Aggiorna il timer con id `"timer"`
- */
-function updateShopTimer(){
-    const span = document.getElementById("timer");
-    if(span === null){
-        if(shopTimerInterval !== null){
-            clearInterval(shopTimerInterval);
-            shopTimerInterval = null;
-        }
-        return;
-    }
-    let [minutes, seconds] = span.innerText.split(":").map(Number);
-    if(minutes === 0 && seconds === 0){
-        clearInterval(shopTimerInterval);
-        showShop();
-        return;
-    }
-    else {
-        if(seconds === 0){
-            --minutes;
-            seconds = 59;
-        }
-        else{
-            --seconds;
-        }
-        span.innerText = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-    }
 }
 
 

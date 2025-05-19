@@ -186,9 +186,9 @@
        d="M 0,433.51393 6.0529356e-5,458.22587 1600,454.698 v -29.70027 l -800.15888,4.25809 z"/>
   </g>
   
-  <g fill="#90ee90" stroke="#408040" stroke-width="2" >
-         <rect id="PF-box_pg1" x="200" y="52" rx="15pt" width="400" height="40"/>
-         <rect id="PF-box_pg2" x="1000" y="52" rx="15pt" width="400" height="40" />
+  <g fill="#90ee90" stroke="#408040" >
+         <rect id="PF-box_pg1" x="200"  y="52" rx="15pt" width="400" height="40" stroke-width="2"/>
+         <rect id="PF-box_pg2" x="1000" y="52" rx="15pt" width="400" height="40" stroke-width="2"/>
    </g>
 
    <!-- Barra vita PG1 -->
@@ -204,11 +204,11 @@
    <!-- Testo PF PG1 -->
    <text
      id="pf_text_pg1"
-     x="500"
+     x="590"
      y="115"
      font-size="25"
      fill="#1f1f1f"
-     text-anchor="start">100/100</text>
+     text-anchor="end">100/100</text>
    
    <!-- Barra vita PG2 -->
    <rect
@@ -223,11 +223,11 @@
    <!-- Testo PF PG2 -->
    <text
      id="pf_text_pg2"
-     x="1110"
+     x="1010"
      y="115"
      font-size="25"
      fill="#1f1f1f"
-     text-anchor="end">100/100</text>
+     text-anchor="start">100/100</text>
    <g fill="rgb(255, 255, 224)">
       <rect
          id="arma_pg1"
@@ -280,14 +280,14 @@
    <g>
     <image
        id="tuoPG"
-       href="characters/acqua.svg"
+       href=""
        x="200"
        y="300"
        width="400"
        height="600" />
     <image
        id="enemyPG"
-       href="characters/acqua.svg"
+       href=""
        transform="scale(-1,1)"
        x="-1400"
        y="300"

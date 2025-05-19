@@ -91,11 +91,9 @@ CREATE TABLE Combattimenti (
     Giocatore2_Proprietario INT NOT NULL,
     Terminata BOOLEAN NOT NULL DEFAULT 0,
     Vittoria_Giocatore1 BOOLEAN DEFAULT NULL,
-    Turno_Giocatore1 BOOLEAN DEFAULT 0,
-    TempoRimanente INT DEFAULT 60,
-    StatoBattaglia JSON DEFAULT NULL,
-    Data DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    PRIMARY KEY (Giocatore1_Proprietario, Giocatore2_Proprietario, Data),
+    StatoPersonaggi JSON DEFAULT NULL,
+    DataInizioBattaglia DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    PRIMARY KEY (Giocatore1_Proprietario, Giocatore2_Proprietario, DataInizioBattaglia),
     FOREIGN KEY (Giocatore1_Nome, Giocatore1_Proprietario) REFERENCES Personaggi(Nome, Proprietario) ON DELETE CASCADE,
     FOREIGN KEY (Giocatore2_Nome, Giocatore2_Proprietario) REFERENCES Personaggi(Nome, Proprietario) ON DELETE CASCADE
 );
@@ -315,30 +313,28 @@ BEGIN
 END;
 //
 
-CREATE TRIGGER before_insert_Combattimenti
+CREATE TRIGGER trg_combattimenti_check_valid_insert
 BEFORE INSERT ON Combattimenti
 FOR EACH ROW
 BEGIN
     IF NEW.Vittoria_Giocatore1 IS NULL THEN
-        IF NEW.Turno_Giocatore1 IS NULL OR NEW.TempoRimanente IS NULL OR NEW.StatoBattaglia IS NULL THEN
+        IF NEW.StatoPersonaggi IS NULL THEN
             SIGNAL SQLSTATE '45000' 
-            SET MESSAGE_TEXT = 'Turno_Giocatore1, TempoRimanente e StatoBattaglia non possono essere NULL se Vittoria_Giocatore1 è NULL';
+            SET MESSAGE_TEXT = 'StatoPersonaggi non può essere NULL se non è settata Vittoria_Giocatore1';
         END IF;
     END IF;
 END; 
 //
 
-CREATE TRIGGER before_update_Combattimenti
+CREATE TRIGGER trg_combattimenti_update_victory_status
 BEFORE UPDATE ON Combattimenti
 FOR EACH ROW
 BEGIN
-    IF NEW.Vittoria_Giocatore1 IS NULL THEN
-        IF NEW.Turno_Giocatore1 IS NULL OR NEW.TempoRimanente IS NULL OR NEW.StatoBattaglia IS NULL THEN
-            SIGNAL SQLSTATE '45000' 
-            SET MESSAGE_TEXT = 'Turno_Giocatore1, TempoRimanente e StatoBattaglia non possono essere NULL se Vittoria_Giocatore1 è NULL';
-        END IF;
+    IF NEW.Vittoria_Giocatore1 IS NOT NULL THEN
+        SET NEW.StatoPersonaggi = NULL;
+        SET NEW.Terminata = 1;
     END IF;
-END; 
+END;
 //
 
 DELIMITER ;

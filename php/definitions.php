@@ -1222,23 +1222,44 @@ class Personaggio{
             throw new Exception("Connessione al database fallita: " . $conn->connect_error, 500);
         }
         
+        $conn->begin_transaction();
         $stmt = null;
+        $stmtUpdate = null;
         try {
             $sql = "SELECT * 
                     FROM Combattimenti 
                     WHERE Giocatore1_Nome = ? AND Giocatore1_Proprietario = ? AND Terminata = 0
-                    ORDER BY Data DESC LIMIT 1";
+                    ORDER BY DataInizioBattaglia DESC LIMIT 1";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param('si', $this->nome, $this->proprietario);
             $stmt->execute();
             $result = $stmt->get_result();
+            $output = null;
             if($result && $result->num_rows > 0){
-                return $result->fetch_assoc();
+                $output = $result->fetch_assoc();
+                $currentDateTime = new DateTime("now");
+                $currentTimestamp = $currentDateTime->format('Y-m-d H:i:s');
+
+                $sqlUpdate = "UPDATE Combattimenti SET DataUltimoTurno = ?
+                              WHERE Giocatore1_Proprietario = ? 
+                                AND Giocatore2_Proprietario = ?
+                                AND Terminata = 0 ";
+                $stmtUpdate = $conn->prepare($sqlUpdate);
+                $stmtUpdate->bind_param('sii', $currentTimestamp, $this->proprietario, $output['Giocatore2_Proprietario']);
+                if(!$stmtUpdate->execute()){
+                    $conn->rollback();
+                    throw new Exception("Problemi durante il recupero dell'ultima battaglia del personaggio" . $this->nome . "(proprietario ". $this->proprietario .")", 500);
+                }
+
+                $output["Turno_Giocatore1"] = false;
+                $output["DataUltimoTurno"] = $currentDateTime;
             }
-            return null;
+            $conn->commit();
+            return $output;
         } 
         finally {
-            if($stmt) $stmt->close();
+            if($stmt)       $stmt->close();
+            if($stmtUpdate) $stmtUpdate->close();
             $conn->close();
         }
     }
@@ -1259,27 +1280,22 @@ class Personaggio{
         $selectStmt = null;
         try {
             $sql = "INSERT INTO Combattimenti 
-                (Giocatore1_Nome, Giocatore1_Proprietario, Giocatore2_Nome, Giocatore2_Proprietario, Turno_Giocatore1, StatoBattaglia)
-                VALUES (?, ?, ?, ?, ?, ?)";
+                (Giocatore1_Nome, Giocatore1_Proprietario, Giocatore2_Nome, Giocatore2_Proprietario, StatoPersonaggi)
+                VALUES (?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);            
 
             $nomeAvversario = $avversario->getNome();
             $proprietarioAvversario = $avversario->getProprietario();
-            $turno = random_int(0, 9) % 2;
-            $statoBattaglia = [
+            $turno = random_int(0, 9) % 2 === 0;
+            $statoPersonaggi = [
                 "pg1" => $this->getAll(),
                 "pg2" => $avversario->getAll()
             ];
-            $statoBattagliaJson = json_encode($statoBattaglia);
+            $statoPersonaggiJson = json_encode($statoPersonaggi);
 
-            $vars = [$this->nome,
-                $this->proprietario,
-                $nomeAvversario,
-                $proprietarioAvversario,
-                $turno,
-                $statoBattagliaJson];
-            error_log(print_r($vars, true));
-            $stmt->bind_param('sisiis', ...$vars);
+            $vars = [$this->nome, $this->proprietario, $nomeAvversario, $proprietarioAvversario, $statoPersonaggiJson];
+
+            $stmt->bind_param('sisis', ...$vars);
             if(!$stmt->execute()){
                 throw new Exception("Errore durante la creazione del combattimento: " . $stmt->error, 500);
             }
@@ -1297,6 +1313,7 @@ class Personaggio{
 
             $result = $selectStmt->get_result();
             $battaglia = $result->fetch_assoc();
+            $battaglia['Turno_Giocatore1'] = $turno;
 
             $conn->commit();
             return $battaglia;

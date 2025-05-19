@@ -3,6 +3,10 @@
 session_start();
 require_once "./methods.php";
 
+if (!isset($_SERVER['HTTP_REFERER'])) {
+	pageError(403);
+}
+
 if(basename($_SERVER['HTTP_REFERER']) !== "gestisciPersonaggio.php" || $_SERVER['REQUEST_METHOD'] !== "POST"){
 	pageError(403);
 }
@@ -25,10 +29,10 @@ try{
 		$battaglia = $personaggio->creaCombattimento($avversario);
 	}
 	else{
-		$_SESSION['message'] = "Ripristinata la battaglia iniziata in data: " . date('Y-m-d', strtotime($battaglia['Data']));
+		$_SESSION['message'] = "Ripristinata la battaglia iniziata in data: " . date('Y-m-d', strtotime($battaglia['DataInizioBattaglia'])) ."\nDato il ripristino è il turno dell'avversario!";
 	}
 	
-	$stato = json_decode($battaglia['StatoBattaglia'], associative: true);
+	$stato = json_decode($battaglia['StatoPersonaggi'], associative: true);
 	if (isset($stato['pg1']) && isset($stato['pg2'])) {
 		$pg1 = Personaggio::fromArray($stato['pg1']);
 		$pg2 = Personaggio::fromArray($stato['pg2']);

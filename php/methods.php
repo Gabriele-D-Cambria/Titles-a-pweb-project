@@ -806,7 +806,7 @@ function getRemainingTime(&$currentTime, $shopRefresh) {
 }
 
 /**
- * Recupera tutti gli elementi dal database, inclusi i relativi modificatori e percorsi.
+ * Recupera tutti gli `elementi` dal database, inclusi i relativi modificatori e percorsi.
  * @return array Ritorna i dati recuperati dal database.
  */
 function getAllPG(){
