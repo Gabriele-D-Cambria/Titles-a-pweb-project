@@ -506,7 +506,7 @@ class Personaggio{
                 $this->proprietario           = $proprietarioId;
                 $this->FOR             = self::DEFAULT_FOR_DES + $elementInfo["ModificatoreFor"];
                 $this->DES             = self::DEFAULT_FOR_DES + $elementInfo["ModificatoreDes"];
-                $this->PF              = self::DEFAULT_PF + $elementInfo["ModificatorePF"];
+                $this->PF              = self::DEFAULT_PF + $elementInfo["RecuperoVita"];
                 $this->elemento        = $elementInfo['Nome'];
                 $this->prevaleSu       = $elementInfo['PrevaleSu'];
                 $this->prevalsoDa      = $elementInfo['PrevalsoDa'];
@@ -849,6 +849,12 @@ class Personaggio{
     public function getElemento(): string{
         return $this->elemento;
     }
+    public function getAllPF(){
+        return [
+            "PF"        => $this->PF,
+            "tmp_PF"   => $this->tmp_PF
+        ];
+    }
     public function getAll() {
         return [
             'nome'            => $this->nome,
@@ -928,6 +934,75 @@ class Personaggio{
             if ($stmt) $stmt->close();
             $connectionDB->close();
         }
+    }
+
+    /**
+     * Restituisce tutti gli oggetti utilizzabili secondo le seguenti regole:
+     *  - Non restituisce oggetti cura se già full vita
+     *  - Non restituisce solo oggetti FOR se la statistica è già al massimo
+     *  - Non restituisce solo oggetti DES se la statistica è già al massimo
+     * @return array|null contenente gli oggetti secondo questi filtri se presenti, `null` altrimenti
+     */
+    public function getOggettiUtilizzabili() {
+        $oggetti = [];
+        foreach ($this->zaino as $item) {
+            if ($item['RecuperoVita'] > 0 && $this->tmp_PF == $this->PF) 
+                continue;
+            if ($item['ModificatoreFor'] > 0 && $item['ModificatoreDes'] == 0 && $this->currentFOR == self::MAX_FOR_DES) 
+                continue;
+            if ($item['ModificatoreDes'] > 0 && $item['ModificatoreFor'] == 0 && $this->currentDES == self::MAX_FOR_DES) 
+                continue;
+            $oggetti[] = $item;
+        }
+
+        return (count($oggetti) === 0)? null : $oggetti;
+    }
+
+    /**
+     * @return array|null Restituisce l'oggetto con il miglior RecuperoVita (>0), oppure null.
+     */
+    public function getBestOggettoCura() {
+        $best = null;
+        $oggetti = $this->getOggettiUtilizzabili() ?? [];
+        foreach ($oggetti as $item) {
+            if ($item['RecuperoVita'] > 0) {
+                if ($best === null || $item['RecuperoVita'] > $best['RecuperoVita']) {
+                    $best = $item;
+                }
+            }
+        }
+        return $best;
+    }
+
+    /**
+     * @return array|null Restituisce l'oggetto con il miglior ModificatoreFor (>0), oppure null.
+     */
+    public function getBestOggettoFOR() {
+        $best = null;
+        $oggetti = $this->getOggettiUtilizzabili() ?? [];
+        foreach ($oggetti as $item) {
+            if ($item['ModificatoreFor'] > 0) {
+                if ($best === null || $item['ModificatoreFor'] > $best['ModificatoreFor']) {
+                    $best = $item;
+                }
+            }
+        }
+        return $best;
+    }
+
+    /**
+     * @return array|null Restituisce l'ID deloggetto con il miglior ModificatoreDes (>0), oppure null.
+     */
+    public function getBestOggettoDES() {
+        $best = null;
+        foreach ($this->getOggettiUtilizzabili() as $item) {
+            if ($item['ModificatoreDes'] > 0) {
+                if ($best === null || $item['ModificatoreDes'] > $best['ModificatoreDes']) {
+                    $best = $item;
+                }
+            }
+        }
+        return $best;
     }
 
     /**
@@ -1014,6 +1089,13 @@ class Personaggio{
     }
 
     /**
+     * Funzione per capire se un personaggio ha i `tmp_PF` minori o uguali a zero
+     * @return bool `true` se il personaggio è morto, `false` altrimenti
+     */
+    public function isDead(){
+        return $this->tmp_PF <= 0;
+    }
+    /**
      * Cura il personaggio
      * @param int $amount valore di cura del personaggio
      * @return bool se `true` indica che il personaggio ha guadagnato dei PF, altrimenti indica che il personaggio aveva già la vita al massimo
@@ -1071,8 +1153,55 @@ class Personaggio{
         return $this->updateDB();
     }
 
-    public function useItem($itemId){
-        // TODO
+    /**
+     * Funzione che utilizza l'oggetto specificato tramite ID se presente nell'inventario.
+     * Eventualmente aggiorna il database rimuovendo l'oggetto
+     * @param int $itemId id dell'oggetto da utilizzare
+     * @param boolean $updateDB se aggiornare o meno il database [Default: `false`]
+     * @return boolean `true` se l'oggetto è stato trovato e utilizzato correttamente, `false` altrimenti
+     */
+    public function useItem($itemId, $updateDB = false){       
+        $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+        if ($connectionDB->connect_error) {
+            throw new Exception("Connessione al database fallita: ". $connectionDB->connect_error, 500);
+        }
+
+        $foundIndex = null;
+        foreach ($this->zaino as $index => $oggetto) {
+            if ($oggetto['ID'] == $itemId) {
+                $foundIndex = $index;
+                $item = $oggetto;
+                break;
+            }
+        }
+        if (!$foundIndex) {
+            return false;
+        }
+
+        $used = false;
+
+        // Cura
+        if (isset($item['RecuperoVita']) && $item['RecuperoVita'] > 0) {
+            $used = $this->heal($item['RecuperoVita']);
+        }
+        // Modifica FOR
+        if (isset($item['ModificatoreFor']) && $item['ModificatoreFor'] != 0) {
+            $this->currentFOR = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->currentFOR + $item['ModificatoreFor']));
+            $used = true;
+        }
+        // Modifica DES
+        if (isset($item['ModificatoreDes']) && $item['ModificatoreDes'] != 0) {
+            $this->currentDES = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->currentDES + $item['ModificatoreDes']));
+            $used = true;
+        }
+
+        $this->setEquipmentStats();
+        
+        $this->removeFromZaino($connectionDB, $itemId, $updateDB);
+        
+        $connectionDB->close();
+
+        return $used;
     }
 
     /**
@@ -1252,7 +1381,7 @@ class Personaggio{
                 }
 
                 $output["Turno_Giocatore1"] = false;
-                $output["DataUltimoTurno"] = $currentDateTime;
+                $output["DataUltimoTurno"] = serialize($currentDateTime);
             }
             $conn->commit();
             return $output;
@@ -1314,6 +1443,7 @@ class Personaggio{
             $result = $selectStmt->get_result();
             $battaglia = $result->fetch_assoc();
             $battaglia['Turno_Giocatore1'] = $turno;
+            $battaglia['DataUltimoTurno'] = serialize(new DateTime($battaglia['DataUltimoTurno']));
 
             $conn->commit();
             return $battaglia;
@@ -1455,7 +1585,7 @@ class Personaggio{
  *                   "PathImmaginePG" => string, // Percorso dell'immagine PG dell'elemento.
  *                   "ModificatoreFor" => float, // Modificatore per la forza.
  *                   "ModificatoreDes" => float, // Modificatore per la destrezza.
- *                   "ModificatorePF" => float,  // Modificatore per i punti vita.
+ *                   "RecuperoVita" => float,  // Modificatore per i punti vita.
  *                   "PrevaleSu" => string,      // Elemento/i su cui questo elemento prevale.
  *                   "PrevalsoDa" => string      // Elemento/i da cui questo elemento è prevalso.
  *                 ]

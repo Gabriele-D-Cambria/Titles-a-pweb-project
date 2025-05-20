@@ -40,6 +40,9 @@ if(isset($_SESSION["message"])){
 }
 ?>
 
+
+<!--TODO: implemententa un contatore di battaglie vinte/perse -->
+<!--inoltre segna se c'è una partita lasciata a metà, e in caso blocca la rimozione degli oggetti dall'inventario, con messaggio di errore -->
 <!DOCTYPE html>
 <html lang="it">
 <head>

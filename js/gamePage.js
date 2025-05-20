@@ -1,6 +1,6 @@
 "use strict";
 
-import {showMessage, errorHandler, createHTML_img} from "./methods.js"
+import {showMessage, errorHandler, createHTML_img, createHTMLElement} from "./methods.js"
 import { centerSvgElement, insertClippedImage } from "./svgMethods.js";
 import { Timer } from "./definitions.js";
 
@@ -17,6 +17,10 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(svg => {
 			document.getElementById('imageContainer').innerHTML = svg;
 			getGameInfo();
+		})
+		.catch(error => {
+			errorHandler(error);
+			// window.location.href = "./errorPage.php/?error_code=" + error.code;
 		});
 
 
@@ -39,10 +43,16 @@ function getGameInfo(){
 			turno = data.turno;
 			setArenaPG(data.pg1, data.pg2);
 
+
+			if(data.vittoria !== null){
+				setWinningSection(data.vittoria);
+				turno = null;
+				return;
+			}
+			
+
 			// TODO
 			/**
-			 * attack event
-			 * updateStatus
 			 * arrenditi
 			 */
 
@@ -51,8 +61,12 @@ function getGameInfo(){
 			setZaino(data.pg1.zaino);
 
 			setTurn(data.tempoRimanente_secondi);
+
 		})
-		.catch(error => errorHandler(error));
+		.catch(error => {
+			errorHandler(error);
+			// window.location.href = "./errorPage.php/?error_code=" + error.code;
+		});
 }
 
 function setArenaPG(PG1, PG2){
@@ -60,17 +74,23 @@ function setArenaPG(PG1, PG2){
 	const svgDoc = document.querySelector('svg');
 	svgDoc.getElementById('tuoPG').setAttribute("href", "./../" + PG1.pathImmaginePG);
 	svgDoc.getElementById('enemyPG').setAttribute("href", "./../" + PG2.pathImmaginePG);
+	
+	if(turno !== null){
+		const id = turno? "tuoPG" : "enemyPG";
+		svgDoc.getElementById(id).setAttribute("class", "always-animated");
+	}
+
 
 
 	if(PG1.arma)
-		insertClippedImage(svgDoc, "arma_pg1", PG1.arma['PathImmagine'], "clipArmaPG1");
+		insertClippedImage(svgDoc, "arma_pg1", PG1.arma, "clipArmaPG1");
 	if(PG1.armatura)
-		insertClippedImage(svgDoc, "armatura_pg1", PG1.armatura['PathImmagine'], "clipArmaturaPG1");
+		insertClippedImage(svgDoc, "armatura_pg1", PG1.armatura, "clipArmaturaPG1");
 
 	if(PG2.arma)
-		insertClippedImage(svgDoc, "arma_pg2", PG2.arma['PathImmagine'], "clipArmaPG2");
+		insertClippedImage(svgDoc, "arma_pg2", PG2.arma, "clipArmaPG2");
 	if(PG2.armatura)
-		insertClippedImage(svgDoc, "armatura_pg2", PG2.armatura['PathImmagine'], "clipArmaturaPG2");
+		insertClippedImage(svgDoc, "armatura_pg2", PG2.armatura, "clipArmaturaPG2");
 
 
 	svgDoc.getElementById("nome_pg1").innerHTML = PG1.nome;
@@ -106,17 +126,24 @@ function setZaino(zaino){
 			while(space.childElementCount)
 				space.removeChild(space.firstChild);
 			space.appendChild(img);
-			space.addEventListener("click",(e) => {
-				if(turno){
+			space.addEventListener("click", (e) => {
+				if (turno) {
+					const selected = document.querySelector(".selected-item");
+					if (selected && selected !== space) {
+						selected.classList.remove("selected-item");
+						document.getElementById(`input-${selected.id}`).checked = false;
+					}
+
 					const id = String(e.target.id).split("-")[0];
 					const btn = document.getElementById("actionBtn");
-					if(document.getElementById(id).classList.toggle("selected-item")){
+
+					if (document.getElementById(id).classList.toggle("selected-item")) {
 						btn.classList.add("oggetto");
 						btn.classList.remove("attacco");
 						btn.innerText = "Usa Oggetto";
 						document.getElementById(`input-${id}`).checked = true;
-					}
-					else{
+						document.getElementById(`input-${id}`).value = item.ID;
+					} else {
 						btn.classList.add("attacco");
 						btn.classList.remove("oggetto");
 						btn.innerText = "Attacca";
@@ -158,11 +185,11 @@ function play(){
 	}
 
 	const formData = new FormData();
-	const selectedObj = document.querySelector('input[name="usingObj"]:checked');
+	const selectedObj_id = document.querySelector('input[name="usingObj"]:checked');
 
-	if(selectedObj) {
+	if(selectedObj_id) {
 		formData.append("azione", "usa_oggetto");
-		formData.append("oggetto_index", selectedObj.value);
+		formData.append("oggetto_index", selectedObj_id.value);
 	} 
 	else {
 		formData.append("azione", "attacco");
@@ -170,7 +197,6 @@ function play(){
 
 	sendPlay(formData);
 }
-
 
 /**
  * Funzione che cambia il turno del personaggio eseguendo una mossa casuale
@@ -193,7 +219,7 @@ function changeTurn(){
  * @param {FormData} formData contennete le informazioni da comunicare all'API
  */
 function sendPlay(formData){
-	fetch("./API/playAction.php", {
+	fetch("playAction.php", {
 		method: "POST",
 		body: formData
 	})
@@ -203,8 +229,29 @@ function sendPlay(formData){
 			throw result;
 		}
 		
-		showMessage("ESDRONGO");
-		getGameInfo();
+		window.location.reload();
 	})
-	.catch(error => errorHandler(error));
+	.catch(error => {
+		errorHandler(error);
+		// window.location.href = "./errorPage.php/?error_code=" + error.code;
+	});
+}
+
+
+function setWinningSection(hasWon){
+	let div = document.getElementById("top-section");
+
+	while(div.childElementCount)
+		div.removeChild(div.firstChild);
+
+	div.classList.remove("timer-section");
+	div.classList.add("winner-name-section");
+
+	const message = hasWon? "Hai vinto" : "Hai perso"
+	let p = createHTMLElement("p", "winningP", null, message);
+
+	div.appendChild(p);
+
+
+	div = document.getElementById("")
 }

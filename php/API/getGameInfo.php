@@ -2,6 +2,8 @@
 
 require_once "../methods.php";
 session_start();
+header('Content-Type: application/json');
+
 
 if(!isset($_SESSION['account']) || !isset($_SESSION['currentPG_nome'])){
 	apiError(403);
@@ -12,58 +14,63 @@ if(!isset($_SESSION['battaglia'])){
 }
 
 $battaglia = unserialize($_SESSION['battaglia']);
-
-$stato = json_decode($battaglia['StatoPersonaggi'], true);
-
-if(!isset($stato['pg1']) || !isset($stato['pg2'])){
-	apiError(401);
-}
-
-$durataTurno = Personaggio::DEFAULT_TURN_TIME;
-$currentTime = new DateTime("now");
-
-$tempoPassato = $currentTime->getTimestamp() - $battaglia['DataUltimoTurno']->getTimestamp();
-
-$tempoRimanente =Personaggio::DEFAULT_TURN_TIME - $tempoPassato;
-
-if($tempoRimanente < 0){
-	error_log("FAI IL CAMBIO TURNO!");
+$tempoRimanente = Personaggio::DEFAULT_TURN_TIME;
+if(!$battaglia['Terminata']){    
+    $durataTurno = Personaggio::DEFAULT_TURN_TIME;
+    $currentTime = new DateTime("now");
+    
+    $tempoPassato = $currentTime->getTimestamp() - unserialize($battaglia['DataUltimoTurno'])->getTimestamp();
+    
+    $tempoRimanente = Personaggio::DEFAULT_TURN_TIME - $tempoPassato;
+    
+    if($tempoRimanente < 0){
+        $tempoRimanente = 0;
+    }    
 }
 
 $minuti = $tempoRimanente / 60;
 $secondi = $tempoRimanente % 60;
 $tempoRimanenteFormattato = sprintf("%02d:%02d", $minuti, $secondi);
 
-$myPG = $stato['pg1'];
+$myPG = unserialize($battaglia['pg1'])->getAll();
 $pg1_filtrato = [
     'nome'            => $myPG['nome'],
     'pathImmaginePG'  => $myPG['pathImmaginePG'],
     'PF'              => $myPG['PF'],
-    'temp_PF'         => $myPG['temp_PF'],
-    'arma' 			  => $myPG['arma']['pathImmagine'],
-    'armatura' 		  => $myPG['armatura']['pathImmagine'],
+    'temp_PF'         => ($myPG['temp_PF'] >= 0)? $myPG['temp_PF'] : 0,
     'zaino' 		  => $myPG['zaino']
 ];
 
-$enemyPG = $stato['pg2'];
+if($myPG['arma']){
+    $pg1_filtrato['arma'] = $myPG['arma']['PathImmagine'];
+}
+if($myPG['armatura']){
+    $pg1_filtrato['armatura'] = $myPG['armatura']['PathImmagine'];
+}
+
+$enemyPG = unserialize($battaglia['pg2'])->getAll();
 
 $pg2_filtrato = [
     'nome'            => $enemyPG['nome'],
     'pathImmaginePG'  => $enemyPG['pathImmaginePG'],
     'PF'              => $enemyPG['PF'],
-    'temp_PF'         => $enemyPG['temp_PF'],
-    'arma' 			  => $enemyPG['arma']['pathImmagine'],
-    'armatura' 		  => $enemyPG['armatura']['pathImmagine']
+    'temp_PF'         => ($enemyPG['temp_PF'] >= 0)? $enemyPG['temp_PF'] : 0,
 ];
 
+if($enemyPG['arma']){
+    $pg2_filtrato['arma'] = $enemyPG['arma']['PathImmagine'];
+}
+if($enemyPG['armatura']){
+    $pg2_filtrato['armatura'] = $enemyPG['armatura']['PathImmagine'];
+}
 
 $output = [
 	'pg1'			 		 => $pg1_filtrato,
 	'pg2'			 		 => $pg2_filtrato,
+    'vittoria'               => $battaglia['Vittoria_Giocatore1'],
 	'turno' 		 		 => $battaglia['Turno_Giocatore1'],
     'tempoRimanente' 		 => $tempoRimanenteFormattato,
 	'tempoRimanente_secondi' => $tempoRimanente
 ];
 
-header('Content-Type: application/json');
 echo json_encode($output);

@@ -266,7 +266,7 @@
      x="234.46355"
      y="40.323013"
      id="nome_pg1"
-     transform="scale(1.0091501,0.99093287)">Nome Personaggio 1</text>
+     transform="scale(1,1)">Nome Personaggio 1</text>
   <text
      xml:space="preserve"
      font-size="34px"
@@ -274,7 +274,7 @@
      x="1024.46355"
      y="40.323013"
      id="nome_pg2"
-     transform="scale(1.0091501,0.99093287)">Nome Personaggio 2</text>
+     transform="scale(1,1)">Nome Personaggio 2</text>
 
    <!-- Personaggi -->
    <g>
@@ -285,13 +285,15 @@
        y="300"
        width="400"
        height="600" />
-    <image
-       id="enemyPG"
-       href=""
-       transform="scale(-1,1)"
-       x="-1400"
-       y="300"
-       width="400"
-       height="600" />
+    <g transform="scale(-1, 1)">
+      <image
+         id="enemyPG"
+         href=""
+         x="-1400"
+         y="300"
+         width="400"
+         height="600" />
+         
+    </g>
   </g>
 </svg>

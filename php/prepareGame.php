@@ -38,6 +38,7 @@ try{
 		$pg2 = Personaggio::fromArray($stato['pg2']);
 		$battaglia['pg1'] = serialize($pg1);
 		$battaglia['pg2'] = serialize($pg2);
+		unset($battaglia['StatoPersonaggi']);
 	}
 	else{
 		pageError(401);

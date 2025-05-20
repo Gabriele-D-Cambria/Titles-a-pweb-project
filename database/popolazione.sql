@@ -1,5 +1,5 @@
 -- Inserimento Elementi
-INSERT INTO Element (Nome, PathImmagine, PathImmaginePG, ModificatoreFor, ModificatoreDES, ModificatorePF) VALUES
+INSERT INTO Element (Nome, PathImmagine, PathImmaginePG, ModificatoreFor, ModificatoreDES, RecuperoVita) VALUES
 ('Acqua',	'images/pics/acqua.svg', 	'images/characters/acqua.svg',	 -3, +2, +5),
 ('Fuoco',	'images/pics/fuoco.svg', 	'images/characters/fuoco.svg',	 +4, +3, -3),
 ('Terra',	'images/pics/terra.svg', 	'images/characters/terra.svg',	 +0, -2, +6),

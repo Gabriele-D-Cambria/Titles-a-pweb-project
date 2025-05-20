@@ -292,8 +292,9 @@ body{
 	transition: transform 0.3s ease-in-out;
 }
 
-.character-choose img.always-animated, .character-choose img.sometimes-animated:hover{
+.always-animated, .sometimes-animated:hover{
 	animation: idleWait 2s ease-in-out infinite;
+	transform-origin: center;
 }
 
 .character-box hr{

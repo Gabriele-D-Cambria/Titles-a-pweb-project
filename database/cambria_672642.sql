@@ -18,7 +18,7 @@ CREATE TABLE Element(
     PathImmaginePG VARCHAR(255) COLLATE utf8_bin DEFAULT NULL,
     ModificatoreFor INT DEFAULT 0,
     ModificatoreDes INT DEFAULT 0,
-    ModificatorePF INT DEFAULT 0,
+    RecuperoVita INT DEFAULT 0,
     PrevaleSu VARCHAR(50) DEFAULT NULL,
     PrevalsoDa VARCHAR(50) DEFAULT NULL,
     FOREIGN KEY (PrevaleSu) REFERENCES Element(Nome) ON DELETE SET NULL,
@@ -93,6 +93,7 @@ CREATE TABLE Combattimenti (
     Vittoria_Giocatore1 BOOLEAN DEFAULT NULL,
     StatoPersonaggi JSON DEFAULT NULL,
     DataInizioBattaglia DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    DataUltimoTurno DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (Giocatore1_Proprietario, Giocatore2_Proprietario, DataInizioBattaglia),
     FOREIGN KEY (Giocatore1_Nome, Giocatore1_Proprietario) REFERENCES Personaggi(Nome, Proprietario) ON DELETE CASCADE,
     FOREIGN KEY (Giocatore2_Nome, Giocatore2_Proprietario) REFERENCES Personaggi(Nome, Proprietario) ON DELETE CASCADE
@@ -323,6 +324,32 @@ BEGIN
             SET MESSAGE_TEXT = 'StatoPersonaggi non può essere NULL se non è settata Vittoria_Giocatore1';
         END IF;
     END IF;
+
+    IF NEW.DataUltimoTurno < NEW.DataInizioBattaglia THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = "L'ultimo turno non può essere precedente all'inizio della battaglia";
+    END IF;
+END; 
+//
+
+CREATE TRIGGER trg_combattimenti_check_valid_update
+BEFORE UPDATE ON Combattimenti
+FOR EACH ROW
+BEGIN
+    DECLARE msg TEXT;
+    
+    IF NEW.Vittoria_Giocatore1 IS NULL THEN
+        IF NEW.StatoPersonaggi IS NULL THEN
+            SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = 'StatoPersonaggi non può essere NULL se non è settata Vittoria_Giocatore1';
+        END IF;
+    END IF;
+
+    IF NEW.DataUltimoTurno <= OLD.DataUltimoTurno THEN
+        SET msg = CONCAT('Errore: Il nuovo turno deve iniziare dopo quello precedente. NEW.DataUltimoTurno: ', NEW.DataUltimoTurno, ', OLD.DataUltimoTurno: ', OLD.DataUltimoTurno);
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = msg;
+    END IF;
 END; 
 //
 
@@ -333,6 +360,7 @@ BEGIN
     IF NEW.Vittoria_Giocatore1 IS NOT NULL THEN
         SET NEW.StatoPersonaggi = NULL;
         SET NEW.Terminata = 1;
+        SET NEW.DataUltimoTurno = NULL;
     END IF;
 END;
 //

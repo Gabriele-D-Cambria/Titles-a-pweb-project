@@ -29,6 +29,7 @@ if(isset($_SESSION['errorMessage'])){
 	<link rel="stylesheet" href="./../css/gamePage.css">
 	<link rel="stylesheet" href="./../css/personaggio.css">
 	<link rel="stylesheet" href="./../css/inventory.css">
+	<link rel="stylesheet" href="./../css/pgAnimations.css">
 	<script type="module" src="./../js/gamePage.js"></script>
 	<script>
 		const message = <?php echo json_encode($message)?>;
@@ -47,7 +48,7 @@ if(isset($_SESSION['errorMessage'])){
 		<div id="imageContainer"></div>
 		<aside class="actionSection">
 			<div class="action-block">
-				<div class="timer-section">
+				<div id="top-section" class="timer-section">
 					<span id="timer">00:00</span>
 				</div>
 				<input type="radio" name="usingObj" id="input-obj_0" value="0" disabled hidden>
