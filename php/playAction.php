@@ -58,7 +58,6 @@ try{
 		if(!$randomMove){
 			if($azione === 'attacco'){
 				$esito = $pg1->attack($pg2);
-
 				$message .= ($esito['colpito'])?
 					"Il tuo colpo ha colpito!\n Hai fatto " . $esito['dannoInflitto'] . " danni":
 					"L'avversario ha schivato!";
@@ -69,16 +68,19 @@ try{
 					$randomMove = true;
 					$message .= "Non posiedi questo oggetto, la tua mossa sarà quindi scelta casualmente.\n";
 				}
+				else{
+					$message .= "Hai utilizzato l'oggetto!\n";
+				}
 			}
 		}
 
 		if($randomMove){
 			$esito = randomMove($pg1, $pg2);
-			$message .= "Hai attaccato!";
 			if($esito['mossa'] === 'attacco'){
+				$message .= "Hai attaccato";
 				$message .= ($esito['colpito'])?
-					"Il tuo colpo ha colpito!\n Hai fatto " . $esito['dannoInflitto'] . " danni\n":
-					"L'avversario ha schivato!";
+					" e il tuo colpo ha colpito!\n Hai fatto " . $esito['dannoInflitto'] . " danni\n":
+					", ma l'avversario ha schivato!";
 			}
 			else{
 				$message .= "Hai utilizzato l'oggetto " . $esito['oggetto'] . "\n";
@@ -88,14 +90,15 @@ try{
 	}
 	else{
 		$esito = randomMove($pg2, $pg1);
-		$message .= $pg2->getNome() . " ha attaccato!";
+		$message .= $pg2->getNome();
 		if($esito['mossa'] === 'attacco'){
+			$message .= " ha attaccato";
 			$message .= ($esito['colpito'])?
-				"Il suo colpo ha colpito!\n Ti ha fatto " . $esito['dannoInflitto'] . " danni\n":
-				"Lo hai schivato!";
+				" e il suo colpo ha colpito!\n Ti ha fatto " . $esito['dannoInflitto'] . " danni\n":
+				", ma lo hai schivato!";
 		}
 		else{
-			$message .= "Ha utilizzato l'oggetto " . $esito['oggetto'] . "\n";
+			$message .= " ha utilizzato l'oggetto " . $esito['oggetto'] . "\n";
 		}
 	}
 
@@ -110,7 +113,7 @@ try{
 		updateGame($battaglia);
 
 	$_SESSION['battaglia'] = serialize($battaglia);
-	$_SESSION['message'] = $message;
+	$_SESSION['gameMessage'] = $message;
 }
 catch(Exception $e){
 	error_log($e->getMessage(), $e->getCode());
@@ -127,6 +130,10 @@ echo json_encode(["ok" => true]);
  * @param Personaggio $pg2 colui che subisce la mossa
  * @param boolean $updateDB indica se la mossa deve avere ripercussioni sullo zaino complessivo del personaggio. [Default: `false`]
  * @return array contenente informazioni sulla mossa eseguita
+ * 		- `"mossa": indica la mossa eseguita
+ * 		- `"colpito"`?: SOLO SE la mossa era `"attacco"`
+ * 		- `"dannoInflitto"`?: SOLO SE la mossa era `"attacco"` e `"colpito"` è `true`
+ * 		- `"oggetto"`?: SOLO SE la mossa era `"oggetto"`, contiene il nome dell'oggetto utilizzato
  */
 function randomMove(&$pg1, &$pg2, $updateDB = false){
 	$output = [
@@ -242,6 +249,7 @@ function updateGame(&$battagliaInfo, $terminata = null){
 			$battagliaInfo['Terminata'] = true;
 			$battagliaInfo['DataUltimoTurno'] = null;
 			$battagliaInfo['StatoPersonaggi'] = null;
+			$battagliaInfo['Turno_Giocatore1'] = null;
 		}
         $conn->commit();
         return true;

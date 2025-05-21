@@ -17,6 +17,12 @@ if(isset($_SESSION['errorMessage'])){
 	$errorMessage = $_SESSION['errorMessage'];
 	unset($_SESSION['errorMessage']);
 }
+
+$gameMessage= null;
+if(isset($_SESSION['gameMessage'])){
+	$gameMessage = $_SESSION['gameMessage'];
+	unset($_SESSION['gameMessage']);
+}
 ?>
 
 <!DOCTYPE html>
@@ -34,6 +40,7 @@ if(isset($_SESSION['errorMessage'])){
 	<script>
 		const message = <?php echo json_encode($message)?>;
 		const errorMessage = <?php echo json_encode($errorMessage)?>;
+		const gameMessage = <?php echo json_encode($gameMessage)?>;
 	</script>
 	<meta charset="UTF-8">
 </head>

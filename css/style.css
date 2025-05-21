@@ -183,6 +183,13 @@ a:hover{
     font-weight: bold;
 }
 
+.messaggio.gioco{
+    color: #121212;
+    background-color: #f1c40f;
+    text-align: center;
+    font-weight: bold;
+}
+
 /*
 Orange Elements
 background-color: #e67e22;

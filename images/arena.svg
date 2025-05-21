@@ -186,7 +186,7 @@
        d="M 0,433.51393 6.0529356e-5,458.22587 1600,454.698 v -29.70027 l -800.15888,4.25809 z"/>
   </g>
   
-  <g fill="#90ee90" stroke="#408040" >
+  <g fill="#90ee9080" stroke="#408040" >
          <rect id="PF-box_pg1" x="200"  y="52" rx="15pt" width="400" height="40" stroke-width="2"/>
          <rect id="PF-box_pg2" x="1000" y="52" rx="15pt" width="400" height="40" stroke-width="2"/>
    </g>

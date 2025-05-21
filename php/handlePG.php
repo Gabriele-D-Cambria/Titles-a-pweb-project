@@ -9,6 +9,9 @@ if(!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== "POST"){
 	pageError(403);
 }
 
+/**
+ * @var Account $account dhsd
+ */
 $account = unserialize($_SESSION['account']);
 $userId = $account->getId();
 

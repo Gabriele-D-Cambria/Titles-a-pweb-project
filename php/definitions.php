@@ -359,7 +359,7 @@ class Personaggio{
     const DEFAULT_FOR_DES = 0;
     const ZAINO_SIZE = 3;       // 3 + arma + armatura
 
-    const DEFAULT_TURN_TIME = 60;
+    const DEFAULT_TURN_TIME = 30;
     private $pathImmagine;
     private $pathImmaginePG;
     private $nome;
@@ -818,8 +818,8 @@ class Personaggio{
 
             if($updateDB){
                 $sqlZaino = ($nOccorrenze > 1)?
-                    "DELETE FROM Zaino WHERE Personaggio = ? AND Proprietario = ? AND Oggetto = ?":
-                    "UPDATE Zaino SET Quantita = Quantita - 1 WHERE Personaggio = ? AND Proprietario = ? AND Oggetto = ?";
+                "UPDATE Zaino SET Quantita = Quantita - 1 WHERE Personaggio = ? AND Proprietario = ? AND Oggetto = ?":
+                "DELETE FROM Zaino WHERE Personaggio = ? AND Proprietario = ? AND Oggetto = ?";
 
                 $zainoStmt = $connectionDB->prepare($sqlZaino);
 
@@ -838,6 +838,24 @@ class Personaggio{
             if($zainoStmt) $zainoStmt->close();
         }
 
+    }
+
+    /**
+     * Funzione che controla se il personaggio ha delle battaglie in corso
+     * @param mysqli $connectionDB connessione al database passata per riferimento
+     * @return bool `true` se ci sono, `false` altrimenti
+     */
+    private function hasOpenedBattles(&$connectionDB){
+        $sqlBattaglie = "SELECT COUNT(*) AS Numero
+                             FROM Combattimenti
+                             WHERE Giocatore1_Nome = ? AND Giocatore1_Proprietario = ? AND Terminata = 0;";
+        $battleStmt = $connectionDB->prepare($sqlBattaglie);
+        $battleStmt->bind_param('si', $this->nome, $this->proprietario);
+        $battleStmt->execute();
+        $result = $battleStmt->get_result();
+        $row = $result->fetch_assoc();
+        $battleStmt->close();
+        return $row['Numero'] > 0;
     }
 
     public function getNome(): string{
@@ -1116,6 +1134,20 @@ class Personaggio{
      * @return boolean `true` se l'aggiornamento viene effettuato, `false` altrimenti
      */
     public function upgradeStats($newPF, $newFOR, $newDES){
+        $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+        if ($connectionDB->connect_error) {
+            throw new Exception("Connessione al database fallita: ". $connectionDB->connect_error, 500);
+        }
+        try{
+            if($this->hasOpenedBattles($connectionDB)){
+                throw new Exception("Hai una battaglia in corso, non puoi migliorare le tue statistiche", 400);
+            }
+        }
+        finally{
+            $connectionDB->close();
+        }
+        
+        
         if ($newFOR < self::MIN_FOR_DES || $newFOR > self::MAX_FOR_DES || $newFOR < $this->currentFOR) {
             throw new Exception("Aggiornamento Fallito: Valore non ammissibile per la Forza: " . $newFOR, 400);
         }
@@ -1156,7 +1188,7 @@ class Personaggio{
     /**
      * Funzione che utilizza l'oggetto specificato tramite ID se presente nell'inventario.
      * Eventualmente aggiorna il database rimuovendo l'oggetto
-     * @param int $itemId id dell'oggetto da utilizzare
+     * @param string $itemId id dell'oggetto da utilizzare
      * @param boolean $updateDB se aggiornare o meno il database [Default: `false`]
      * @return boolean `true` se l'oggetto è stato trovato e utilizzato correttamente, `false` altrimenti
      */
@@ -1166,42 +1198,50 @@ class Personaggio{
             throw new Exception("Connessione al database fallita: ". $connectionDB->connect_error, 500);
         }
 
-        $foundIndex = null;
-        foreach ($this->zaino as $index => $oggetto) {
-            if ($oggetto['ID'] == $itemId) {
-                $foundIndex = $index;
-                $item = $oggetto;
-                break;
+        try{
+            if (!is_numeric($itemId) || intval($itemId) != $itemId) {
+                $connectionDB->close();
+                throw new Exception("ID oggetto non valido: deve essere un numero intero", 400);
             }
+            $itemId = intval($itemId);
+    
+            $foundIndex = null;
+            foreach ($this->zaino as $index => $oggetto) {
+                if ($oggetto['ID'] === $itemId) {
+                    $foundIndex = $index;
+                    $item = $oggetto;
+                    break;
+                }
+            }
+            if ($foundIndex === null) {
+                return false;
+            }
+    
+            $used = false;
+    
+            // Cura
+            if (isset($item['RecuperoVita']) && $item['RecuperoVita'] > 0) {
+                $used = $this->heal($item['RecuperoVita']);
+            }
+            // Modifica FOR
+            if (isset($item['ModificatoreFor']) && $item['ModificatoreFor'] != 0) {
+                $this->currentFOR = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->currentFOR + $item['ModificatoreFor']));
+                $used = true;
+            }
+            // Modifica DES
+            if (isset($item['ModificatoreDes']) && $item['ModificatoreDes'] != 0) {
+                $this->currentDES = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->currentDES + $item['ModificatoreDes']));
+                $used = true;
+            }
+    
+            $this->setEquipmentStats();
+            
+            $this->removeFromZaino($connectionDB, $itemId, $updateDB);
+            return $used;
         }
-        if (!$foundIndex) {
-            return false;
+        finally{
+            $connectionDB->close();
         }
-
-        $used = false;
-
-        // Cura
-        if (isset($item['RecuperoVita']) && $item['RecuperoVita'] > 0) {
-            $used = $this->heal($item['RecuperoVita']);
-        }
-        // Modifica FOR
-        if (isset($item['ModificatoreFor']) && $item['ModificatoreFor'] != 0) {
-            $this->currentFOR = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->currentFOR + $item['ModificatoreFor']));
-            $used = true;
-        }
-        // Modifica DES
-        if (isset($item['ModificatoreDes']) && $item['ModificatoreDes'] != 0) {
-            $this->currentDES = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->currentDES + $item['ModificatoreDes']));
-            $used = true;
-        }
-
-        $this->setEquipmentStats();
-        
-        $this->removeFromZaino($connectionDB, $itemId, $updateDB);
-        
-        $connectionDB->close();
-
-        return $used;
     }
 
     /**
@@ -1220,6 +1260,9 @@ class Personaggio{
         $searchStmt = null;
         $inventoryStmt = null;
         try{
+            if($this->hasOpenedBattles($connectionDB))
+                throw new Exception("Hai una battaglia in corso, non puoi aggiungere oggetti all'inventario", 400);
+
             $sqlSearch = "SELECT Inventario.Quantita, Item.Tipologia
                           FROM Inventario
                             JOIN Item ON Inventario.Oggetto = Item.ID
@@ -1298,10 +1341,14 @@ class Personaggio{
             throw new Exception("Connessione al database fallita: ". $connectionDB->connect_error, 500);
         }
         $connectionDB->begin_transaction();
+        $battleStmt = null;
         $searchStmt = null;
         $inventoryStmt = null;
 
         try{
+            if($this->hasOpenedBattles($connectionDB)){
+                throw new Exception("Hai una battaglia in corso, non puoi rimuovere gli oggetti dall'inventario", 400);
+            }
 
             $found = false;
             if($this->arma && $itemId === $this->arma['ID']){

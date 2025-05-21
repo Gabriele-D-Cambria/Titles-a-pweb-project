@@ -1,6 +1,6 @@
 "use strict";
 
-import {showMessage, errorHandler, createHTML_img, createHTMLElement} from "./methods.js"
+import {showMessage, errorHandler, createHTML_img, createHTMLElement, GAME_MESSAGE} from "./methods.js"
 import { centerSvgElement, insertClippedImage } from "./svgMethods.js";
 import { Timer } from "./definitions.js";
 
@@ -29,6 +29,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	if(errorMessage)
 		errorHandler(errorMessage);
+	
+	if(gameMessage)
+		showMessage(gameMessage, GAME_MESSAGE);
 });
 
 
@@ -57,8 +60,6 @@ function getGameInfo(){
 			 */
 
 			setTimer(data.tempoRimanente);
-
-			setZaino(data.pg1.zaino);
 
 			setTurn(data.tempoRimanente_secondi);
 
@@ -99,10 +100,25 @@ function setArenaPG(PG1, PG2){
 	centerSvgElement(svgDoc, "nome_pg2", "PF-box_pg2", false);
 
 	const totalWidth1 = svgDoc.getElementById("PF-box_pg1").getAttribute("width") - svgDoc.getElementById("PF-box_pg1").getAttribute("stroke-width");
-	svgDoc.getElementById("tmpPF_pg1").setAttribute("width", (PG1.temp_PF/PG1.PF) * totalWidth1);
-	svgDoc.getElementById("tmpPF_pg2").setAttribute("width", (PG2.temp_PF/PG2.PF) * totalWidth1);
+	const widthPF1 = Math.max(0, (PG1.temp_PF/PG1.PF) * totalWidth1);
+	const widthPF2 = Math.max(0, (PG2.temp_PF/PG2.PF) * totalWidth1);
+	
+	svgDoc.getElementById("tmpPF_pg1").setAttribute("width", widthPF1);
+	svgDoc.getElementById("tmpPF_pg2").setAttribute("width", widthPF2);
+
+	if(widthPF1 === 0){
+		svgDoc.getElementById("PF-box_pg1").setAttribute("fill", "#e67e2280");
+		svgDoc.getElementById("PF-box_pg1").setAttribute("stroke", "#a95a14");
+	}
+	if(widthPF2 === 0){
+		svgDoc.getElementById("PF-box_pg2").setAttribute("fill", "#e67e2280");
+		svgDoc.getElementById("PF-box_pg2").setAttribute("stroke", "#a95a14");
+	}
+
 	svgDoc.getElementById("pf_text_pg1").innerHTML = `${PG1.temp_PF}/${PG1.PF}`;
 	svgDoc.getElementById("pf_text_pg2").innerHTML = `${PG2.temp_PF}/${PG2.PF}`;
+
+	setZaino(PG1.zaino);
 
 }
 
@@ -167,7 +183,9 @@ function setTurn(tempoMassimo){
 		btn.setAttribute("disabled", true);
 		btn.innerText = "Attendi il tuo turno";
 		// Tra un tempo casuale gioca
-		const randomDelay = Math.max(6000, Math.floor(Math.random() * 1000) % (tempoMassimo) * 1000);
+		// const randomDelay = Math.max(6000, Math.floor(Math.random() * 1000) % (tempoMassimo) * 1000);
+		const randomDelay = 2000;
+
 		setTimeout(() => {
 			changeTurn();
 		}, randomDelay);
@@ -244,14 +262,29 @@ function setWinningSection(hasWon){
 	while(div.childElementCount)
 		div.removeChild(div.firstChild);
 
-	div.classList.remove("timer-section");
-	div.classList.add("winner-name-section");
-
-	const message = hasWon? "Hai vinto" : "Hai perso"
+	const message = hasWon? "Hai vinto!" : "Hai perso!"
 	let p = createHTMLElement("p", "winningP", null, message);
 
 	div.appendChild(p);
 
+	const btn = document.getElementById("actionBtn");
 
-	div = document.getElementById("")
+	document.querySelectorAll("input").forEach(input => input.remove());
+	const bottomSection = document.querySelector(".bag-section");
+
+	bottomSection.parentNode.removeChild(bottomSection);
+
+
+	const newBtn = btn.cloneNode(true);
+	btn.parentNode.replaceChild(newBtn, btn);
+
+	newBtn.disabled = false;
+	
+	newBtn.innerText = "Ottieni Ricompense";
+	newBtn.classList.add(hasWon? "hasWon":"hasNotWon");
+
+	newBtn.addEventListener("click", () => {
+		// window.location.href = "caso.php";
+		showMessage("Bello");
+	});
 }

@@ -137,7 +137,18 @@ main{
     outline-offset: -3pt;
 }
 
-#cazzo1{
-	width: 100%;
-	height: auto;
+button.hasWon{
+	grid-row: span 2;
+	align-self: center;
+	justify-self: center;
+
+	border-color: #2ecc40 !important;
+	color: #2ecc40;
+}
+button.hasNotWon{
+	grid-row: span 2;
+	align-self: center;
+	justify-self: center;
+	border-color: #a95a14 !important;
+	color: #a95a14;
 }

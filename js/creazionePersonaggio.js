@@ -1,6 +1,6 @@
 "use strict";
 
-import {showMessage, errorHandler, IMPORTANT_MESSAGE, createHTML_img} from "./methods.js";
+import {errorHandler, IMPORTANT_MESSAGE} from "./methods.js";
 
 let listaPersonaggi = null;
 let idCurrentPG = null;
@@ -81,7 +81,7 @@ function getPersonaggi(){
  * @param {Object} personaggio personaggio da inserire
  */
 function setPG(personaggio) {	
-	document.getElementById("PF").innerText = Math.max(costantiPersonaggi.DEFAULT_PF + personaggio.RecuperoVita, costantiPersonaggi.MIN_HEALTH);
+	document.getElementById("PF").innerText = Math.max(costantiPersonaggi.DEFAULT_PF + personaggio.ModificatorePF, costantiPersonaggi.MIN_HEALTH);
 
 	let forza = costantiPersonaggi.DEFAULT_FOR_DES + personaggio.ModificatoreFor;
 
@@ -109,7 +109,7 @@ function setPG(personaggio) {
 	document.getElementById("element").value = personaggio.Nome;
 
 	const pic = document.getElementById("elementPic");
-	pic.src = personaggio.PathImmagine;
+	pic.src = "./../" + personaggio.PathImmagine;
 	pic.alt = `Elemento ${personaggio.Nome}`;
 	pic.title = `${personaggio.Nome}`;
 

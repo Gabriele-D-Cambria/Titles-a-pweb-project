@@ -56,7 +56,7 @@ function handleKeyPress(e){
  * Effettua un redirect verso la pagina di creazione nuovo personaggio
  */
 function addNewCharacter(){
-    window.location.href = "./php/creazionePersonaggio.php";
+    window.location.href = "./creazionePersonaggio.php";
 }
 
 /**

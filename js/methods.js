@@ -17,6 +17,12 @@ export const patterns = {
 export const IMPORTANT_MESSAGE = 4000;
 
 /**
+ * Costante di tempo che identifica quando applicare lo stile di messaggio dal gioco 
+ * @function `showMessage()`
+ */
+export const GAME_MESSAGE = 6000;
+
+/**
  * Indica la funzione di listener per rimuovere i moduli in sovraimpressione
  */
 export let moduleListener = null;
@@ -298,6 +304,9 @@ export function showMessage(messaggio, showTime = 1500) {
     
     if(showTime === IMPORTANT_MESSAGE){
         messageContainer.classList.add("errore");
+    }
+    else if(showTime === GAME_MESSAGE){
+        messageContainer.classList.add("gioco");
     }
 
     document.body.appendChild(messageContainer);
@@ -803,7 +812,7 @@ function changeUsername(){
 
     const form = document.createElement("form");
     form.classList.add("username");
-    form.action = "php/changeCredentials.php";
+    form.action = "./changeCredentials.php";
     form.method = "POST";
 
     el = createUsernameInput("Nuovo Username:");
@@ -855,7 +864,7 @@ function changePassword(){
 
     const form = document.createElement("form");
     form.classList.add("password");
-    form.action = "php/changeCredentials.php";
+    form.action = "./changeCredentials.php";
     form.method = "POST";
 
     el = createPasswordInput("Nuova Password:", false);
@@ -914,7 +923,7 @@ function deleteAccount(){
     space.classList.add("menu-space");
 
     const form = document.createElement("form");
-    form.action = "php/changeCredentials.php";
+    form.action = "./changeCredentials.php";
     form.method = "POST";
 
     // Lo sfrutto per capire se la richiesta è o meno di elimina account
@@ -995,7 +1004,7 @@ function changeImage(){
 
             const form = document.createElement("form");;
             form.classList.add("image");
-            form.action = "php/changeCredentials.php";
+            form.action = "./changeCredentials.php";
             form.method = "POST";
 
             el = document.createElement("div");
@@ -1234,7 +1243,7 @@ export function createDeleteBox(){
     space.classList.add("menu-space");
 
     const form = document.createElement("form");
-    form.action = "php/handlePG.php";
+    form.action = "./handlePG.php";
     form.method = "POST";
 
     // Lo sfrutto per capire se la richiesta è o meno di elimina account
