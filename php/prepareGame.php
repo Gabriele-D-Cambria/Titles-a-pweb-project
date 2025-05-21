@@ -3,7 +3,7 @@
 session_start();
 require_once "./methods.php";
 
-if (!isset($_SERVER['HTTP_REFERER'])) {
+if (!isset($_SERVER['HTTP_REFERER'])){
 	pageError(403);
 }
 
@@ -25,7 +25,10 @@ if(!$personaggio){
 try{
 	$battaglia = $personaggio->getBattagliaInCorso();
 	if(!$battaglia){
-		$avversario = getRandomPG($account->getId());
+		$avversario = getRandomPG($account->getId(), $personaggio->getLivello());
+		if($avversario === null){
+			throw new Exception("Nessun avversario disponibile al momento, ci dispiace.", 404);
+		}
 		$battaglia = $personaggio->creaCombattimento($avversario);
 	}
 	else{
@@ -33,7 +36,7 @@ try{
 	}
 	
 	$stato = json_decode($battaglia['StatoPersonaggi'], associative: true);
-	if (isset($stato['pg1']) && isset($stato['pg2'])) {
+	if (isset($stato['pg1']) && isset($stato['pg2'])){
 		$pg1 = Personaggio::fromArray($stato['pg1']);
 		$pg2 = Personaggio::fromArray($stato['pg2']);
 		$battaglia['pg1'] = serialize($pg1);
@@ -62,5 +65,6 @@ catch(Exception $e){
 	exit;
 }
 
+session_write_close();
 header("Location: ./gamePage.php");
 exit;

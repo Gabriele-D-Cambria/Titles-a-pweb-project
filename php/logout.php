@@ -12,6 +12,7 @@ session_start();
 if($message)
 	$_SESSION["message"] = $message;
 
+session_write_close();
 header("Location: ./../index.php");
 exit();
 

@@ -1,10 +1,7 @@
 "use strict";
 
-
 export const svgNamespace = "http://www.w3.org/2000/svg";
 
-
-//? Aiuto dall'intelligenza artificiale "GitHub Copilot basato su GPT-4.1"
 /**
  * Centra orizzontalmente (e opzionalmente verticalmente) un elemento SVG rispetto a un altro.
  * @param {SVGSVGElement} svgDoc Il nodo SVG principale (es: document.querySelector('svg'))
@@ -12,7 +9,7 @@ export const svgNamespace = "http://www.w3.org/2000/svg";
  * @param {string} idReference id dell'elemento di riferimento (es: rettangolo)
  * @param {boolean} [vertical=true] se `true` centra anche verticalmente, altrimenti solo orizzontalmente [Default = `true`]
  */
-export function centerSvgElement(svgDoc, idToCenter, idReference, vertical = true) {
+export function centerSvgElement(svgDoc, idToCenter, idReference, vertical = true){
     const elToCenter = svgDoc.getElementById(idToCenter);
     const refEl = svgDoc.getElementById(idReference);
     
@@ -24,19 +21,19 @@ export function centerSvgElement(svgDoc, idToCenter, idReference, vertical = tru
     let x = refBox.x + refBox.width / 2;
     let textLength = 0;
 
-    // Se è testo SVG, usa getComputedTextLength per la larghezza
-    if (typeof elToCenter.getComputedTextLength === "function") {
+    // Se è testo SVG, usa getComputedTextLength per la larghezza, altrimenti utilizzo width
+    if (typeof elToCenter.getComputedTextLength === "function"){
         textLength = elToCenter.getComputedTextLength();
     } 
-	else if (elToCenter.hasAttribute("width")) {
+	else if (elToCenter.hasAttribute("width")){
         textLength = parseFloat(elToCenter.getAttribute("width")) || 0;
     }
 
     elToCenter.setAttribute("x", x - textLength / 2);
 
-    if (vertical) {
+    if (vertical){
         let y = refBox.y + refBox.height / 2;
-        if (elToCenter.tagName.toLowerCase() === "text") {
+        if (elToCenter.tagName.toLowerCase() === "text"){
             y += 10;
         }
         elToCenter.setAttribute("y", y);
@@ -51,14 +48,14 @@ export function centerSvgElement(svgDoc, idToCenter, idReference, vertical = tru
  * @param {string} clipPathId - id della clipPath da applicare (opzionale).
  * @param {Object} [imgAttrs] - attributi aggiuntivi da applicare all'image (opzionale).
  */
-export function insertClippedImage(svgDoc, rectId, imgHref, clipPathId, imgAttrs = {}) {
+export function insertClippedImage(svgDoc, rectId, imgHref, clipPathId, imgAttrs = {}){
     const rect = svgDoc.getElementById(rectId);
 	
     if (!rect) 
 		return;
 	
     // Imposta attributi opzionali sul rettangolo (es: fill, rx, class)
-    if (imgAttrs.rect) {
+    if (imgAttrs.rect){
         Object.entries(imgAttrs.rect).forEach(([k, v]) => rect.setAttribute(k, v));
     }
 
@@ -72,11 +69,9 @@ export function insertClippedImage(svgDoc, rectId, imgHref, clipPathId, imgAttrs
         img.setAttribute("clip-path", `url(#${clipPathId})`);
 
     // Attributi aggiuntivi sull'image
-    if (imgAttrs.image) {
+    if (imgAttrs.image){
         Object.entries(imgAttrs.image).forEach(([k, v]) => img.setAttribute(k, v));
     }
 
     rect.parentNode.insertBefore(img, rect.nextSibling);
 }
-
-//? fine aiuto AI

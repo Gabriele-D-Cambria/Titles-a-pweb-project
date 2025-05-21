@@ -17,10 +17,11 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(svg => {
 			document.getElementById('imageContainer').innerHTML = svg;
 			getGameInfo();
+			document.getElementById("giveUpBtn").addEventListener("click", endGame);
 		})
 		.catch(error => {
 			errorHandler(error);
-			// window.location.href = "./errorPage.php/?error_code=" + error.code;
+			window.location.href = "./errorPage.php/?error_code=" + error.code;
 		});
 
 
@@ -52,12 +53,6 @@ function getGameInfo(){
 				turno = null;
 				return;
 			}
-			
-
-			// TODO
-			/**
-			 * arrenditi
-			 */
 
 			setTimer(data.tempoRimanente);
 
@@ -66,7 +61,7 @@ function getGameInfo(){
 		})
 		.catch(error => {
 			errorHandler(error);
-			// window.location.href = "./errorPage.php/?error_code=" + error.code;
+			window.location.href = "./errorPage.php/?error_code=" + error.code;
 		});
 }
 
@@ -143,9 +138,9 @@ function setZaino(zaino){
 				space.removeChild(space.firstChild);
 			space.appendChild(img);
 			space.addEventListener("click", (e) => {
-				if (turno) {
+				if (turno){
 					const selected = document.querySelector(".selected-item");
-					if (selected && selected !== space) {
+					if (selected && selected !== space){
 						selected.classList.remove("selected-item");
 						document.getElementById(`input-${selected.id}`).checked = false;
 					}
@@ -153,7 +148,7 @@ function setZaino(zaino){
 					const id = String(e.target.id).split("-")[0];
 					const btn = document.getElementById("actionBtn");
 
-					if (document.getElementById(id).classList.toggle("selected-item")) {
+					if (document.getElementById(id).classList.toggle("selected-item")){
 						btn.classList.add("oggetto");
 						btn.classList.remove("attacco");
 						btn.innerText = "Usa Oggetto";
@@ -183,8 +178,7 @@ function setTurn(tempoMassimo){
 		btn.setAttribute("disabled", true);
 		btn.innerText = "Attendi il tuo turno";
 		// Tra un tempo casuale gioca
-		// const randomDelay = Math.max(6000, Math.floor(Math.random() * 1000) % (tempoMassimo) * 1000);
-		const randomDelay = 2000;
+		const randomDelay = Math.max(6000, Math.floor(Math.random() * 1000) % (tempoMassimo) * 1000);
 
 		setTimeout(() => {
 			changeTurn();
@@ -205,7 +199,7 @@ function play(){
 	const formData = new FormData();
 	const selectedObj_id = document.querySelector('input[name="usingObj"]:checked');
 
-	if(selectedObj_id) {
+	if(selectedObj_id){
 		formData.append("azione", "usa_oggetto");
 		formData.append("oggetto_index", selectedObj_id.value);
 	} 
@@ -251,21 +245,25 @@ function sendPlay(formData){
 	})
 	.catch(error => {
 		errorHandler(error);
-		// window.location.href = "./errorPage.php/?error_code=" + error.code;
+		if(error.code != 1010)
+			window.location.href = "./errorPage.php/?error_code=" + error.code;
 	});
 }
 
 
 function setWinningSection(hasWon){
-	let div = document.getElementById("top-section");
+	const div = document.getElementById("top-section");
 
 	while(div.childElementCount)
 		div.removeChild(div.firstChild);
 
 	const message = hasWon? "Hai vinto!" : "Hai perso!"
-	let p = createHTMLElement("p", "winningP", null, message);
+	const p = createHTMLElement("p", "winningP", null, message);
 
 	div.appendChild(p);
+
+	const upperBtn = document.getElementById("giveUpBtn");
+	upperBtn.parentElement.removeChild(upperBtn);
 
 	const btn = document.getElementById("actionBtn");
 
@@ -282,9 +280,30 @@ function setWinningSection(hasWon){
 	
 	newBtn.innerText = "Ottieni Ricompense";
 	newBtn.classList.add(hasWon? "hasWon":"hasNotWon");
+	newBtn.addEventListener("click", endGame);
+}
 
-	newBtn.addEventListener("click", () => {
-		// window.location.href = "caso.php";
-		showMessage("Bello");
-	});
+function endGame(){
+	const formData = new FormData();
+	
+    document.body.classList.add("caricamento");
+    fetch("./endGame.php", {
+        method: "POST",
+        body: formData,
+    })
+    .then(response => response.json())
+    .then(data => {
+		document.body.classList.remove("caricamento");
+        if(data.ok){
+           window.location.href = "./gestisciPersonaggio.php";
+        } 
+		else{
+            console.error("Errore: ", data);
+            showMessage(data, IMPORTANT_MESSAGE);
+        }
+    })
+    .catch(error => {
+        errorHandler(error);
+		window.location.href = "./errorPage.php/?error_code=500";
+    });
 }

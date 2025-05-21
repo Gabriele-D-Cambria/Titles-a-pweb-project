@@ -5,20 +5,19 @@ session_start();
 if(!isset($_SESSION['account']) || !isset($_SESSION['currentPG_nome'])){
 	pageError(401);
 }
-
-$message= null;
+$message = null;
 if(isset($_SESSION['message'])){
 	$message = $_SESSION['message'];
 	unset($_SESSION['message']);
 }
 
-$errorMessage= null;
+$errorMessage = null;
 if(isset($_SESSION['errorMessage'])){
 	$errorMessage = $_SESSION['errorMessage'];
 	unset($_SESSION['errorMessage']);
 }
 
-$gameMessage= null;
+$gameMessage = null;
 if(isset($_SESSION['gameMessage'])){
 	$gameMessage = $_SESSION['gameMessage'];
 	unset($_SESSION['gameMessage']);

@@ -106,12 +106,12 @@ export function createHTML_img(src, alt, title = null, id = null, classe = null)
  * @param {Function} onClick La funzione da eseguire al click del pulsante.
  * @returns {HTMLButtonElement} Il pulsante creato.
  */
-export function createButton(type, id, text, onClick) {
+export function createButton(type, id, text, onClick){
     const btn = document.createElement("button");
     btn.type = type;
     btn.id = id;
     btn.innerText = text;
-    if (onClick) {
+    if (onClick){
         btn.addEventListener("click", onClick);
     }
     return btn;
@@ -151,7 +151,7 @@ export function createUsernameInput(labelTxt){
  * @param {Boolean} isConfirm Indica se si tratta di un campo di conferma password [Default `false`].
  * @returns {Object} Un oggetto contenente il label e il contenitore della password.
  */
-export function createPasswordInput(labelTxt, isConfirm = false) {
+export function createPasswordInput(labelTxt, isConfirm = false){
     const label = document.createElement("label");
     
     label.for = (isConfirm)? "confirmPassword" : "password";
@@ -237,7 +237,7 @@ export function hideShowPassword(target, confirm = false){
     let input;
     input = document.getElementById((confirm)? "confirmPassword" : "password");
 
-    if (input.type === "password") {
+    if (input.type === "password"){
         input.type = "text";
         target.innerText = "Nascondi";
     } else {
@@ -272,9 +272,9 @@ export function showModule(id, showCoins = false){
  * @param {Boolean} showCoins Indica se rimuovere il focus sulle monete. [Default `false`]
  * @returns {Boolean} `true` se la rimozione ha avuto effetto, altrimenti `false`.
  */
-export function closeModule(event, id, override = false, showCoins = false) {
+export function closeModule(event, id, override = false, showCoins = false){
     const module = document.getElementById(id);
-    if (override || event.target === module) {
+    if (override || event.target === module){
         module.classList.remove("show");
         if(showCoins){
             const coins = document.querySelector(".coin-display");
@@ -299,7 +299,7 @@ export function closeModule(event, id, override = false, showCoins = false) {
  * @param {String} messaggio Il testo del messaggio da visualizzare.
  * @param {Number} showTime Per quanto tempo il messaggio rimane visibile [Default `1.5 secondi`]
  */
-export function showMessage(messaggio, showTime = 1500) {
+export function showMessage(messaggio, showTime = 1500){
     const messageContainer = createHTMLElement("div", "messaggio", "messageBox", messaggio);
     
     if(showTime === IMPORTANT_MESSAGE){
@@ -342,7 +342,7 @@ export function errorHandler(error){
  * @param {Boolean} equipment Indica l'inventario serve per equipaggiare oggetti (`true`) o per la sua gestione (`false`)[Default `false`]
  * @param {Array|null} filterObj filtro contenente i tipi degli oggetti da recuperare tramite API [Default `null`]
  */
-export function showInventory(newItems = false, equipment = false, filterObj = null) {
+export function showInventory(newItems = false, equipment = false, filterObj = null){
     if (currentlyOpened !== null && currentlyOpened !== "inventoryModule")
         return;
 
@@ -360,7 +360,7 @@ export function showInventory(newItems = false, equipment = false, filterObj = n
         .then(response => response.json())
         .then(risposta => {
             document.body.classList.remove("caricamento");
-            if (risposta.error !== undefined && risposta.error) {
+            if (risposta.error !== undefined && risposta.error){
                 throw risposta;
             }
             const data = risposta["inventario"];
@@ -424,10 +424,10 @@ export function showInventory(newItems = false, equipment = false, filterObj = n
  * @param {Boolean} newItems Indica se evidenziare gli oggetti appena ottenuti.
  * @returns {HTMLElement} Lo slot creato.
  */
-export function createItemSlot(item, id, newItems) {
+export function createItemSlot(item, id, newItems){
     const space = createHTMLElement("div", "item-slot", id);
 
-    if (newItems && openedItems.includes(item.ID)) {
+    if (newItems && openedItems.includes(item.ID)){
         space.classList.add("newItem");
     }
 
@@ -683,7 +683,7 @@ export function openBox(){
             if(data.rimosso){
                 shownItem = null;
             }
-            showInventory(currentlyOpened, true);
+            showInventory(currentlyOpened);
             showMessage(`Box Aperta! | +${data.guadagno}🪙`);
         }
     })
@@ -700,18 +700,18 @@ export function openBox(){
  * @param {Boolean} overload Indica se effettuare il controllo sull'evento [Default `false`]
  * @param {Boolean} coins Indica se è presente il counter di monete da rimuovere o meno. [Default `true`]
  */
-export function closeModuleEvent(event, id, overload = false, coins = true) {
+export function closeModuleEvent(event, id, overload = false, coins = true){
     if (moduleListener === null || currentlyOpened !== id)
         return;
 
     const module = document.getElementById(id);
-    if (overload || event.target === module) {
+    if (overload || event.target === module){
         window.removeEventListener("click", moduleListener);
         moduleListener = null;
         openBoxSelected = false;
         shownItem = null;
         currentlyOpened = null;
-        if (shopTimer !== null) {
+        if (shopTimer !== null){
             shopTimer.clearTimer();
             shopTimer = null;
         }
@@ -726,8 +726,8 @@ export function closeModuleEvent(event, id, overload = false, coins = true) {
 /**
  * Mostra il menu principale con id `"menuModule"` con le opzioni per cambiare username, cambiare password o eliminare l'account.
  */
-export function showMenu() {
-    if (currentlyOpened !== null && currentlyOpened !== "menuModule") {
+export function showMenu(){
+    if (currentlyOpened !== null && currentlyOpened !== "menuModule"){
         return;
     }
 

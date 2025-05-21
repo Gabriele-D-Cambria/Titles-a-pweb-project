@@ -1,6 +1,6 @@
 "use strict";
 
-import {showMessage, errorHandler, showInventory, createDeleteBox, createHTMLElement, createHTML_img} from "./methods.js";
+import {showMessage, errorHandler, showInventory, createDeleteBox, createHTML_img, GAME_MESSAGE} from "./methods.js";
 
 let usedPU = {
 	PF: 0,
@@ -19,6 +19,9 @@ document.addEventListener("DOMContentLoaded", () =>{
 
 	if(message){
 		showMessage(message);
+	}
+	if(endgameMessage){
+		showMessage(endgameMessage, GAME_MESSAGE);
 	}
 	if(errorMessage){
 		errorHandler(errorMessage);
@@ -106,7 +109,7 @@ export function aggiornaStat(id, aumenta, PG){
 		return;
 	}
 	
-	switch (statId) {
+	switch (statId){
         case "PF":
 			if(!aumenta && !usedPU.PF)
 				return;
@@ -117,7 +120,7 @@ export function aggiornaStat(id, aumenta, PG){
         case "FOR":
 			if(!aumenta && !usedPU.FOR)
 				return;
-            if (PG.FOR < PG.MAX_FOR_DES && PG.FOR > PG.MIN_FOR_DES) {
+            if (PG.FOR < PG.MAX_FOR_DES && PG.FOR > PG.MIN_FOR_DES){
                 PG.FOR += upd;
                 usedPU.FOR += upd;
 				document.getElementById(`more-${statId}`).classList.toggle("clickable", (PG.FOR !== PG.MAX_FOR_DES));
@@ -134,7 +137,7 @@ export function aggiornaStat(id, aumenta, PG){
         case "DES":
 			if(!aumenta && !usedPU.DES)
 				return;
-            if (PG.DES < PG.MAX_FOR_DES && PG.DES > PG.MIN_FOR_DES) {
+            if (PG.DES < PG.MAX_FOR_DES && PG.DES > PG.MIN_FOR_DES){
                 PG.DES += upd;
                 usedPU.DES += upd;
 				document.getElementById(`more-${statId}`).classList.toggle("clickable", (PG.DES !== PG.MAX_FOR_DES));

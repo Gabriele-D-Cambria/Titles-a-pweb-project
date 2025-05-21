@@ -61,7 +61,7 @@ CREATE TABLE Personaggi (
     Elemento VARCHAR(50) NOT NULL,
     Forza INT NOT NULL,
     Destrezza INT NOT NULL,
-    PuntiVita INT NOT NULL DEFAULT 25,
+    PuntiVita INT NOT NULL DEFAULT 50,
     Armatura INT DEFAULT NULL,     -- Riferimento all'ID dell'armatura equipaggiata
     Arma INT DEFAULT NULL,		 -- Riferimento all'ID dell'arma equipaggiata
     Livello INT NOT NULL DEFAULT 1,

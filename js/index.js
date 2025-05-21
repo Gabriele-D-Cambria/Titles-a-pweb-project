@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
  * Crea un modulo di login o registrazione.
  * @param {boolean} login - Indica se creare il modulo di login (true) o registrazione (false).
  */
-function createModule(login) {
+function createModule(login){
     let module = document.getElementById("loginModule");
 
     let container = document.createElement("div");

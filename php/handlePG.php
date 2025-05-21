@@ -32,6 +32,7 @@ if(isset($_POST['deleteCheck'])){
 
 		$_SESSION["account"] = serialize($account);
 		$_SESSION["message"] = "Personaggio ". $nome ." eliminato con successo!";
+		session_write_close();
 		header("Location: ./dashboard.php");
 		exit;
 	}
@@ -58,6 +59,7 @@ else if(isset($_POST['upgrade'])){
 
 		$_SESSION['account'] = serialize($account);
 		$_SESSION['message'] = "Personaggio " . $nome . " migliorato con successo!";
+		session_write_close();
 		header("Location: ./gestisciPersonaggio.php");
 		exit;
 	}
@@ -81,7 +83,7 @@ else{
 		}
 
 		$element = $_POST['element'];
-		if (is_null($element)) {
+		if ($element === null){
 			throw new Exception("invalid_element", 400);
 		}
 

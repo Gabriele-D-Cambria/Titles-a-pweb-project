@@ -1,6 +1,6 @@
 <?php
 
-if (basename($_SERVER['PHP_SELF']) === 'definitions.php') {
+if (basename($_SERVER['PHP_SELF']) === 'definitions.php'){
     require_once "methods.php";
     pageError(403);
 }
@@ -106,16 +106,16 @@ class Account{
         $this->immagineProfilo = $immagineProfilo;
     }
 
-    public function getId() {
+    public function getId(){
         return $this->id;
     }
-    public function getUsername() {
+    public function getUsername(){
         return $this->username;
     }
-    public function getMonete() {
+    public function getMonete(){
         return $this->monete;
     }
-    public function getShopRefresh() {
+    public function getShopRefresh(){
         return $this->shopRefresh;
     }
     /**
@@ -126,7 +126,7 @@ class Account{
      *          - `Personaggio` se il perosnaggio con nome `$name` è presente
      *          - `null` se non è presente alcun personaggio con il `$name` fornito
      */
-    public function getPersonaggi($name = null) {
+    public function getPersonaggi($name = null){
         if($name === null)
             return $this->personaggi;
 
@@ -138,7 +138,7 @@ class Account{
 
         return null;
     }
-    public function getImmagineProfilo() {
+    public function getImmagineProfilo(){
         return $this->immagineProfilo;
     }
 
@@ -262,13 +262,24 @@ class Account{
         return false;
     }
 
+    /**
+     * Funzione che aggiorna i punti esperienza di un personaggio e ne gestisce il LVLUP
+     * @param string $nomePersonaggio nome del personaggio
+     * @param boolean $hasWon indica se il personaggio sta guadagnando esperienza da una vittoria o una sconfitta
+     * @return int|null se l'aggiornamento ha avuto successo restituisce il numero di livelli guadagnati dal personaggio. Se il personaggio non esiste 
+     */
     public function addPGExp($nomePersonaggio, $hasWon){
+        $nLvlUp = -1;
         foreach($this->personaggi as $pg){
             if($pg->getNome() === $nomePersonaggio){
                 $nLvlUp = $pg->addExp($hasWon);
-                $this->modifyCoins(false, self::COINS_LVL_UP * $nLvlUp);
+                if($nLvlUp > 0)
+                    $this->modifyCoins(false, self::COINS_LVL_UP * $nLvlUp);
             }
         }
+        if($nLvlUp === -1)
+            return null;
+        return $nLvlUp;
     }
     /**
      * Aggiunge un item all'equipaggiamento di un `Personaggio` dell'account
@@ -286,10 +297,17 @@ class Account{
         return false;
     }
 
-    public function unequipItem($nomePersonaggio, $itemId){
+    /**
+     * Rimuove un'oggetto dall'inventario del personaggio specificato.
+     * @param string $nomePersonaggio nome del personaggio sul quale effettuare l'azione
+     * @param int $itemId id dell'oggetto da rimuovere
+     * @param bool $moveToInventario indica se spostarlo nell'inventario o meno
+     * @return bool
+     */
+    public function unequipPGItem($nomePersonaggio, $itemId, $moveToInventario = true){
         foreach($this->personaggi as $personaggio){
             if($personaggio->getNome() === $nomePersonaggio){
-                $personaggio->unequipItem($itemId);
+                $personaggio->unequipItem($itemId, $moveToInventario);
                 return true;
             }
         }
@@ -355,7 +373,7 @@ class Personaggio{
         +10 => 60
     ];
 
-    const DEFAULT_PF = 25;
+    const DEFAULT_PF = 50;
     const DEFAULT_FOR_DES = 0;
     const ZAINO_SIZE = 3;       // 3 + arma + armatura
 
@@ -411,7 +429,7 @@ class Personaggio{
             // Verifico se il proprietario esiste
             $proprietarioCheckQuery = "SELECT * FROM Account WHERE ID = ?";
             $proprietarioStmt = $connectionDB->prepare($proprietarioCheckQuery);
-            if (!is_numeric($proprietarioId)) {
+            if (!is_numeric($proprietarioId)){
                 $connectionDB->rollback();
                 throw new Exception("Proprietario non esistente", 400);
             }
@@ -420,7 +438,7 @@ class Personaggio{
             $proprietarioStmt->execute();
             $result = $proprietarioStmt->get_result();
 
-            if ($result->num_rows === 0) {
+            if ($result->num_rows === 0){
                 $connectionDB->rollback();
                 throw new Exception("Proprietario non esistente", 400);
             }
@@ -435,25 +453,25 @@ class Personaggio{
             $personaggioStmt->execute();
             $personaggioResult = $personaggioStmt->get_result();
 
-            if ($personaggioResult->num_rows > 0) {
+            if ($personaggioResult->num_rows > 0){
                 // Il PG esiste
                 $personaggioData = $personaggioResult->fetch_assoc();
 
-                $this->pathImmagine    = $personaggioData['PathImmagine'];
-                $this->pathImmaginePG  = $personaggioData['PathImmaginePG'];
-                $this->nome            = $personaggioData['Nome'];
-                $this->proprietario    = $personaggioData['Proprietario'];
-                $this->FOR             = $personaggioData['Forza'];
-                $this->DES             = $personaggioData['Destrezza'];
-                $this->PF              = $personaggioData['PuntiVita'];
-                $this->elemento        = $personaggioData['Elemento'];
-                $this->prevaleSu       = $personaggioData['PrevaleSu'];
-                $this->prevalsoDa      = $personaggioData['PrevalsoDa'];
+                $this->pathImmagine    = (string)$personaggioData['PathImmagine'];
+                $this->pathImmaginePG  = (string)$personaggioData['PathImmaginePG'];
+                $this->nome            = (string)$personaggioData['Nome'];
+                $this->proprietario    = (int)$personaggioData['Proprietario'];
+                $this->FOR             = (int)$personaggioData['Forza'];
+                $this->DES             = (int)$personaggioData['Destrezza'];
+                $this->PF              = (int)$personaggioData['PuntiVita'];
+                $this->elemento        = (string)$personaggioData['Elemento'];
+                $this->prevaleSu       = (string)$personaggioData['PrevaleSu'];
+                $this->prevalsoDa      = (string)$personaggioData['PrevalsoDa'];
                 $this->arma            = null;
                 $this->armatura        = null;
-                $this->livello         = $personaggioData['Livello'];
-                $this->exp             = $personaggioData['PuntiExp'];
-                $this->puntiUpgrade    = $personaggioData['PuntiUpgrade'];
+                $this->livello         = (int)$personaggioData['Livello'];
+                $this->exp             = (int)$personaggioData['PuntiExp'];
+                $this->puntiUpgrade    = (int)$personaggioData['PuntiUpgrade'];
                 $this->tmp_PF          = $this->PF;
                 $this->currentFOR      = $this->FOR;
                 $this->currentDES      = $this->DES;
@@ -500,16 +518,16 @@ class Personaggio{
                     throw new Exception("Elemento non valido: ". $elementInfo, 400);
                 }
 
-                $this->pathImmagine    = $elementInfo['PathImmagine'];
-                $this->pathImmaginePG  = $elementInfo['PathImmaginePG'];
-                $this->nome            = $nome;
-                $this->proprietario           = $proprietarioId;
-                $this->FOR             = self::DEFAULT_FOR_DES + $elementInfo["ModificatoreFor"];
-                $this->DES             = self::DEFAULT_FOR_DES + $elementInfo["ModificatoreDes"];
-                $this->PF              = self::DEFAULT_PF + $elementInfo["RecuperoVita"];
-                $this->elemento        = $elementInfo['Nome'];
-                $this->prevaleSu       = $elementInfo['PrevaleSu'];
-                $this->prevalsoDa      = $elementInfo['PrevalsoDa'];
+                $this->pathImmagine    = (string)$elementInfo['PathImmagine'];
+                $this->pathImmaginePG  = (string)$elementInfo['PathImmaginePG'];
+                $this->nome            = (string)$nome;
+                $this->proprietario    = (int)$proprietarioId;
+                $this->FOR             = (int)(self::DEFAULT_FOR_DES + $elementInfo["ModificatoreFor"]);
+                $this->DES             = (int)(self::DEFAULT_FOR_DES + $elementInfo["ModificatoreDes"]);
+                $this->PF              = (int)(self::DEFAULT_PF + $elementInfo["ModificatorePF"]);
+                $this->elemento        = (string)$elementInfo['Nome'];
+                $this->prevaleSu       = (string)$elementInfo['PrevaleSu'];
+                $this->prevalsoDa      = (string)$elementInfo['PrevalsoDa'];
                 $this->armatura        = null;
                 $this->arma            = null;
                 $this->livello         = 1;
@@ -534,14 +552,12 @@ class Personaggio{
                            $this->elemento,
                            $this->puntiUpgrade);
 
-                if (!$insertStmt->execute()) {
+                if (!$insertStmt->execute()){
                     $connectionDB->rollback();
                     throw new Exception("Errore durante l'inserimento del personaggio: " . $insertStmt->error, 500);
                 }
                 $insertStmt->close();
             }
-
-
 
             $connectionDB->commit();
         }
@@ -558,7 +574,7 @@ class Personaggio{
      * @param array $data array contenente tutti i dati;
      * @return Personaggio
      */
-    public static function fromArray($data) {
+    public static function fromArray($data){
         $pg = new Personaggio($data['nome'], $data['proprietario'], $data['elemento']);
         $pg->FOR = $data['FOR'];
         $pg->currentFOR = $data['currentFOR'];
@@ -615,7 +631,7 @@ class Personaggio{
         $updateStmt = null;
         try{
             if($updateDB){
-                if ($armaId === null) {
+                if ($armaId === null){
                     $sqlUpdate = "UPDATE Personaggi SET Arma = NULL WHERE Nome = ? AND Proprietario = ?";
                     $updateStmt = $connectionDB->prepare($sqlUpdate);
                     $updateStmt->bind_param("si", $this->nome, $this->proprietario);
@@ -630,7 +646,7 @@ class Personaggio{
                 }
             }
 
-            if ($this->arma) {
+            if ($this->arma){
                 addToInventario($connectionDB, $this->proprietario, $this->arma['ID']);
                 $this->currentFOR -= $this->arma['ModificatoreFor'];
                 $this->currentDES -= $this->arma['ModificatoreDes'];
@@ -685,7 +701,7 @@ class Personaggio{
         $updateStmt = null;
         try{
             if($updateDB){
-                if ($armaturaId === null) {
+                if ($armaturaId === null){
                     $sqlUpdate = "UPDATE Personaggi SET Armatura = NULL WHERE Nome = ? AND Proprietario = ?";
                     $updateStmt = $connectionDB->prepare($sqlUpdate);
                     $updateStmt->bind_param("si", $this->nome, $this->proprietario);
@@ -699,7 +715,7 @@ class Personaggio{
                 }
             }
 
-            if ($this->armatura) {
+            if ($this->armatura){
                 addToInventario($connectionDB, $this->proprietario, $this->armatura['ID']);
                 $this->currentFOR -= $this->armatura['ModificatoreFor'];
                 $this->currentDES -= $this->armatura['ModificatoreDes'];
@@ -792,10 +808,11 @@ class Personaggio{
      * Funzione privata che si occupa di rimuovere un `Item` allo zaino se presente, eventualmente aggiornando il database
      * @param mysqli $connectionDB connessione al database passata per riferimento
      * @param int $itemId id dell'`Item` da rimuovere
-     * @param boolean $updateDB Indica se aggiornare o meno il database con aggiornamento del campo. (Default `true`)
+     * @param boolean $updateDB Indica se aggiornare o meno il database con aggiornamento del campo. [Default `true`]
+     * @param boolean $inserisciInInventario Indica se inserire o meno l'oggetto rimosso nell'inventario del proprietario. [Default `true`]
      * @return void
      */
-    private function removeFromZaino(&$connectionDB, $itemId, $updateDB = true){
+    private function removeFromZaino(&$connectionDB, $itemId, $updateDB = true, $inserisciInInventario = true){
         $itemStmt = null;
         $zainoStmt = null;
         try{
@@ -829,7 +846,9 @@ class Personaggio{
                 }
             }
 
-            addToInventario($connectionDB, $this->proprietario, $itemId);
+            if($inserisciInInventario)
+                addToInventario($connectionDB, $this->proprietario, $itemId);
+
             unset($this->zaino[$found[0]]);
             $this->zaino = array_values($this->zaino);
         }
@@ -864,6 +883,9 @@ class Personaggio{
     public function getProprietario(): int{
         return $this->proprietario;
     }
+    public function getLivello(): int{
+        return $this->livello;
+    }
     public function getElemento(): string{
         return $this->elemento;
     }
@@ -873,10 +895,19 @@ class Personaggio{
             "tmp_PF"   => $this->tmp_PF
         ];
     }
-    public function getAll() {
+    public function getOggettiIDs(){
+        $output = [];
+        foreach($this->zaino as $item){
+            $output[] = $item['ID'];
+        }
+
+        return $output;
+        
+    }
+    public function getAll(){
         return [
             'nome'            => $this->nome,
-            'proprietario'           => $this->proprietario,
+            'proprietario'    => $this->proprietario,
             'FOR'             => $this->FOR,
             'currentFOR'      => $this->currentFOR,
             'damage'          => $this->damage,
@@ -961,9 +992,9 @@ class Personaggio{
      *  - Non restituisce solo oggetti DES se la statistica è già al massimo
      * @return array|null contenente gli oggetti secondo questi filtri se presenti, `null` altrimenti
      */
-    public function getOggettiUtilizzabili() {
+    public function getOggettiUtilizzabili(){
         $oggetti = [];
-        foreach ($this->zaino as $item) {
+        foreach ($this->zaino as $item){
             if ($item['RecuperoVita'] > 0 && $this->tmp_PF == $this->PF) 
                 continue;
             if ($item['ModificatoreFor'] > 0 && $item['ModificatoreDes'] == 0 && $this->currentFOR == self::MAX_FOR_DES) 
@@ -979,12 +1010,12 @@ class Personaggio{
     /**
      * @return array|null Restituisce l'oggetto con il miglior RecuperoVita (>0), oppure null.
      */
-    public function getBestOggettoCura() {
+    public function getBestOggettoCura(){
         $best = null;
         $oggetti = $this->getOggettiUtilizzabili() ?? [];
-        foreach ($oggetti as $item) {
-            if ($item['RecuperoVita'] > 0) {
-                if ($best === null || $item['RecuperoVita'] > $best['RecuperoVita']) {
+        foreach ($oggetti as $item){
+            if ($item['RecuperoVita'] > 0){
+                if ($best === null || $item['RecuperoVita'] > $best['RecuperoVita']){
                     $best = $item;
                 }
             }
@@ -995,12 +1026,12 @@ class Personaggio{
     /**
      * @return array|null Restituisce l'oggetto con il miglior ModificatoreFor (>0), oppure null.
      */
-    public function getBestOggettoFOR() {
+    public function getBestOggettoFOR(){
         $best = null;
         $oggetti = $this->getOggettiUtilizzabili() ?? [];
-        foreach ($oggetti as $item) {
-            if ($item['ModificatoreFor'] > 0) {
-                if ($best === null || $item['ModificatoreFor'] > $best['ModificatoreFor']) {
+        foreach ($oggetti as $item){
+            if ($item['ModificatoreFor'] > 0){
+                if ($best === null || $item['ModificatoreFor'] > $best['ModificatoreFor']){
                     $best = $item;
                 }
             }
@@ -1011,11 +1042,11 @@ class Personaggio{
     /**
      * @return array|null Restituisce l'ID deloggetto con il miglior ModificatoreDes (>0), oppure null.
      */
-    public function getBestOggettoDES() {
+    public function getBestOggettoDES(){
         $best = null;
-        foreach ($this->getOggettiUtilizzabili() as $item) {
-            if ($item['ModificatoreDes'] > 0) {
-                if ($best === null || $item['ModificatoreDes'] > $best['ModificatoreDes']) {
+        foreach ($this->getOggettiUtilizzabili() as $item){
+            if ($item['ModificatoreDes'] > 0){
+                if ($best === null || $item['ModificatoreDes'] > $best['ModificatoreDes']){
                     $best = $item;
                 }
             }
@@ -1053,7 +1084,7 @@ class Personaggio{
             }
 
             if($this->exp >= self::MAX_EXP){
-                $livelliGuadagnati = $this->exp / self::MAX_EXP;
+                $livelliGuadagnati = intdiv($this->exp, self::MAX_EXP);
                 $this->exp %= self::MAX_EXP;
                 $this->livello += $livelliGuadagnati;
                 $this->puntiUpgrade += self::PU_LVL_UP * $livelliGuadagnati;
@@ -1074,7 +1105,11 @@ class Personaggio{
      * @return int quantità di danno effettivamente subito calcolato come differenza con la protezione danno
      */
     private function takeDamage($damage){
-        $totalDamage = $damage + $this->protezioneDanno;
+        $totalDamage = $damage - $this->protezioneDanno;
+
+        if($totalDamage <= 0)
+            $totalDamage = 1;
+        
         $this->tmp_PF -= $totalDamage;
         return $totalDamage;
     }
@@ -1135,7 +1170,7 @@ class Personaggio{
      */
     public function upgradeStats($newPF, $newFOR, $newDES){
         $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
-        if ($connectionDB->connect_error) {
+        if ($connectionDB->connect_error){
             throw new Exception("Connessione al database fallita: ". $connectionDB->connect_error, 500);
         }
         try{
@@ -1148,15 +1183,15 @@ class Personaggio{
         }
         
         
-        if ($newFOR < self::MIN_FOR_DES || $newFOR > self::MAX_FOR_DES || $newFOR < $this->currentFOR) {
+        if ($newFOR < self::MIN_FOR_DES || $newFOR > self::MAX_FOR_DES || $newFOR < $this->currentFOR){
             throw new Exception("Aggiornamento Fallito: Valore non ammissibile per la Forza: " . $newFOR, 400);
         }
 
-        if ($newDES < self::MIN_FOR_DES || $newDES > self::MAX_FOR_DES || $newDES < $this->currentDES) {
+        if ($newDES < self::MIN_FOR_DES || $newDES > self::MAX_FOR_DES || $newDES < $this->currentDES){
             throw new Exception("Aggiornamento Fallito: Valore non ammissibile per la Destrezza: " . $newDES, 400);
         }
 
-        if ($newPF < $this->PF) {
+        if ($newPF < $this->PF){
             throw new Exception("Aggiornamento Fallito: Valore non ammissibile per i Punti Ferita: ". $newPF, 400);
         }
 
@@ -1179,14 +1214,14 @@ class Personaggio{
         
         $this->DES += $usedPU["DES"];
         $this->currentDES = $newDES;
-        $this->damage = self::DAMAGE_LOOKUP[$newFOR];
-        $this->dodgingChance = self::DODGE_LOOKUP[$newDES];
+        
+        $this->setEquipmentStats();
 
         return $this->updateDB();
     }
 
     /**
-     * Funzione che utilizza l'oggetto specificato tramite ID se presente nell'inventario.
+     * Funzione che utilizza l'oggetto specificato tramite ID se presente nello zaino del personaggio.
      * Eventualmente aggiorna il database rimuovendo l'oggetto
      * @param string $itemId id dell'oggetto da utilizzare
      * @param boolean $updateDB se aggiornare o meno il database [Default: `false`]
@@ -1194,49 +1229,50 @@ class Personaggio{
      */
     public function useItem($itemId, $updateDB = false){       
         $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
-        if ($connectionDB->connect_error) {
+        if ($connectionDB->connect_error){
             throw new Exception("Connessione al database fallita: ". $connectionDB->connect_error, 500);
         }
 
         try{
-            if (!is_numeric($itemId) || intval($itemId) != $itemId) {
+            if (!is_numeric($itemId) || intval($itemId) != $itemId){
                 $connectionDB->close();
                 throw new Exception("ID oggetto non valido: deve essere un numero intero", 400);
             }
             $itemId = intval($itemId);
     
             $foundIndex = null;
-            foreach ($this->zaino as $index => $oggetto) {
-                if ($oggetto['ID'] === $itemId) {
+            foreach ($this->zaino as $index => $oggetto){
+                if ($oggetto['ID'] === $itemId){
                     $foundIndex = $index;
                     $item = $oggetto;
                     break;
                 }
             }
-            if ($foundIndex === null) {
+            if ($foundIndex === null){
                 return false;
             }
     
             $used = false;
     
             // Cura
-            if (isset($item['RecuperoVita']) && $item['RecuperoVita'] > 0) {
-                $used = $this->heal($item['RecuperoVita']);
+            if (isset($item['RecuperoVita']) && $item['RecuperoVita'] > 0){
+                if(!$this->heal($item['RecuperoVita']))
+                    throw new Exception("Sei già al massimo della vita!", 1010);
             }
             // Modifica FOR
-            if (isset($item['ModificatoreFor']) && $item['ModificatoreFor'] != 0) {
+            if (isset($item['ModificatoreFor']) && $item['ModificatoreFor'] != 0){
                 $this->currentFOR = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->currentFOR + $item['ModificatoreFor']));
                 $used = true;
             }
             // Modifica DES
-            if (isset($item['ModificatoreDes']) && $item['ModificatoreDes'] != 0) {
+            if (isset($item['ModificatoreDes']) && $item['ModificatoreDes'] != 0){
                 $this->currentDES = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->currentDES + $item['ModificatoreDes']));
                 $used = true;
             }
     
             $this->setEquipmentStats();
             
-            $this->removeFromZaino($connectionDB, $itemId, $updateDB);
+            $this->removeFromZaino($connectionDB, $itemId, $updateDB, false);
             return $used;
         }
         finally{
@@ -1332,16 +1368,16 @@ class Personaggio{
     /**
      * Rimuove un'`item` dagli oggetti equipaggiati (arma, armatura o dallo zaino) e lo inserisce nell'inventario di `$this->proprietario`
      * @param int $itemId id dell'oggetto da inserire nell'inventario
+     * @param boolean $moveToInventario indica se spostare l'oggetto nell'inventario del proprietario o meno [Default: `true`]
      * @throws Exception per problemi con 
      * @return bool
      */
-    public function unequipItem($itemId){
+    public function unequipItem($itemId, $moveToInventario = true){
         $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
         if($connectionDB->connect_error){
             throw new Exception("Connessione al database fallita: ". $connectionDB->connect_error, 500);
         }
         $connectionDB->begin_transaction();
-        $battleStmt = null;
         $searchStmt = null;
         $inventoryStmt = null;
 
@@ -1363,7 +1399,7 @@ class Personaggio{
                 foreach($this->zaino as $item){
                     if($itemId === $item['ID']){
                         $found = true;
-                        $this->removeFromZaino($connectionDB, $itemId);
+                        $this->removeFromZaino($connectionDB, $itemId, true, $moveToInventario);
                         break;
                     }
                 }
@@ -1392,7 +1428,7 @@ class Personaggio{
      * Funzione che controlla se è presente una battaglia in corso per questo personaggio
      * @return array|null L'array contiene informazioni sulla battaglia, altrimenti `null`
      */
-    public function getBattagliaInCorso() {
+    public function getBattagliaInCorso(){
         $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
         if($conn->connect_error){
             throw new Exception("Connessione al database fallita: " . $conn->connect_error, 500);
@@ -1510,7 +1546,7 @@ class Personaggio{
      * Aggiorna i dati del personaggio nel database
      * @return bool true se l'aggiornamento è avvenuto con successo, false altrimenti
      */
-    private function updateDB() {
+    private function updateDB(){
         $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
 
         if($connectionDB->connect_error){
@@ -1528,7 +1564,7 @@ class Personaggio{
                         PuntiUpgrade = ? WHERE Nome = ? AND Proprietario = ?";
 
             $stmt = $connectionDB->prepare($query);
-            if (!$stmt) {
+            if (!$stmt){
                 return false;
             }
 
@@ -1549,7 +1585,7 @@ class Personaggio{
      * Rimuove il personaggio dal database e resetta tutti i suoi campi
      * @return bool true se l'eliminazione è avvenuta con successo, false altrimenti
      */
-    public function deleteFromDB() {
+    public function deleteFromDB(){
         $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
         $connectionDB->begin_transaction();
         if($connectionDB->connect_error){
@@ -1562,7 +1598,7 @@ class Personaggio{
             $query = "DELETE FROM Personaggi WHERE Nome = ? AND Proprietario = ?";
 
             $stmt = $connectionDB->prepare($query);
-            if (!$stmt) {
+            if (!$stmt){
                 return false;
             }
 
@@ -1690,7 +1726,7 @@ function addToInventario(&$conn, $proprietarioId, $itemId){
                      ON DUPLICATE KEY UPDATE Quantita = Quantita + 1";
     $inventarioStmt = $conn->prepare($sqlInventario);
     $inventarioStmt->bind_param("ii", $proprietarioId, $itemId);
-    if (!$inventarioStmt->execute()) {
+    if (!$inventarioStmt->execute()){
         throw new Exception("Errore durante l'aggiornamento dell'inventario per l'oggetto con ID: " . $itemId, $inventarioStmt->errno);
     }
     $inventarioStmt->close();

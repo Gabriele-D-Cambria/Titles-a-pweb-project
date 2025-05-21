@@ -24,7 +24,7 @@ try{
 	else{
 		$itemId = json_decode($_POST['itemId_remove']);
 		
-		if($account->unequipItem($nomePG, $itemId)){
+		if($account->unequipPGItem($nomePG, $itemId)){
 			$_SESSION['account'] = serialize($account);
 		}
 	}

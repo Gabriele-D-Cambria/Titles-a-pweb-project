@@ -22,7 +22,7 @@
             break;
         case '500':
             $title = '500 Internal Server Error';
-            $paragrafo = "Ci scusiamo per il disagio, ma il server non è al momento disponibile.</p><p> Per favore, provare più tardi..";
+            $paragrafo = "Ci scusiamo per il disagio, ma il server non è al momento disponibile.</p><p> Per favore, provare più tardi.";
             $bottone = "Ritorna alla <i>home page</i>";
             break;
         case '400': default:

@@ -1,16 +1,16 @@
 
 export class Timer{
-	constructor(funzioneDaChiamare, timer) {
+	constructor(funzioneDaChiamare, timer){
 		this.timerIntervall = setInterval(() => {
 			this.updateTimer(funzioneDaChiamare);
 		}, timer);
 	}
 	
 
-	updateTimer(funzioneDaChiamare) {
+	updateTimer(funzioneDaChiamare){
 		const span = document.getElementById("timer");
-		if (span === null) {
-			if (this.timerIntervall !== null) {
+		if (span === null){
+			if (this.timerIntervall !== null){
 				clearInterval(this.timerIntervall);
 				this.timerIntervall = null;
 			}
@@ -22,13 +22,13 @@ export class Timer{
 			minutes = 0;
 			seconds = 0;
 		}
-		else if(minutes === 0 && seconds === 0) {
+		else if(minutes === 0 && seconds === 0){
 			clearInterval(this.timerIntervall);
 			funzioneDaChiamare();
 			return;
 		} 
 		else {
-			if (seconds === 0) {
+			if (seconds === 0){
 				--minutes;
 				seconds = 59;
 			} else {

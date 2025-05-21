@@ -17,7 +17,7 @@ $accountId = $account->getId();
 $filter = json_decode($_POST['filter']);
 
 if($filter !== null){
-    if (!is_array($filter)) {
+    if (!is_array($filter)){
         $filter = [$filter];
     }   
     $allItemType = getItemTypes();

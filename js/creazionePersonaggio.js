@@ -80,7 +80,7 @@ function getPersonaggi(){
  * Funzione che imposta il personaggio e le sue statistiche, con relativi modificatori
  * @param {Object} personaggio personaggio da inserire
  */
-function setPG(personaggio) {	
+function setPG(personaggio){	
 	document.getElementById("PF").innerText = Math.max(costantiPersonaggi.DEFAULT_PF + personaggio.ModificatorePF, costantiPersonaggi.MIN_HEALTH);
 
 	let forza = costantiPersonaggi.DEFAULT_FOR_DES + personaggio.ModificatoreFor;

@@ -2,8 +2,6 @@
 session_start();
 require_once "./methods.php";
 
-// FIXME: errori nell'utilizzo degli oggetti. Da indagare meglio
-
 if(!isset($_SESSION['battaglia']) || !isset($_SESSION['account'])){
 	apiError(403, "Sessione non valida!");
 }
@@ -116,10 +114,14 @@ try{
 	$_SESSION['gameMessage'] = $message;
 }
 catch(Exception $e){
+	if($e->getCode() === 1010){
+		apiError(1010, $e->getMessage());
+	}
 	error_log($e->getMessage(), $e->getCode());
 	apiError(500, "ERRORE DEL SERVER");
 }
 
+session_write_close();
 header('Content-Type: application/json');
 echo json_encode(["ok" => true]);
 
@@ -190,74 +192,6 @@ function randomMove(&$pg1, &$pg2, $updateDB = false){
 	}
 
 	return $output;
-}
-
-/**
- * Questa funzione aggiorna i dati relativi allo stato dei personaggi e la data dell'ultimo turno per una battaglia specifica
- * @param array $battagliaInfo Array associativo preso per riferimento contenente le informazioni della battaglia
- * @param boolean|null $terminata `true` indica che ha vinto il personaggio1, `false` che ha vinto il perosnaggio2. Se non ha vinto nessuno da mantenere `null` [Default: null]
- * @throws Exception Se la connessione al database fallisce o se si verifica un errore durante l'update.
- * @return bool Restituisce true se l'aggiornamento è andato a buon fine.
- */
-function updateGame(&$battagliaInfo, $terminata = null){
-    $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
-    if($conn->connect_error){
-        throw new Exception("Connessione al database fallita: " . $conn->connect_error, 500);
-    }
-
-    $conn->begin_transaction();
-    $stmt = null;
-    try {
-        // Prepara lo stato aggiornato dei personaggi
-        $pg1 = unserialize($battagliaInfo['pg1']);
-        $pg2 = unserialize($battagliaInfo['pg2']);
-        $statoPersonaggi = [
-            "pg1" => $pg1->getAll(),
-            "pg2" => $pg2->getAll()
-        ];
-        $statoPersonaggiJson = json_encode($statoPersonaggi);
-
-        $sql = ($terminata === null)?
-			"UPDATE Combattimenti
-			 SET StatoPersonaggi = ?, DataUltimoTurno = ?
-			 WHERE Giocatore1_Nome = ? AND Giocatore1_Proprietario = ?
-			 AND Giocatore2_Nome = ? AND Giocatore2_Proprietario = ? AND Terminata = 0":
-			"UPDATE Combattimenti
-			 SET Vittoria_Giocatore1 = ?
-             WHERE Giocatore1_Nome = ? AND Giocatore1_Proprietario = ?
-             AND Giocatore2_Nome = ? AND Giocatore2_Proprietario = ? AND Terminata = 0";
-
-        $stmt = $conn->prepare($sql);
-
-        $dataUltimoTurno = unserialize($battagliaInfo['DataUltimoTurno'])->format('Y-m-d H:i:s');
-
-		$types = ($terminata === null)? "sssisi" : "isisi";
-		$vars  = ($terminata === null)? 
-		[$statoPersonaggiJson, $dataUltimoTurno, $battagliaInfo['Giocatore1_Nome'], $battagliaInfo['Giocatore1_Proprietario'], $battagliaInfo['Giocatore2_Nome'], $battagliaInfo['Giocatore2_Proprietario']]:
-		[$terminata, $battagliaInfo['Giocatore1_Nome'], $battagliaInfo['Giocatore1_Proprietario'], $battagliaInfo['Giocatore2_Nome'], $battagliaInfo['Giocatore2_Proprietario']];
-		
-        $stmt->bind_param($types, ...$vars);
-            
-
-        if(!$stmt->execute()){
-            $conn->rollback();
-            throw new Exception("Errore durante l'update della battaglia: " . $stmt->error, 500);
-        }
-
-		if($terminata !== null){
-			$battagliaInfo['Vittoria_Giocatore1'] = $terminata;
-			$battagliaInfo['Terminata'] = true;
-			$battagliaInfo['DataUltimoTurno'] = null;
-			$battagliaInfo['StatoPersonaggi'] = null;
-			$battagliaInfo['Turno_Giocatore1'] = null;
-		}
-        $conn->commit();
-        return true;
-    }
-    finally {
-        if($stmt) $stmt->close();
-        $conn->close();
-    }
 }
 
 ?>

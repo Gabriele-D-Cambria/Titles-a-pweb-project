@@ -63,7 +63,7 @@ function addNewCharacter(){
  * Effettua una richiesta POST per aprire la pagina di gestione del personaggio.
  * @param {string} characterName Nome del personaggio selezionato.
  */
-function openCharacter(characterName) {
+function openCharacter(characterName){
     const formData = new FormData();
     formData.append("pg", characterName);
 
@@ -74,10 +74,11 @@ function openCharacter(characterName) {
     })
     .then(response => {
         document.body.classList.remove("caricamento");
-        if (response.ok) {
-            if (response.redirected) {
+        if (response.ok){
+            if (response.redirected){
                 window.location.href = response.url;
-            } else {
+            } 
+            else {
                 return response.text();
             }
         } else {

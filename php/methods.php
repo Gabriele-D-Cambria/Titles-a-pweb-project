@@ -1,5 +1,5 @@
 <?php
-if (basename($_SERVER['PHP_SELF']) === 'methods.php') {
+if (basename($_SERVER['PHP_SELF']) === 'methods.php'){
     pageError(403);
 }
 
@@ -26,9 +26,9 @@ function pageError($errorCode, $prefix = ""){
  * @param string|null $message Messaggio di errore personalizzato [Default: null]
  * @return never
  */
-function apiError($errorCode = 500, $message = null) {
-    if ($message === null) {
-        $message = match ($errorCode) {
+function apiError($errorCode = 500, $message = null){
+    if ($message === null){
+        $message = match ($errorCode){
             400 => "Richiesta non valida",
             401 => "Non autorizzato",
             403 => "Accesso negato",
@@ -129,7 +129,7 @@ function getUserData($username){
             return null;
         }
     }
-    catch (Exception $e) {
+    catch (Exception $e){
         apiError(500, "Errore in getUserData: " . $e->getMessage());
     }
     finally{
@@ -244,7 +244,7 @@ function removeOneItem($itemId, $accountId, $currentQuantity, &$conn){
 
         return $newQuantity;
     }
-    catch(Exception $e) {
+    catch(Exception $e){
         apiError(500, "Errore durante la rimozione dell'oggetto:" . $e->getMessage());
     }
     finally {
@@ -323,7 +323,7 @@ function addOneItem($itemId, $accountId, &$conn): int{
 
         return $newQuantity;
     }
-    catch (Exception $e) {
+    catch (Exception $e){
         $conn->rollback();
         apiError(500, "Errore durante l'aggiunta dell'oggetto: " . $e->getMessage());
     }
@@ -499,7 +499,7 @@ function buyItem($itemId, $accountId){
             "spesa" => $spesa
         ];
 
-    } catch (Exception $e) {
+    } catch (Exception $e){
         $conn->rollback();
         apiError($e->getCode(), $e->getMessage());
     }
@@ -703,8 +703,8 @@ function getShop($accountId, $lastRefresh){
  * @param mysqli $conn connessione al database passata per riferimento
  * @return array Contiene gli item attualmente nel negozio e il timestamp dell'aggiornamento
  */
-function refreshShop($id, $currentTime, &$conn) {
-    if ($conn->connect_error) {
+function refreshShop($id, $currentTime, &$conn){
+    if ($conn->connect_error){
         apiError(500, "Connessione al database fallita: " . $conn->connect_error);
     }
 
@@ -742,7 +742,7 @@ function refreshShop($id, $currentTime, &$conn) {
         $result = $stmtItems->get_result();
 
         $newShopItems = [];
-        while ($row = $result->fetch_assoc()) {
+        while ($row = $result->fetch_assoc()){
             $newShopItems[] = $row;
         }
 
@@ -754,7 +754,7 @@ function refreshShop($id, $currentTime, &$conn) {
         // Inserimento degli Item nel Negozio
         $sqlInsert = "INSERT INTO Negozio (Proprietario, Oggetto) VALUES (?, ?)";
         $stmtInsert = $conn->prepare($sqlInsert);
-        foreach ($newShopItems as $item) {
+        foreach ($newShopItems as $item){
             $stmtInsert->bind_param('ii', $id, $item['ID']);
             if (!$stmtInsert->execute())
                 throw new Exception("Errore durante l'inserimento di". $item["ID"] ." nel negozio: " . $stmtInsert->error);
@@ -765,7 +765,7 @@ function refreshShop($id, $currentTime, &$conn) {
             "updateTime" => $currentTime,
             "items" => $newShopItems
         ];
-    } catch (Exception $e) {
+    } catch (Exception $e){
         $conn->rollback();
         error_log("Errore in refreshShop: ". $e->getMessage());
         apiError(500, "Errore durante il refresh del negozio: " . $e->getMessage());
@@ -784,7 +784,7 @@ function refreshShop($id, $currentTime, &$conn) {
  * @param DateTime $shopRefresh Timestamp dell'ultimo refresh
  * @return array Tempo rimanente in minuti e secondi
  */
-function getRemainingTime(&$currentTime, $shopRefresh) {
+function getRemainingTime(&$currentTime, $shopRefresh){
     $passedSeconds = ($currentTime->getTimestamp() - $shopRefresh->getTimestamp()) % SHOP_TIMER_RESET_SECONDS;
 
     $remainingSeconds = SHOP_TIMER_RESET_SECONDS - $passedSeconds;
@@ -885,9 +885,10 @@ function getItemTypes(){
 /**
  * Funzione che seleziona un personaggio tra gli account non online al momento
  * @param int $accountToAvoid id dell'account che inizializza la battaglia, ergo quello dal quale non prendere i personaggi
- * @return Personaggio personaggio estratto
+ * @param int $livello indica il livello al quale cercare l'avversario. Verrà selezionato nel range [$livello - 1; $livello + 1]
+ * @return Personaggio|null personaggio estratto se presente, alrimenti `null`
  */
-function getRandomPG($accountIdToAvoid){
+function getRandomPG($accountIdToAvoid, $livello){
     $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
     if($conn->connect_error){
         pageError(500, "Connessione al database fallita: " . $conn->connect_error);
@@ -897,19 +898,88 @@ function getRandomPG($accountIdToAvoid){
     try {
         $sql = "SELECT Nome, Proprietario, Elemento
                 FROM Personaggi
-                WHERE Proprietario <> ?
+                WHERE Proprietario <> ? 
+                    AND Livello <= ?
                 ORDER BY RAND() LIMIT 1";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param('i', $accountIdToAvoid);
+        $upperLevel = $livello + 1;
+        $stmt->bind_param('ii', $accountIdToAvoid, $upperLevel);
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
         if(!$row){
-            pageError(404, "Nessun avversario disponibile al momento!");
+            return null;
         }
         $randomPG = new Personaggio($row["Nome"], $row['Proprietario'], null);
         
         return $randomPG;
+    }
+    finally {
+        if($stmt) $stmt->close();
+        $conn->close();
+    }
+}
+
+/**
+ * Questa funzione aggiorna i dati relativi allo stato dei personaggi e la data dell'ultimo turno per una battaglia specifica
+ * @param array $battagliaInfo Array associativo preso per riferimento contenente le informazioni della battaglia
+ * @param boolean|null $terminata `true` indica che ha vinto il personaggio1, `false` che ha vinto il perosnaggio2. Se non ha vinto nessuno da mantenere `null` [Default: null]
+ * @throws Exception Se la connessione al database fallisce o se si verifica un errore durante l'update.
+ * @return bool Restituisce true se l'aggiornamento è andato a buon fine.
+ */
+function updateGame(&$battagliaInfo, $terminata = null){
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+    if($conn->connect_error){
+        throw new Exception("Connessione al database fallita: " . $conn->connect_error, 500);
+    }
+
+    $conn->begin_transaction();
+    $stmt = null;
+    try {
+        // Prepara lo stato aggiornato dei personaggi
+        $pg1 = unserialize($battagliaInfo['pg1']);
+        $pg2 = unserialize($battagliaInfo['pg2']);
+        $statoPersonaggi = [
+            "pg1" => $pg1->getAll(),
+            "pg2" => $pg2->getAll()
+        ];
+        $statoPersonaggiJson = json_encode($statoPersonaggi);
+
+        $sql = ($terminata === null)?
+			"UPDATE Combattimenti
+			 SET StatoPersonaggi = ?, DataUltimoTurno = ?
+			 WHERE Giocatore1_Nome = ? AND Giocatore1_Proprietario = ?
+			 AND Giocatore2_Nome = ? AND Giocatore2_Proprietario = ? AND Terminata = 0":
+			"UPDATE Combattimenti
+			 SET Vittoria_Giocatore1 = ?
+             WHERE Giocatore1_Nome = ? AND Giocatore1_Proprietario = ?
+             AND Giocatore2_Nome = ? AND Giocatore2_Proprietario = ? AND Terminata = 0";
+
+        $stmt = $conn->prepare($sql);
+
+        $dataUltimoTurno = unserialize($battagliaInfo['DataUltimoTurno'])->format('Y-m-d H:i:s');
+
+		$types = ($terminata === null)? "sssisi" : "isisi";
+		$vars  = ($terminata === null)? 
+		[$statoPersonaggiJson, $dataUltimoTurno, $battagliaInfo['Giocatore1_Nome'], $battagliaInfo['Giocatore1_Proprietario'], $battagliaInfo['Giocatore2_Nome'], $battagliaInfo['Giocatore2_Proprietario']]:
+		[$terminata, $battagliaInfo['Giocatore1_Nome'], $battagliaInfo['Giocatore1_Proprietario'], $battagliaInfo['Giocatore2_Nome'], $battagliaInfo['Giocatore2_Proprietario']];
+		
+        $stmt->bind_param($types, ...$vars);
+            
+
+        if(!$stmt->execute()){
+            $conn->rollback();
+            throw new Exception("Errore durante l'update della battaglia: " . $stmt->error, 500);
+        }
+
+		if($terminata !== null){
+			$battagliaInfo['Vittoria_Giocatore1'] = $terminata;
+			$battagliaInfo['Terminata'] = true;
+			$battagliaInfo['DataUltimoTurno'] = null;
+			$battagliaInfo['Turno_Giocatore1'] = null;
+		}
+        $conn->commit();
+        return true;
     }
     finally {
         if($stmt) $stmt->close();

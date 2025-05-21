@@ -3,7 +3,9 @@
 require_once "methods.php";
 session_start();
 
-if($_SERVER['REQUEST_METHOD'] === "POST" && isset($_POST['pg'])) {
+
+
+if($_SERVER['REQUEST_METHOD'] === "POST" && isset($_POST['pg'])){
     $_SESSION['currentPG_nome'] = serialize($_POST['pg']);
 	header("Location: gestisciPersonaggio.php");
 	exit;
@@ -14,8 +16,6 @@ if(!isset($_SESSION['account']) || !isset($_SESSION['currentPG_nome'])){
 }
 
 $account = unserialize($_SESSION['account']);
-$personaggi = $account->getPersonaggi();
-
 $PG_name = unserialize($_SESSION['currentPG_nome']);
 
 $currentPGobj = $account->getPersonaggi($PG_name);
@@ -38,6 +38,12 @@ if(isset($_SESSION["message"])){
 	$message = $_SESSION["message"];
 	unset($_SESSION["message"]);
 }
+
+$endgameMessage = null;
+if(isset($_SESSION["endgameMessage"])){
+	$endgameMessage = $_SESSION["endgameMessage"];
+	unset($_SESSION["endgameMessage"]);
+}
 ?>
 
 
@@ -57,8 +63,9 @@ if(isset($_SESSION["message"])){
 	<link rel="stylesheet" href="./../css/pgAnimations.css">
 	<script type="module" src="./../js/gestisciPersonaggio.js"></script>
 	<script>
-		const errorMessage = <?php echo json_encode($errorMessage)?>;
 		const message = <?php echo json_encode($message)?>;
+		const errorMessage = <?php echo json_encode($errorMessage)?>;
+		const endgameMessage = <?php echo json_encode($endgameMessage)?>;
 	</script>
 </head>
 <body>

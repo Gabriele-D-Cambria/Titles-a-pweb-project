@@ -97,6 +97,7 @@ body{
 	border: solid 1pt #1e1e1e;
 	background-color: white;
 	border-radius: 50px;
+	display: flex;
 
 }
 

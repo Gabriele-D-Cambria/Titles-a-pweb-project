@@ -6,7 +6,7 @@ session_start();
 if(!isset($_SERVER['REQUEST_METHOD']) || basename($_SERVER['HTTP_REFERER']) !== 'dashboard.php'){
 	pageError("403");
 }
-if (!isset($_SESSION['account'])) {
+if (!isset($_SESSION['account'])){
 	pageError("401");
 }
 
@@ -139,7 +139,7 @@ try{
 		$sqlDelete = "DELETE FROM Account WHERE ID = ?";
 		$stmtDelete = $conn->prepare($sqlDelete);
 		$stmtDelete->bind_param('i', $accountId);
-		if (!$stmtDelete->execute()) {
+		if (!$stmtDelete->execute()){
 			throw new Exception($stmtDelete->error);
 		}
 
@@ -204,6 +204,7 @@ function terminateChangeError($errorType, $errorCode){
 		"errorCode" => $errorCode
 	];
 
+	session_write_close();
 	header("Location: dashboard.php");
 	exit();
 }
@@ -212,6 +213,7 @@ function terminateChange($logout, $message){
 	$direction = $logout? "logout.php" : "dashboard.php";
 
 	$_SESSION["message"] = $message;
+	session_write_close();
 	header("Location: ". $direction);
 	exit();
 }
