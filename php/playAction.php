@@ -58,7 +58,7 @@ try{
 				$esito = $pg1->attack($pg2);
 				$message .= ($esito['colpito'])?
 					"Il tuo colpo ha colpito!\n Hai fatto " . $esito['dannoInflitto'] . " danni":
-					"L'avversario ha schivato!";
+					$pg2->getNome() . " ha schivato!";
 			}
 			else{
 				$objectToUse = $_POST['oggetto_index'];
@@ -78,7 +78,7 @@ try{
 				$message .= "Hai attaccato";
 				$message .= ($esito['colpito'])?
 					" e il tuo colpo ha colpito!\n Hai fatto " . $esito['dannoInflitto'] . " danni\n":
-					", ma l'avversario ha schivato!";
+					", ma " . $pg2->getNome() . " ha schivato!";
 			}
 			else{
 				$message .= "Hai utilizzato l'oggetto " . $esito['oggetto'] . "\n";

@@ -387,7 +387,10 @@ export function showInventory(newItems = false, equipment = false, filterObj = n
             for(; objCount < MAX_SIZE; ++objCount){
                 const space = document.createElement("div");
                 space.classList.add("item-slot");
-
+                space.addEventListener("click", () => {
+                    const info = generateInfo("inventory-info", null, true, equipment);
+                    changeItemInfo(info);
+                });
                 container.appendChild(space);
             }
 

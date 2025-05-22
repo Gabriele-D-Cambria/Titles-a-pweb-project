@@ -178,8 +178,7 @@ function setTurn(tempoMassimo){
 		btn.setAttribute("disabled", true);
 		btn.innerText = "Attendi il tuo turno";
 		// Tra un tempo casuale gioca
-		const randomDelay = Math.max(6000, Math.floor(Math.random() * 1000) % (tempoMassimo) * 1000);
-
+		const randomDelay = Math.min(6000, tempoMassimo);
 		setTimeout(() => {
 			changeTurn();
 		}, randomDelay);
