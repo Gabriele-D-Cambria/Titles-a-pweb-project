@@ -234,7 +234,6 @@ function setEquimpent(arma = null, armatura = null, zaino = null, elementi = nul
 		if(!item.childElementCount){
 			item.addEventListener("click", (e) => {
 				const id = String(e.target.id).split("-")[0];
-				console.log(id);
 				showInventory(false, true, id);
 			});
 		}

@@ -315,6 +315,44 @@ class Account{
     }
 
     /**
+     * Dato il nome di un personaggio dell'account e un personaggio di riferimento, rimuove dal personaggio dell'account tutti gli oggetti non presenti nell'altro, **senza inviarli all'inventario**.
+     * @param string $nomePersonaggio nome del personaggio
+     * @param Personaggio $pgRef personaggio di riferimento
+     * @return bool `false` se il personaggio non appartiene a questo account o non sono stati rimossi oggetti, `true` se completa correttamente
+     */
+    public function unequipPGItem_onlyUsed($nomePersonaggio, $pgRef){
+        $personaggio = null;
+        foreach($this->personaggi as $pg){
+            if($pg->getNome() === $nomePersonaggio){
+                $personaggio = $pg;
+                break;
+            }
+        }
+
+        if($personaggio === null)
+            return false;
+
+        $removed = false;
+    	$idOggettiPersonaggio = $personaggio->getOggettiIDs();
+    	$idOggettiPgRef = $pgRef->getOggettiIDs();
+
+	    $countPersonaggio = array_count_values($idOggettiPersonaggio);
+	    $countPgRef = array_count_values($idOggettiPgRef);
+
+        foreach($countPersonaggio as $id => $num){
+            $numPgRef = isset($countPgRef[$id]) ? $countPgRef[$id] : 0;
+            $diff = $num - $numPgRef;
+            if($diff > 0){
+                for($i = 0; $i < $diff; $i++){
+                    $removed = true;
+                    $this->unequipPGItem($nomePersonaggio, $id, false);
+                }
+            }
+        }
+
+        return $removed;
+    }
+    /**
      * Rimuove un Personaggio alla lista dei personaggi dell'account a partire dal nome
      * @param string $nomePersonaggio il nome del personaggio da rimuovere
      * @return bool Se true indica che l'eliminazione è accaduta correttamente; false se il personaggio non esiste tra quelli del giocatore
@@ -904,6 +942,24 @@ class Personaggio{
         return $output;
         
     }
+
+    /**
+     * Dato un ID fornisce il nome e la descrizione dell'oggetto, se presente nello zaino
+     * @param int $itemId id dell'oggetto
+     * @return array{Descrizione: string, Nome: string}|null in base a se l'oggetto è presente o meno
+     */
+    public function getItemInfo($itemId){
+        foreach($this->zaino as $item){
+            if($item['ID'] === $itemId){
+                return [
+                    'Nome'          => $item['Nome'],
+                    'Descrizione'   => $item['Descrizione']
+                ];
+            }
+        }
+
+        return null;
+    }
     public function getAll(){
         return [
             'nome'            => $this->nome,
@@ -1256,8 +1312,10 @@ class Personaggio{
     
             // Cura
             if (isset($item['RecuperoVita']) && $item['RecuperoVita'] > 0){
-                if(!$this->heal($item['RecuperoVita']))
+                if(!$this->heal($item['RecuperoVita'])){
                     throw new Exception("Sei già al massimo della vita!", 1010);
+                }
+                $used = true;
             }
             // Modifica FOR
             if (isset($item['ModificatoreFor']) && $item['ModificatoreFor'] != 0){

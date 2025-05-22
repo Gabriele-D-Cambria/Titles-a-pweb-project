@@ -40,7 +40,6 @@ function getGameInfo(){
 	fetch('./API/getGameInfo.php')
 		.then(response => response.json())
 		.then(data => {
-			console.log(data);
 			if(data.error !== undefined && data.error)
 				throw data;
 
@@ -178,7 +177,8 @@ function setTurn(tempoMassimo){
 		btn.setAttribute("disabled", true);
 		btn.innerText = "Attendi il tuo turno";
 		// Tra un tempo casuale gioca
-		const randomDelay = Math.min(6000, tempoMassimo);
+		const randomDelay = Math.min(6000, tempoMassimo*1000);
+		
 		setTimeout(() => {
 			changeTurn();
 		}, randomDelay);
@@ -230,12 +230,14 @@ function changeTurn(){
  * @param {FormData} formData contennete le informazioni da comunicare all'API
  */
 function sendPlay(formData){
+	document.body.classList.add("caricamento");
 	fetch("playAction.php", {
 		method: "POST",
 		body: formData
 	})
 	.then(response => response.json())
 	.then(result => {
+		document.body.classList.remove("caricamento");
 		if(result.error !== undefined && result.error){
 			throw result;
 		}

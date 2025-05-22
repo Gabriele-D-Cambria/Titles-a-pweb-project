@@ -61,13 +61,14 @@ try{
 					$pg2->getNome() . " ha schivato!";
 			}
 			else{
-				$objectToUse = $_POST['oggetto_index'];
+				$objectToUse = (int)$_POST['oggetto_index'];
+				$info = $pg1->getItemInfo($objectToUse);
 				if(!$pg1->useItem($objectToUse)){
 					$randomMove = true;
 					$message .= "Non posiedi questo oggetto, la tua mossa sarà quindi scelta casualmente.\n";
 				}
 				else{
-					$message .= "Hai utilizzato l'oggetto!\n";
+					$message .= "Hai utilizzato ". $info['Nome'] .":\n\"" . $info['Descrizione'] . "\"";
 				}
 			}
 		}
@@ -106,9 +107,37 @@ try{
 	$battaglia["Turno_Giocatore1"] = !$turnoAttuale;
 	$battaglia['DataUltimoTurno'] = serialize($oraAttuale);
 
-	($pg1->isDead() || $pg2->isDead())?
-		updateGame($battaglia, $pg2->isDead()):
+	if($pg1->isDead() || $pg2->isDead()){
+		updateGame($battaglia, $pg2->isDead());
+
+		/**
+		 * @var Account
+		 */
+		$account = unserialize($_SESSION['account']);
+		$nomePersonaggio = unserialize($_SESSION['currentPG_nome']);
+
+		$account->unequipPGItem_onlyUsed($nomePersonaggio, $pg1);
+		$nLivelliGuadagnati = $account->addPGExp($nomePersonaggio, $battaglia['Vittoria_Giocatore1']);
+	
+		if($nLivelliGuadagnati === null)
+			pageError(500);
+	
+	
+		$exp = $battaglia['Vittoria_Giocatore1']? Personaggio::EXP_WIN : Personaggio::EXP_LOSS;
+	
+		$_SESSION['endgameMessage'] = "Hai guadagnato " . $exp . " punti esperienza!\n";
+	
+		if($nLivelliGuadagnati > 0){
+			$_SESSION['endgameMessage'] .= "Il personaggio ha guadagnato anche ". $nLivelliGuadagnati . " livell";
+			$_SESSION['endgameMessage'] .= ($nLivelliGuadagnati > 1)? "i" : "o";
+			$_SESSION['endgameMessage'] .= "!\n Hai guadagnato ".Account::COINS_LVL_UP." monete e sono state aggiunte delle ricompense all'inventario!";
+		}
+
+		$_SESSION['account'] = serialize($account);
+	}
+	else{
 		updateGame($battaglia);
+	}
 
 	$_SESSION['battaglia'] = serialize($battaglia);
 	$_SESSION['gameMessage'] = $message;
