@@ -1062,7 +1062,6 @@ class Personaggio{
 
         return (count($oggetti) === 0)? null : $oggetti;
     }
-
     /**
      * @return array|null Restituisce l'oggetto con il miglior RecuperoVita (>0), oppure null.
      */
@@ -1078,7 +1077,6 @@ class Personaggio{
         }
         return $best;
     }
-
     /**
      * @return array|null Restituisce l'oggetto con il miglior ModificatoreFor (>0), oppure null.
      */
@@ -1094,7 +1092,6 @@ class Personaggio{
         }
         return $best;
     }
-
     /**
      * @return array|null Restituisce l'ID deloggetto con il miglior ModificatoreDes (>0), oppure null.
      */
@@ -1109,7 +1106,8 @@ class Personaggio{
         }
         return $best;
     }
-
+    
+    
     /**
      * Aggiungo l'esperienza ed eventualemnte effettuo il lvlUP
      * @param bool $win Se l'esperienza guadagnata deriva da una vittoria (true) o da una sconfitta (false)

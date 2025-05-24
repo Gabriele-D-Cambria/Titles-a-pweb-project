@@ -25,6 +25,7 @@ if(!$currentPGobj){
 }
 
 $currentPG = $currentPGobj->getAll();
+$rankStats = $currentPGobj->getMatches();
 $prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
 
 $errorMessage = null;
@@ -48,7 +49,6 @@ if(isset($_SESSION["endgameMessage"])){
 
 
 <!--TODO: implemententa un contatore di battaglie vinte/perse -->
-<!--inoltre segna se c'è una partita lasciata a metà, e in caso blocca la rimozione degli oggetti dall'inventario, con messaggio di errore -->
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -71,6 +71,16 @@ if(isset($_SESSION["endgameMessage"])){
 <body>
 	<header>
         <h1><i>Titles</i></h1>
+		<div class="rank-section">
+			<div class="rank-box">
+				<p id="wins">5</p>
+				<p>Vittorie</p>
+			</div>
+			<div class="rank-box">
+				<p id="loss">0</p>
+				<p>Sconfitte</p>
+			</div>
+		</div>
         <div>
             <form action="logout.php" method="POST">
                 <button type="submit">Logout</button>
