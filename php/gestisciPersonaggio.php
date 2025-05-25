@@ -28,6 +28,10 @@ $currentPG = $currentPGobj->getAll();
 $rankStats = $currentPGobj->getMatches();
 $prevalenceImg = $currentPGobj->getImmaginiPrevalenza();
 
+$btn = ($rankStats['inCorso'])?
+	'<button class="animatedBtnBg" type="submit">Riprendi</button>':
+	'<button type="submit">Gioca</button>';
+
 $errorMessage = null;
 if(isset($_SESSION["errorMessage"])){
 	$errorMessage = $_SESSION["errorMessage"];
@@ -137,7 +141,7 @@ if(isset($_SESSION["endgameMessage"])){
 					<p>DES</p>
 				</div>
 				<div class="sendUpgrades">
-					<button type="submit" id="upgradeStats" disabled>Migliora Statistiche</button>
+					<button type="submit" class="animatedBtnBg" id="upgradeStats" disabled>Migliora Statistiche</button>
 				</div>
 			</form>
 			<div class="character-section">
@@ -170,7 +174,7 @@ if(isset($_SESSION["endgameMessage"])){
 					</footer>
 				</div>
 				<form class="play-box" method="POST" action="./prepareGame.php">
-					<button type="submit">Gioca</button>
+					<?php echo $btn;?>
 					<button id="backToDash">Home</button>
 				</form>
 			</div>
