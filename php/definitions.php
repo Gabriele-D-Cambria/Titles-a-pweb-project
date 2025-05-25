@@ -1481,6 +1481,56 @@ class Personaggio{
     }
 
     /**
+     * FUnzione che recupera le informazioni sui match del `Personaggio` attuale
+     * @throws Exception se ci sono stati problemi di connessione
+     * @return array{inCorso: int, sconfitte: int, vittorie: int} contenente il numero di partite per categoria nel DB
+     */
+    public function getMatches(){
+        $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+        if($conn->connect_error){
+            throw new Exception("Connessione al database fallita: " . $conn->connect_error, 500);
+        }
+
+        $stmt = null;
+        try{
+            $sql = "SELECT *
+                    FROM Combattimenti
+                    WHERE Giocatore1_Nome = ? AND Giocatore1_Proprietario = ?";
+            
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("si", $this->nome, $this->proprietario);
+
+            if(!$stmt->execute()){
+                throw new Exception("C'è stato un problema con il recupero delle informazioni", 500);
+            }
+
+            $result = $stmt->get_result();
+
+            $output = [
+                'vittorie' => 0,
+                'sconfitte' => 0,
+                'inCorso' => 0
+            ];
+
+            while($row = $result->fetch_assoc()){
+                if($row['Vittoria_Giocatore1'] === null)
+                    $output['inCorso']++;
+                else if($row['Vittoria_Giocatore1'] === 1)
+                    $output['vittorie']++;
+                else
+                    $output['sconfitte']++;
+            }
+
+            return $output;
+            
+        }
+        finally{
+            if($stmt)   $stmt->close();
+            $conn->close();
+        }
+
+    }
+    /**
      * Funzione che controlla se è presente una battaglia in corso per questo personaggio
      * @return array|null L'array contiene informazioni sulla battaglia, altrimenti `null`
      */
@@ -1510,10 +1560,10 @@ class Personaggio{
 
                 $sqlUpdate = "UPDATE Combattimenti SET DataUltimoTurno = ?
                               WHERE Giocatore1_Proprietario = ? 
-                                AND Giocatore2_Proprietario = ?
+                                AND Giocatore1_Nome = ?
                                 AND Terminata = 0 ";
                 $stmtUpdate = $conn->prepare($sqlUpdate);
-                $stmtUpdate->bind_param('sii', $currentTimestamp, $this->proprietario, $output['Giocatore2_Proprietario']);
+                $stmtUpdate->bind_param('sii', $currentTimestamp, $this->proprietario, $this->nome);
                 if(!$stmtUpdate->execute()){
                     $conn->rollback();
                     throw new Exception("Problemi durante il recupero dell'ultima battaglia del personaggio" . $this->nome . "(proprietario ". $this->proprietario .")", 500);
@@ -1521,6 +1571,7 @@ class Personaggio{
 
                 $output["Turno_Giocatore1"] = false;
                 $output["DataUltimoTurno"] = serialize($currentDateTime);
+
             }
             $conn->commit();
             return $output;
@@ -1548,12 +1599,10 @@ class Personaggio{
         $selectStmt = null;
         try {
             $sql = "INSERT INTO Combattimenti 
-                (Giocatore1_Nome, Giocatore1_Proprietario, Giocatore2_Nome, Giocatore2_Proprietario, StatoPersonaggi)
-                VALUES (?, ?, ?, ?, ?)";
+                (Giocatore1_Nome, Giocatore1_Proprietario, StatoPersonaggi)
+                VALUES (?, ?, ?)";
             $stmt = $conn->prepare($sql);            
 
-            $nomeAvversario = $avversario->getNome();
-            $proprietarioAvversario = $avversario->getProprietario();
             $turno = random_int(0, 9) % 2 === 0;
             $statoPersonaggi = [
                 "pg1" => $this->getAll(),
@@ -1561,9 +1610,9 @@ class Personaggio{
             ];
             $statoPersonaggiJson = json_encode($statoPersonaggi);
 
-            $vars = [$this->nome, $this->proprietario, $nomeAvversario, $proprietarioAvversario, $statoPersonaggiJson];
+            $vars = [$this->nome, $this->proprietario, $statoPersonaggiJson];
 
-            $stmt->bind_param('sisis', ...$vars);
+            $stmt->bind_param('sis', ...$vars);
             if(!$stmt->execute()){
                 throw new Exception("Errore durante la creazione del combattimento: " . $stmt->error, 500);
             }
@@ -1571,11 +1620,10 @@ class Personaggio{
             $sqlSelect = "SELECT * 
                           FROM Combattimenti 
                           WHERE Giocatore1_Nome = ? AND Giocatore1_Proprietario = ? 
-                            AND Giocatore2_Nome = ? AND Giocatore2_Proprietario = ? 
                             AND Terminata = 0";
 
             $selectStmt = $conn->prepare($sqlSelect);
-            $selectStmt->bind_param('sisi', $this->nome, $this->proprietario, $nomeAvversario, $proprietarioAvversario);
+            $selectStmt->bind_param('si', $this->nome, $this->proprietario);
             if(!$selectStmt->execute())
                 throw new Exception("Errore durante il recupero del combattimento", 500);
 

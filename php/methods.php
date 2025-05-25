@@ -948,21 +948,19 @@ function updateGame(&$battagliaInfo, $terminata = null){
         $sql = ($terminata === null)?
 			"UPDATE Combattimenti
 			 SET StatoPersonaggi = ?, DataUltimoTurno = ?
-			 WHERE Giocatore1_Nome = ? AND Giocatore1_Proprietario = ?
-			 AND Giocatore2_Nome = ? AND Giocatore2_Proprietario = ? AND Terminata = 0":
+			 WHERE Giocatore1_Nome = ? AND Giocatore1_Proprietario = ? AND Terminata = 0":
 			"UPDATE Combattimenti
 			 SET Vittoria_Giocatore1 = ?
-             WHERE Giocatore1_Nome = ? AND Giocatore1_Proprietario = ?
-             AND Giocatore2_Nome = ? AND Giocatore2_Proprietario = ? AND Terminata = 0";
+             WHERE Giocatore1_Nome = ? AND Giocatore1_Proprietario = ? AND Terminata = 0";
 
         $stmt = $conn->prepare($sql);
 
         $dataUltimoTurno = unserialize($battagliaInfo['DataUltimoTurno'])->format('Y-m-d H:i:s');
 
-		$types = ($terminata === null)? "sssisi" : "isisi";
+		$types = ($terminata === null)? "sssi" : "isi";
 		$vars  = ($terminata === null)? 
-		[$statoPersonaggiJson, $dataUltimoTurno, $battagliaInfo['Giocatore1_Nome'], $battagliaInfo['Giocatore1_Proprietario'], $battagliaInfo['Giocatore2_Nome'], $battagliaInfo['Giocatore2_Proprietario']]:
-		[$terminata, $battagliaInfo['Giocatore1_Nome'], $battagliaInfo['Giocatore1_Proprietario'], $battagliaInfo['Giocatore2_Nome'], $battagliaInfo['Giocatore2_Proprietario']];
+		[$statoPersonaggiJson, $dataUltimoTurno, $battagliaInfo['Giocatore1_Nome'], $battagliaInfo['Giocatore1_Proprietario']]:
+		[$terminata, $battagliaInfo['Giocatore1_Nome'], $battagliaInfo['Giocatore1_Proprietario']];
 		
         $stmt->bind_param($types, ...$vars);
             

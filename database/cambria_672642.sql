@@ -87,16 +87,13 @@ CREATE TABLE Zaino (
 CREATE TABLE Combattimenti (
     Giocatore1_Nome VARCHAR(100) COLLATE utf8_bin NOT NULL,
     Giocatore1_Proprietario INT NOT NULL,
-    Giocatore2_Nome VARCHAR(100) COLLATE utf8_bin NOT NULL,
-    Giocatore2_Proprietario INT NOT NULL,
     Terminata BOOLEAN NOT NULL DEFAULT 0,
     Vittoria_Giocatore1 BOOLEAN DEFAULT NULL,
     StatoPersonaggi JSON DEFAULT NULL,
     DataInizioBattaglia DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
     DataUltimoTurno DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (Giocatore1_Proprietario, Giocatore2_Proprietario, DataInizioBattaglia),
-    FOREIGN KEY (Giocatore1_Nome, Giocatore1_Proprietario) REFERENCES Personaggi(Nome, Proprietario) ON DELETE CASCADE,
-    FOREIGN KEY (Giocatore2_Nome, Giocatore2_Proprietario) REFERENCES Personaggi(Nome, Proprietario) ON DELETE CASCADE
+    PRIMARY KEY (Giocatore1_Nome, Giocatore1_Proprietario, DataInizioBattaglia),
+    FOREIGN KEY (Giocatore1_Nome, Giocatore1_Proprietario) REFERENCES Personaggi(Nome, Proprietario) ON DELETE CASCADE
 );
 
 CREATE TABLE Negozio (
@@ -345,7 +342,7 @@ BEGIN
         END IF;
     END IF;
 
-    IF NEW.DataUltimoTurno <= OLD.DataUltimoTurno THEN
+    IF NEW.DataUltimoTurno < OLD.DataUltimoTurno THEN
         SET msg = CONCAT('Errore: Il nuovo turno deve iniziare dopo quello precedente. NEW.DataUltimoTurno: ', NEW.DataUltimoTurno, ', OLD.DataUltimoTurno: ', OLD.DataUltimoTurno);
         SIGNAL SQLSTATE '45000' 
         SET MESSAGE_TEXT = msg;

@@ -47,8 +47,6 @@ if(isset($_SESSION["endgameMessage"])){
 }
 ?>
 
-
-<!--TODO: implemententa un contatore di battaglie vinte/perse -->
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -73,11 +71,11 @@ if(isset($_SESSION["endgameMessage"])){
         <h1><i>Titles</i></h1>
 		<div class="rank-section">
 			<div class="rank-box">
-				<p id="wins">5</p>
+				<p id="wins"><?php echo $rankStats['vittorie']?></p>
 				<p>Vittorie</p>
 			</div>
 			<div class="rank-box">
-				<p id="loss">0</p>
+				<p id="loss"><?php echo $rankStats['sconfitte']?></p>
 				<p>Sconfitte</p>
 			</div>
 		</div>
