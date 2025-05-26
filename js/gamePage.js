@@ -186,7 +186,7 @@ function setTurn(tempoMassimo){
 	else{
 		btn.removeAttribute("disabled");
 		btn.innerText = "Attacca";
-		btn.classList.add("attack");
+		btn.classList.add("attacco");
 	}
 }
 
