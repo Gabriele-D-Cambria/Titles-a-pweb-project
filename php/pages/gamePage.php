@@ -5,6 +5,12 @@ session_start();
 if(!isset($_SESSION['account']) || !isset($_SESSION['currentPG_nome'])){
 	pageError(401);
 }
+
+if(!isset($_SESSION['battaglia'])){
+	header("Location: ./dashboard.php");
+	exit;
+}
+
 $message = null;
 if(isset($_SESSION['message'])){
 	$message = $_SESSION['message'];
@@ -29,13 +35,12 @@ if(isset($_SESSION['gameMessage'])){
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Titles</title>
-	<link rel="icon" href="./../images/icon.svg" type="image/svg+xml" sizes="16x16" >
-	<link rel="stylesheet" href="./../css/style.css">
-	<link rel="stylesheet" href="./../css/gamePage.css">
-	<link rel="stylesheet" href="./../css/personaggio.css">
-	<link rel="stylesheet" href="./../css/inventory.css">
-	<link rel="stylesheet" href="./../css/pgAnimations.css">
-	<script type="module" src="./../js/gamePage.js"></script>
+	<link rel="icon" href="./../../images/icon.svg" type="image/svg+xml" sizes="16x16" >
+	<link rel="stylesheet" href="./../../css/global/style.css">
+	<link rel="stylesheet" href="./../../css/pages/gamePage.css">
+	<link rel="stylesheet" href="./../../css/components/personaggio.css">
+	<link rel="stylesheet" href="./../../css/components/inventory.css">
+	<script type="module" src="./../../js/pages/gamePage.js"></script>
 	<script>
 		const message = <?php echo json_encode($message)?>;
 		const errorMessage = <?php echo json_encode($errorMessage)?>;

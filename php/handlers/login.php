@@ -1,7 +1,7 @@
 <?php
 session_start();
 session_unset();
-require_once "methods.php";
+require_once __DIR__ . "/../includes/methods.php";
 
 if(!isset($_SERVER['REQUEST_METHOD']) || $_SERVER["REQUEST_METHOD"] !== "POST"){
     pageError("403");
@@ -91,12 +91,12 @@ catch(Exception $e){
     $_SESSION['loginError'] = $login;
 
     error_log("Errore login [" .$login['errorcode'] ."]: " . $login['message']);
-    if($error['message'] === ERROR_TYPES['default']){
+    if($login['message'] === ERROR_TYPES['default']){
 		error_log("Messaggio originale: " . $errorType);
 	}
     
     http_response_code($login['errorcode']);
-    header("Location: ../index.php");
+    header("Location: ./../../index.php");
     exit;
 }
 finally{
@@ -107,9 +107,9 @@ finally{
 
 
 function startSession($username){
-$account = getUserData($username);
-$_SESSION['account'] = serialize($account);
+    $account = getUserData($username);
+    $_SESSION['account'] = serialize($account);
 
-header("Location: dashboard.php");
-exit;
+    header("Location: ./../pages/dashboard.php");
+    exit;
 }

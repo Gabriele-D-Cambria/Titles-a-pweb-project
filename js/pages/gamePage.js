@@ -1,8 +1,8 @@
 "use strict";
 
-import {showMessage, errorHandler, createHTML_img, createHTMLElement, GAME_MESSAGE} from "./methods.js"
-import { centerSvgElement, insertClippedImage } from "./svgMethods.js";
-import { Timer } from "./definitions.js";
+import {showMessage, errorHandler, createHTML_img, createHTMLElement, GAME_MESSAGE} from "./../utils/methods.js"
+import { centerSvgElement, insertClippedImage } from "./../utils/svgMethods.js";
+import { Timer } from "./../utils/definitions.js";
 
 
 let gameTimer = null;
@@ -12,7 +12,7 @@ let turno = null;
 
 document.addEventListener("DOMContentLoaded", () => {
 	
-	fetch('./../images/arena.svg')
+	fetch('./../../images/arena.svg')
         .then(response => response.text())
         .then(svg => {
 			document.getElementById('imageContainer').innerHTML = svg;
@@ -36,8 +36,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+/**
+ * Recupera le informazioni di gioco dal server e aggiorna l'interfaccia di conseguenza.
+ */
 function getGameInfo(){
-	fetch('./API/getGameInfo.php')
+	fetch('./../API/getGameInfo.php')
 		.then(response => response.json())
 		.then(data => {
 			if(data.error !== undefined && data.error)
@@ -64,11 +67,16 @@ function getGameInfo(){
 		});
 }
 
+/**
+ * Imposta i personaggi nell'arena SVG, aggiorna immagini, nomi, PF e oggetti.
+ * @param {Object} PG1 - Dati del primo personaggio (utente)
+ * @param {Object} PG2 - Dati del secondo personaggio (nemico)
+ */
 function setArenaPG(PG1, PG2){
 	
 	const svgDoc = document.querySelector('svg');
-	svgDoc.getElementById('tuoPG').setAttribute("href", "./../" + PG1.pathImmaginePG);
-	svgDoc.getElementById('enemyPG').setAttribute("href", "./../" + PG2.pathImmaginePG);
+	svgDoc.getElementById('tuoPG').setAttribute("href", "./../../" + PG1.pathImmaginePG);
+	svgDoc.getElementById('enemyPG').setAttribute("href", "./../../" + PG2.pathImmaginePG);
 	
 	if(turno !== null){
 		const id = turno? "tuoPG" : "enemyPG";
@@ -116,6 +124,10 @@ function setArenaPG(PG1, PG2){
 
 }
 
+/**
+ * Imposta il timer visivo e logico per il turno corrente.
+ * @param {string|number} tempoRimanente - Tempo rimanente da visualizzare
+ */
 function setTimer(tempoRimanente){
 	document.getElementById("timer").innerText = tempoRimanente;
 	if(gameTimer !== null){
@@ -126,6 +138,10 @@ function setTimer(tempoRimanente){
 	gameTimer = new Timer(changeTurn, 1000);
 }
 
+/**
+ * Popola la sezione zaino con gli oggetti posseduti dal personaggio.
+ * @param {Array} zaino - Lista degli oggetti nello zaino
+ */
 function setZaino(zaino){
 	if(zaino !== null){
 		zaino.forEach((item, index) => {
@@ -176,7 +192,7 @@ function setTurn(tempoMassimo){
 	if(!turno){
 		btn.setAttribute("disabled", true);
 		btn.innerText = "Attendi il tuo turno";
-		// Tra un tempo casuale gioca
+		// Tra un tempo casuale gioca l'avversario
 		const randomDelay = Math.min(6000, tempoMassimo*1000);
 		
 		setTimeout(() => {
@@ -190,6 +206,9 @@ function setTurn(tempoMassimo){
 	}
 }
 
+/**
+ * Gestisce l'azione del giocatore (attacco o uso oggetto) e invia la richiesta al server.
+ */
 function play(){
 	if(!turno){
 		return;
@@ -231,7 +250,7 @@ function changeTurn(){
  */
 function sendPlay(formData){
 	document.body.classList.add("caricamento");
-	fetch("playAction.php", {
+	fetch("./../API/playAction.php", {
 		method: "POST",
 		body: formData
 	})
@@ -252,6 +271,10 @@ function sendPlay(formData){
 }
 
 
+/**
+ * Mostra la sezione di vittoria o sconfitta e aggiorna l'interfaccia di fine partita.
+ * @param {boolean} hasWon - `true` se il giocatore ha vinto, `false` altrimenti
+ */
 function setWinningSection(hasWon){
 	const div = document.getElementById("top-section");
 
@@ -284,11 +307,14 @@ function setWinningSection(hasWon){
 	newBtn.addEventListener("click", endGame);
 }
 
+/**
+ * Termina la partita e reindirizza alla gestione del personaggio.
+ */
 function endGame(){
 	const formData = new FormData();
 	
     document.body.classList.add("caricamento");
-    fetch("./endGame.php", {
+    fetch("./../handlers/endGame.php", {
         method: "POST",
         body: formData,
     })

@@ -1,7 +1,7 @@
 <?php
 
 if (basename($_SERVER['PHP_SELF']) === 'definitions.php'){
-    require_once "methods.php";
+    require_once __DIR__ . "/methods.php";
     pageError(403);
 }
 
@@ -106,16 +106,16 @@ class Account{
         $this->immagineProfilo = $immagineProfilo;
     }
 
-    public function getId(){
+    public function getId(): int{
         return $this->id;
     }
-    public function getUsername(){
+    public function getUsername(): string{
         return $this->username;
     }
-    public function getMonete(){
+    public function getMonete(): int{
         return $this->monete;
     }
-    public function getShopRefresh(){
+    public function getShopRefresh(): DateTime{
         return $this->shopRefresh;
     }
     /**
@@ -641,6 +641,7 @@ class Personaggio{
      * @return void
      */
     private function setEquipmentStats(){
+        $this->tmp_PF          = $this->PF;
         $this->damage          = self::DAMAGE_LOOKUP[$this->currentFOR];
         $this->dodgingChance   = self::DODGE_LOOKUP[$this->currentDES];
         $this->protezioneDanno = 0;

@@ -1,5 +1,5 @@
 <?php
-require_once "../methods.php";
+require_once "../includes/methods.php";
 session_start();
 
 if(!isset($_SESSION['account'])){

@@ -60,7 +60,7 @@ export function insertClippedImage(svgDoc, rectId, imgHref, clipPathId, imgAttrs
     }
 
     const img = document.createElementNS(svgNamespace, "image");
-    img.setAttribute("href", "./../" + imgHref);
+    img.setAttribute("href", "./../../" + imgHref);
     img.setAttribute("x", rect.getAttribute("x"));
     img.setAttribute("y", rect.getAttribute("y"));
     img.setAttribute("width", rect.getAttribute("width"));

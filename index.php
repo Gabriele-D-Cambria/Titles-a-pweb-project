@@ -2,7 +2,7 @@
 
 session_start();
 
-require_once "./php/methods.php";
+require_once "./php/includes/methods.php";
 
 $message = null;
 $loginError = null;
@@ -26,9 +26,9 @@ if(isset($_SESSION["message"])){
     <title>Titles</title>
     <link rel="icon" href="images/icon.svg" type="image/svg+xml" sizes="16x16" >
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/index.css">
-    <script type="module" src="js/index.js"></script>
+    <link rel="stylesheet" href="./css/global/style.css">
+    <link rel="stylesheet" href="./css/pages/index.css">
+    <script type="module" src="./js/pages/index.js"></script>
     <script>
         const loginError = <?php echo json_encode($loginError); ?>;
         const message = <?php echo json_encode($message)?>;

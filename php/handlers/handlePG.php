@@ -1,5 +1,5 @@
 <?php
-require_once "methods.php";
+require_once __DIR__ . "/../includes/methods.php";
 session_start();
 
 if(!isset($_SESSION['account']))
@@ -33,11 +33,11 @@ if(isset($_POST['deleteCheck'])){
 		$_SESSION["account"] = serialize($account);
 		$_SESSION["message"] = $nome ." eliminato con successo!";
 		session_write_close();
-		header("Location: ./dashboard.php");
+		header("Location: ./../pages/dashboard.php");
 		exit;
 	}
 	catch(Exception $e){
-		sendError($e, "errorMessage", "./dashboard.php");
+		sendError($e, "errorMessage", "./../pages/dashboard.php");
 	}
 
 }
@@ -60,11 +60,11 @@ else if(isset($_POST['upgrade'])){
 		$_SESSION['account'] = serialize($account);
 		$_SESSION['message'] = $nome . " migliorato con successo!";
 		session_write_close();
-		header("Location: ./gestisciPersonaggio.php");
+		header("Location: ./../pages/gestisciPersonaggio.php");
 		exit;
 	}
 	catch(Exception $e){
-		sendError($e, "errorMessage", "./dashboard.php");
+		sendError($e, "errorMessage", "./../pages/dashboard.php");
 	}
 }
 else{
@@ -94,11 +94,11 @@ else{
 		$_SESSION['account'] = serialize($account);
 		$_SESSION['currentPG_nome'] = serialize($name);
 
-		header("Location: ./gestisciPersonaggio.php");
+		header("Location: ./../pages/gestisciPersonaggio.php");
 		exit;
 	}
 	catch(Exception $e){
-		sendError($e, "createPGError", "./creazionePersonaggio.php");
+		sendError($e, "createPGError", "./../pages/creazionePersonaggio.php");
 	}
 }
 

@@ -148,7 +148,7 @@
     font-size: small;
 }
 
-#inventory-info main{
+#inventory-info .main-info-section{
     display: flex;
     align-items: center;
     justify-content: center;

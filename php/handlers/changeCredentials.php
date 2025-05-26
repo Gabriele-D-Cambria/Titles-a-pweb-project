@@ -1,5 +1,5 @@
 <?php
-require_once "methods.php";
+require_once __DIR__ . "/../includes/methods.php";
 
 session_start();
 
@@ -205,12 +205,12 @@ function terminateChangeError($errorType, $errorCode){
 	];
 
 	session_write_close();
-	header("Location: dashboard.php");
+	header("Location: ./../pages/dashboard.php");
 	exit();
 }
 
 function terminateChange($logout, $message){
-	$direction = $logout? "logout.php" : "dashboard.php";
+	$direction = $logout? "./logout.php" : "./../pages/dashboard.php";
 
 	$_SESSION["message"] = $message;
 	session_write_close();

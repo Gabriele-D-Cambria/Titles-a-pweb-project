@@ -4,7 +4,7 @@ if (basename($_SERVER['PHP_SELF']) === 'methods.php'){
 }
 
 ini_set("display_errors", "0");
-require_once "definitions.php";
+require_once __DIR__ . "/definitions.php";
 
 
 // *** Funzioni che gestiscono Errori *** //
@@ -891,7 +891,8 @@ function getItemTypes(){
 function getRandomPG($accountIdToAvoid, $livello){
     $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
     if($conn->connect_error){
-        pageError(500, "Connessione al database fallita: " . $conn->connect_error);
+        error_log("Connessione al database fallita: " . $conn->connect_error);
+        pageError(500);
     }
 
     $stmt = null;

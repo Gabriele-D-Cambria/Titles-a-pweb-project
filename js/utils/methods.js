@@ -86,7 +86,7 @@ export function createHTMLElement(type, className = null, id = null, innerText =
  */
 export function createHTML_img(src, alt, title = null, id = null, classe = null){
     const img = document.createElement("img");
-    img.src = "./../" + src;
+    img.src = "./../../" + src;
     img.alt = alt;
     if(title)
         img.title = title;
@@ -353,7 +353,7 @@ export function showInventory(newItems = false, equipment = false, filterObj = n
     formData.append("filter", JSON.stringify(filterObj));
 
     document.body.classList.add("caricamento");
-    fetch('API/getInventory.php', {
+    fetch('./../API/getInventory.php', {
         method: "POST",
         body: formData,
     })
@@ -427,7 +427,7 @@ export function showInventory(newItems = false, equipment = false, filterObj = n
  * @param {Boolean} newItems Indica se evidenziare gli oggetti appena ottenuti.
  * @returns {HTMLElement} Lo slot creato.
  */
-export function createItemSlot(item, id, newItems){
+function createItemSlot(item, id, newItems){
     const space = createHTMLElement("div", "item-slot", id);
 
     if (newItems && openedItems.includes(item.ID)){
@@ -451,7 +451,7 @@ export function createItemSlot(item, id, newItems){
  * @param {Boolean} equipment Qualora `hasIt === true`, sancisce se l'oggetto deve essere equipaggiato (`true`) oppure va venduto `false` [Default `false`]
  * @returns {HTMLElement} Elemento HTML `<aside>` contenente le informazioni
  */
-export function generateInfo(id, item = null, hasIt = true, equipment = false){
+function generateInfo(id, item = null, hasIt = true, equipment = false){
     shownItem = item;
     openBoxSelected = false;
     const container = document.createElement("aside");
@@ -494,7 +494,7 @@ export function generateInfo(id, item = null, hasIt = true, equipment = false){
 
         container.appendChild(p);
 
-        el = document.createElement("div");
+        el = createHTMLElement("div", "main-info-section");
 
         if(hasIt && item.Tipologia === "box"){
             const open = createButton("button", "open", "Apri", openBox);
@@ -504,8 +504,9 @@ export function generateInfo(id, item = null, hasIt = true, equipment = false){
         }
         else if(item.Tipologia !== "box"){
             const table = document.createElement("table");
+
             let tr = document.createElement("tr");
-            let td = document.createElement("td");
+            let td = createHTMLElement("td", null, null, null);
             let modificatore;
             let txt;
 
@@ -525,27 +526,21 @@ export function generateInfo(id, item = null, hasIt = true, equipment = false){
             td.innerText = txt;
             tr.appendChild(td);
 
-            td = document.createElement("td");
-            td.innerText = item[modificatore];
+            td = createHTMLElement("td", null, null, String(item[modificatore]));
             tr.appendChild(td);
             table.appendChild(tr);
 
             tr = document.createElement("tr");
-            td = document.createElement("td");
-            td.innerText = "Modificatore FOR";
+            td = createHTMLElement("td", null, null, "Modificatore FOR");
             tr.appendChild(td);
-            td = document.createElement("td");
-
-            td.innerText = item.ModificatoreFor;
+            td = createHTMLElement("td", null, null, String(item.ModificatoreFor));
             tr.appendChild(td);
             table.appendChild(tr);
 
             tr = document.createElement("tr");
-            td = document.createElement("td");
-            td.innerText = "Modificatore DES";
+            td = createHTMLElement("td", null, null, "Modificatore DES");
             tr.appendChild(td);
-            td = document.createElement("td");
-            td.innerText = item.ModificatoreDes;
+            td = createHTMLElement("td", null, null, String(item.ModificatoreDes));
             tr.appendChild(td);
 
             table.appendChild(tr);
@@ -569,7 +564,7 @@ export function generateInfo(id, item = null, hasIt = true, equipment = false){
             createButton("button", "buy-btn", "Compra: " + item.Costo + "🪙", buyItem);
 
         el.appendChild(btn);
-        btn = createButton("button", "" ,"Chiudi", () => {
+        btn = createButton("button", "", "Chiudi", () => {
             let info = generateInfo(id);
             changeItemInfo(info);
             shownItem = null;
@@ -587,7 +582,7 @@ export function generateInfo(id, item = null, hasIt = true, equipment = false){
  * Aggiorna la sezione dettagli del modulo attualmente aperto `currentlyOpened` con i dettagli di un oggetto selezionato.
  * @param {HTMLElement} info Elemento HTML contenente le nuove informazioni dell'oggetto
  */
-export function changeItemInfo(info){
+function changeItemInfo(info){
     if(currentlyOpened === null)
         return
     let module = document.getElementById(currentlyOpened);
@@ -609,7 +604,7 @@ function sellItem(){
         return;
     }
     document.body.classList.add("caricamento");
-    fetch('API/sellItem.php', {
+    fetch('./../API/sellItem.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -643,7 +638,7 @@ function sellItem(){
  * Aggiorna il contatore delle monete dell'utente con id `"coin-count"`.
  * @param {Number} amount Quantità di monete da aggiungere o sottrarre
  */
-export function updateCoins(amount){
+function updateCoins(amount){
     let coins = document.getElementById("coin-count");
     coins.innerText = Number(coins.innerText) + amount;
 }
@@ -661,7 +656,7 @@ export function openBox(){
     }
 
     document.body.classList.add("caricamento");
-    fetch("API/openBox.php", {
+    fetch("./../API/openBox.php", {
         method: "POST",
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -815,7 +810,7 @@ function changeUsername(){
 
     const form = document.createElement("form");
     form.classList.add("username");
-    form.action = "./changeCredentials.php";
+    form.action = "./../handlers/changeCredentials.php";
     form.method = "POST";
 
     el = createUsernameInput("Nuovo Username:");
@@ -867,7 +862,7 @@ function changePassword(){
 
     const form = document.createElement("form");
     form.classList.add("password");
-    form.action = "./changeCredentials.php";
+    form.action = "./../handlers/changeCredentials.php";
     form.method = "POST";
 
     el = createPasswordInput("Nuova Password:", false);
@@ -926,7 +921,7 @@ function deleteAccount(){
     space.classList.add("menu-space");
 
     const form = document.createElement("form");
-    form.action = "./changeCredentials.php";
+    form.action = "./../handlers/changeCredentials.php";
     form.method = "POST";
 
     // Lo sfrutto per capire se la richiesta è o meno di elimina account
@@ -983,7 +978,7 @@ function changeImage(){
 
     const module = document.getElementById("menuModule");
     document.body.classList.add("caricamento");
-    fetch('API/getElementPics.php')
+    fetch('./../API/getElementPics.php')
         .then(risposta => risposta.json())
         .then(images => {
             document.body.classList.remove("caricamento");
@@ -1007,7 +1002,7 @@ function changeImage(){
 
             const form = document.createElement("form");;
             form.classList.add("image");
-            form.action = "./changeCredentials.php";
+            form.action = "./../handlers/changeCredentials.php";
             form.method = "POST";
 
             el = document.createElement("div");
@@ -1065,7 +1060,7 @@ function changeImage(){
 }
 
 
-// *** Funzioni dedicate alla gestione dell'inventario  *** //
+// *** Funzioni dedicate alla gestione del negozio  *** //
 
 
 /**
@@ -1084,7 +1079,7 @@ export function showShop(){
     }
 
     document.body.classList.add("caricamento");
-    fetch('API/getShopItems.php')
+    fetch('./../API/getShopItems.php')
         .then(response => response.json())
         .then(risposta => {
             document.body.classList.remove("caricamento");
@@ -1185,7 +1180,7 @@ function buyItem(){
         return;
     }
     document.body.classList.add("caricamento");
-    fetch('API/buyItem.php', {
+    fetch('./../API/buyItem.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -1246,7 +1241,7 @@ export function createDeleteBox(){
     space.classList.add("menu-space");
 
     const form = document.createElement("form");
-    form.action = "./handlePG.php";
+    form.action = "./../handlers/handlePG.php";
     form.method = "POST";
 
     // Lo sfrutto per capire se la richiesta è o meno di elimina account
@@ -1308,7 +1303,7 @@ function equipItem(){
     const formData = new FormData();
     formData.append("itemId", Number(shownItem.ID));
 
-    fetch("API/togglePGItem.php", {
+    fetch("./../API/togglePGItem.php", {
         method: "POST",
         body: formData
     })

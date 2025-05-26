@@ -1,5 +1,5 @@
 <?php
-require_once "../methods.php";
+require_once __DIR__ . "/../includes/methods.php";
 
 session_start();
 
@@ -13,7 +13,7 @@ $id = $account->getId();
 $itemId = $_POST['itemId'];
 $esito = sellItem($itemId, $id);
 
-if(isset($esito["successo"]) && $esito["successo"]){
+if(isset($esito["successe"]) && $esito["successe"]){
     $account->modifyCoins(false, $esito["guadagno"]);
     $_SESSION["account"] = serialize($account);
 }

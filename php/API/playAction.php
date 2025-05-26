@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once "./methods.php";
+require_once __DIR__ . "/../includes/methods.php";
 
 if(!isset($_SESSION['battaglia']) || !isset($_SESSION['account'])){
 	apiError(403, "Sessione non valida!");

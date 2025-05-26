@@ -192,7 +192,7 @@
     transition: all ease-in-out;
 }
 
-.delete-page #submit:hover:not(:disabled){
+.delete-page #submit:hover:not(:disabled), .delete-page #submit:focus:not(:disabled){
     background-color: rgb(140, 0, 0);
     animation: delete-shake 1.5s ease-in-out infinite;
 }

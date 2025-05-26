@@ -1,6 +1,6 @@
 <?php
 
-require_once "../methods.php";
+require_once __DIR__ . "/../includes/methods.php";
 session_start();
 
 if(!isset($_SESSION['account'])){

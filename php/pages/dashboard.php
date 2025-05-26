@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once "methods.php";
+require_once __DIR__ . "/../includes/methods.php";
 
 if(!isset($_SESSION['account'])){
     pageError("401");
@@ -26,7 +26,7 @@ $characterList = "";
 foreach ($user["personaggi"] as $i => $character){
     $PG = $character->getAll();
     $characterList .= "<div id='" . $i ."' class='character-item' data-id='". $PG["nome"]."'>\n";
-    $characterList .= "<div class='pg-info-block'>\n<img src='./../". $PG["pathImmagine"] ."' alt='Immagine Personaggio'>\n";
+    $characterList .= "<div class='pg-info-block'>\n<img src='./../../". $PG["pathImmagine"] ."' alt='Immagine Personaggio'>\n";
     $characterList .= "<p class='pg-name-box'>" . $PG["nome"] . "</p>\n</div>\n";
     $characterList .= "<div class='pg-lvl-block'>\n";
     $characterList .= "<p class='pg-lvl-info'>Livello: " .$PG['livello'] ."</p>\n";
@@ -47,13 +47,13 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Titles - Dashboard</title>
-    <link rel="icon" href="./../images/icon.svg" type="image/svg+xml" sizes="16x16" >
-    <link rel="stylesheet" href="./../css/style.css">
-    <link rel="stylesheet" href="./../css/dashboard.css">
-    <link rel="stylesheet" href="./../css/inventory.css">
-    <link rel="stylesheet" href="./../css/shop.css">
-    <link rel="stylesheet" href="./../css/menu.css">
-    <script type="module" src="./../js/dashboard.js"></script>
+    <link rel="icon" href="./../../images/icon.svg" type="image/svg+xml" sizes="16x16" >
+    <link rel="stylesheet" href="./../../css/global/style.css">
+    <link rel="stylesheet" href="./../../css/pages/dashboard.css">
+    <link rel="stylesheet" href="./../../css/components/inventory.css">
+    <link rel="stylesheet" href="./../../css/components/shop.css">
+    <link rel="stylesheet" href="./../../css/components/menu.css">
+    <script type="module" src="./../../js/pages/dashboard.js"></script>
     <script>
         const USERNAME = "<?php echo $user["username"]?>";
         const message = <?php echo json_encode($message)?>;
@@ -64,24 +64,24 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
     <header>
         <h1><i>Titles</i></h1>
         <aside>
-            <form action="logout.php" method="POST">
+            <form action="../handlers/logout.php" method="POST">
                 <button type="submit">Logout</button>
             </form>
         </aside>
     </header>
     <div class="content">
         <div class="top-section">
-            <img draggable="false" id="menu" src="./../images/menu.svg" alt="menu item" class="clickable">
+            <img draggable="false" id="menu" src="./../../images/menu.svg" alt="menu item" class="clickable">
             <div class="user-info">
                 <div class="user-pic">
-                    <img id="userPic" draggable="false" src="./../<?php echo $user['immagineProfilo']; ?>" alt="Profile Pic">
+                    <img id="userPic" draggable="false" src="./../../<?php echo $user['immagineProfilo']; ?>" alt="Profile Pic">
                 </div>
                 <div class="username-box">
                     <p><?php echo $user['username'];?></p>
                 </div>
             </div> 
             <div class="coin-display">
-                <img draggable="false" src="./../images/coin.svg" alt="coin image">
+                <img draggable="false" src="./../../images/coin.svg" alt="coin image">
                 <span id="coin-count"><?php echo $user['monete']; ?></span>
             </div>
         </div>
@@ -92,11 +92,11 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
             </aside>
             <aside class="button-container">
                 <div id="inventory-btn" class="button inventory-button">
-                    <img draggable="false" src="./../images/inventoryPic.svg" alt="Immagine Inventario">
+                    <img draggable="false" src="./../../images/inventoryPic.svg" alt="Immagine Inventario">
                     <p>Inventario</p>
                 </div> 
                 <div id="shop-btn" class="button shop-button">
-                    <img draggable="false" src="./../images/shopPic.svg" alt="Immagine Shop">
+                    <img draggable="false" src="./../../images/shopPic.svg" alt="Immagine Shop">
                     <p>Negozio</p>
                 </div> 
             </aside>

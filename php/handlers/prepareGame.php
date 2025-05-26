@@ -1,7 +1,7 @@
 <?php
 
 session_start();
-require_once "./methods.php";
+require_once __DIR__ . "/../includes/methods.php";
 
 if (!isset($_SERVER['HTTP_REFERER'])){
 	pageError(403);
@@ -66,5 +66,5 @@ catch(Exception $e){
 }
 
 session_write_close();
-header("Location: ./gamePage.php");
+header("Location: ./../pages/gamePage.php");
 exit;

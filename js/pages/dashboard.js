@@ -1,6 +1,6 @@
 "use strict";
 
-import {showInventory, showMenu, showShop, closeModuleEvent, openBoxSelected, moduleListener, showMessage, errorHandler, openBox} from "./methods.js";
+import {showInventory, showMenu, showShop, closeModuleEvent, openBoxSelected, moduleListener, showMessage, errorHandler, openBox} from "./../utils/methods.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("inventory-btn").addEventListener("click", () => {showInventory()});
@@ -87,13 +87,14 @@ function openCharacter(characterName){
     })
     .then(data => {
         if(data){
-            console.error("Errore: ", data);
-            showMessage(data, IMPORTANT_MESSAGE);
+            throw {
+                message: "Errore nella richiesta al server",
+                errorcode: 500
+            };
         }
     })
     .catch(error => {
-        console.error("Errore nella richiesta: ", error);
-        showMessage("Errore nella richiesta al server.", IMPORTANT_MESSAGE);
+        errorHandler(error);
     });
     
 }

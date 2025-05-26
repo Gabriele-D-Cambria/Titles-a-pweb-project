@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-require_once "methods.php";
+require_once __DIR__ . "/../includes/methods.php";
 
 if(!isset($_SESSION['account'])){
 	pageError("401");
@@ -10,7 +10,7 @@ if(!isset($_SESSION['account'])){
 if (!isset($_SERVER['HTTP_REFERER']) || 
 	basename(parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH)) !== "dashboard.php" &&
 	basename(parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH)) !== "creazionePersonaggio.php"){
-	header("Location: ./dashboard.php");
+	header("Location: ./../pages/dashboard.php");
 	exit;
 }
 
@@ -36,11 +36,10 @@ if(isset($_SESSION["createPGError"])){
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Titles</title>
-    <link rel="icon" href="./../images/icon.svg" type="image/svg+xml" sizes="16x16" >
-	<link rel="stylesheet" href="./../css/style.css">
-	<link rel="stylesheet" href="./../css/personaggio.css">
-	<link rel="stylesheet" href="./../css/pgAnimations.css">
-	<script type="module" src="./../js/creazionePersonaggio.js"></script>
+    <link rel="icon" href="./../../images/icon.svg" type="image/svg+xml" sizes="16x16" >
+	<link rel="stylesheet" href="./../../css/global/style.css">
+	<link rel="stylesheet" href="./../../css/components/personaggio.css">
+	<script type="module" src="./../../js/pages/creazionePersonaggio.js"></script>
 	<script>
 		const createPGError = <?php echo json_encode($message)?>;
 	</script>
@@ -49,13 +48,13 @@ if(isset($_SESSION["createPGError"])){
 	<header>
         <h1><i>Titles</i></h1>
         <div>
-            <form action="logout.php" method="POST">
+            <form action="../handlers/logout.php" method="POST">
                 <button type="submit">Logout</button>
             </form>
         </aside>
     </header>
 	<main class="main-section">
-		<form class="page-box" action="handlePG.php" method="POST">
+		<form class="page-box" action="../handlers/handlePG.php" method="POST">
 			<div class="stats-section">
 				<div class="lvl-block">
 					<p class="lvl-info">Livello <span id="user-lvl">1</span></p>

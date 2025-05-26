@@ -1,6 +1,6 @@
 <?php
 
-require_once "methods.php";
+require_once __DIR__ . "/../includes/methods.php";
 session_start();
 
 if(!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== "POST"){
@@ -24,7 +24,7 @@ try{
 	if(!$battaglia['Terminata']){
 		$givenUp = true;
 		updateGame($battaglia, false);
-
+		
 		$pg1 = unserialize($battaglia['pg1']);
 
 		$_SESSION['endgameMessage'] = "Ti sei arreso quindi non guadagni ricompense.";

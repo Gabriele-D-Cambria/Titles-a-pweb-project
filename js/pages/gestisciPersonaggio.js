@@ -1,6 +1,6 @@
 "use strict";
 
-import {showMessage, errorHandler, showInventory, createDeleteBox, createHTML_img, GAME_MESSAGE} from "./methods.js";
+import {showMessage, errorHandler, showInventory, createDeleteBox, createHTML_img, GAME_MESSAGE} from "./../utils/methods.js";
 
 let usedPU = {
 	PF: 0,
@@ -37,7 +37,7 @@ document.addEventListener("click", () => {
 
 
 function configurePage(){
-	fetch("API/getCurrentPGinfos.php")
+	fetch("./../API/getCurrentPGinfos.php")
 		.then(response => response.json())
 		.then(PG => {
 			if(PG.error !== undefined && PG.error){
@@ -260,7 +260,7 @@ function addRemoveMenu(e, itemId){
 		
 		formData.append("itemId_remove", JSON.stringify(itemId));
 
-		fetch("API/togglePGItem.php", {
+		fetch("./../API/togglePGItem.php", {
 			method: "POST",
 			body: formData,
 		})

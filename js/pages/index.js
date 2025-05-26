@@ -1,6 +1,6 @@
 "use strict";
 
-import {closeModule, showModule, createUsernameInput, createPasswordInput, createButton, showMessage, IMPORTANT_MESSAGE, errorHandler} from './methods.js'
+import {closeModule, showModule, createUsernameInput, createPasswordInput, createButton, showMessage, IMPORTANT_MESSAGE, errorHandler} from "./../utils/methods.js"
 
 let moduleListener = null;
 
@@ -39,7 +39,7 @@ function createModule(login){
     let form = document.createElement("form");
 
     form.method = "POST";
-    form.action = "php/login.php";
+    form.action = "php/handlers/login.php";
 
     // Crea il campo per il nome utente
     let tag = createUsernameInput("Username:");
