@@ -1,14 +1,11 @@
 body{
 	overflow-y: scroll;
-	scrollbar-width: 0px;
 	font-family: sans-serif;
-}
-body::-webkit-scrollbar {
-    display: none;
 }
 
 main, footer{
 	padding: 0px 2vw;
+	font-size: 2.5vh;
 }
 dl{
 	list-style-type: none;
