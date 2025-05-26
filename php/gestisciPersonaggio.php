@@ -32,6 +32,8 @@ $btn = ($rankStats['inCorso'])?
 	'<button class="animatedBtnBg" type="submit">Riprendi</button>':
 	'<button type="submit">Gioca</button>';
 
+$itemsDisabled = $rankStats['inCorso']? 'disabled-item' : '';
+        
 $errorMessage = null;
 if(isset($_SESSION["errorMessage"])){
 	$errorMessage = $_SESSION["errorMessage"];
@@ -204,22 +206,22 @@ if(isset($_SESSION["endgameMessage"])){
 						<p>Arma</p>
 						<p>Armatura</p>
 						<div class="item-container">
-							<div id="arma" class="item-slot bag-item"></div>
+							<div id="arma" class="item-slot bag-item <?php echo $itemsDisabled; ?>"></div>
 						</div>
 						<div class="item-container">
-							<div id="armatura" class="item-slot bag-item"></div>
+							<div id="armatura" class="item-slot bag-item <?php echo $itemsDisabled; ?>"></div>
 						</div>
 					</div>
 					<div class="bag-section">
 						<p>Oggetti</p>
 						<div class="item-container">
-							<div id="obj_0" class="item-slot bag-item"></div>
+							<div id="obj_0" class="item-slot bag-item <?php echo $itemsDisabled; ?>"></div>
 						</div>
 						<div class="item-container">
-							<div id="obj_1" class="item-slot bag-item"></div>
+							<div id="obj_1" class="item-slot bag-item <?php echo $itemsDisabled; ?>"></div>
 						</div>
 						<div class="item-container">
-							<div id="obj_2" class="item-slot bag-item"></div>
+							<div id="obj_2" class="item-slot bag-item <?php echo $itemsDisabled; ?>"></div>
 						</div>
 					</div>
 				</div>

@@ -28,9 +28,6 @@ if(isset($_SESSION["createPGError"])){
     $message = $_SESSION["createPGError"];
     unset($_SESSION["createPGError"]);
 }
-
-
-
 ?>
 
 <!DOCTYPE html>
@@ -62,10 +59,7 @@ if(isset($_SESSION["createPGError"])){
 			<div class="stats-section">
 				<div class="lvl-block">
 					<p class="lvl-info">Livello <span id="user-lvl">1</span></p>
-					<!-- <p class="pu-info">PU: <span id="PU-points">3</span></p> -->
-					<div class="exp-bar">
-						<!-- <div class="exp-points" style="width: 60%;"></div> -->
-					</div>
+					<div class="exp-bar"></div>
 				</div>
 				<div class="stats-block PF">
 					<div class="PF-points-block"><div id="PF" class="PF-amount"></div></div>
@@ -86,7 +80,7 @@ if(isset($_SESSION["createPGError"])){
 			</div>
 			<div class="character-section">
 				<div class="character-box">
-					<input type="text" name="PG-name" id="PG-name" placeholder="Nome" pattern="^[a-zA-Z]{1,9}$" required autocomplete="off" title="Dalle 3 alle 10 lettere">
+					<input type="text" name="PG-name" id="PG-name" placeholder="Nome" pattern="^[a-zA-Z]{3,10}$" required autocomplete="off" title="Dalle 3 alle 10 lettere">
 					<div class="character-choose">
 						<div id="prevPG" class="arrow">←</div>
 						<img id="imagePG" class="always-animated" src="" alt="" draggable="false">
@@ -125,7 +119,8 @@ if(isset($_SESSION["createPGError"])){
 					</div>
 				</div>
 				<div class="button-container">
-					<button id="createPG" type="submit" disabled>Crea</button>
+					<p>Una volta creato, <b>non potrai più cambiare il nome del personaggio</b></p>
+					<button id="createPG" class="animatedBtnBg" type="submit" disabled>Crea</button>
 					<button id="backToDash" type="button">Annulla</button>
 				</div>
 			</div>

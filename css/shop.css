@@ -1,10 +1,10 @@
 .shop-page{
 	display: flex;
-	align-items: center;
+	flex-direction: row;
 	justify-content: space-evenly;
     align-items: stretch;
 	width: 66%;
-	height: 75%;
+	aspect-ratio: 2 / 1;
     background-color: rgb(100, 149, 237);
     border: double 10pt rgb(11, 85, 158);
     border-radius: 15pt;
@@ -207,12 +207,6 @@
 #shop-info tr:nth-child(2){
     border-top: 1pt solid black;
     border-bottom: 1pt solid black;
-}
-
-#open{
-    width: 100%;
-    height: 80%;
-    background-color: rgba(46, 204, 112, 1);
 }
 
 #shop-info footer{

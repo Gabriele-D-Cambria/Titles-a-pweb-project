@@ -69,37 +69,39 @@ $addCharacterButton = (count($user["personaggi"]) != Account::MAX_NUM_PERSONAGGI
             </form>
         </aside>
     </header>
-    <div class="top-section">
-        <img draggable="false" id="menu" src="./../images/menu.svg" alt="menu item" class="clickable">
-        <div class="user-info">
-            <div class="user-pic">
-                <img id="userPic" draggable="false" src="./../<?php echo $user['immagineProfilo']; ?>" alt="Profile Pic">
+    <div class="content">
+        <div class="top-section">
+            <img draggable="false" id="menu" src="./../images/menu.svg" alt="menu item" class="clickable">
+            <div class="user-info">
+                <div class="user-pic">
+                    <img id="userPic" draggable="false" src="./../<?php echo $user['immagineProfilo']; ?>" alt="Profile Pic">
+                </div>
+                <div class="username-box">
+                    <p><?php echo $user['username'];?></p>
+                </div>
+            </div> 
+            <div class="coin-display">
+                <img draggable="false" src="./../images/coin.svg" alt="coin image">
+                <span id="coin-count"><?php echo $user['monete']; ?></span>
             </div>
-            <div class="username-box">
-                <p><?php echo $user['username'];?></p>
-            </div>
-    </div> 
-        <div class="coin-display">
-            <img draggable="false" src="./../images/coin.svg" alt="coin image">
-            <span id="coin-count"><?php echo $user['monete']; ?></span>
         </div>
+        <main class="main-section">
+            <aside class="character-list" style="grid-template-rows: repeat(<?php echo count($user["personaggi"])?>, 3em) 1fr;">
+                <?php echo $characterList; ?>
+                <?php echo $addCharacterButton; ?>
+            </aside>
+            <aside class="button-container">
+                <div id="inventory-btn" class="button inventory-button">
+                    <img draggable="false" src="./../images/inventoryPic.svg" alt="Immagine Inventario">
+                    <p>Inventario</p>
+                </div> 
+                <div id="shop-btn" class="button shop-button">
+                    <img draggable="false" src="./../images/shopPic.svg" alt="Immagine Shop">
+                    <p>Negozio</p>
+                </div> 
+            </aside>
+        </main>
     </div>
-    <main class="main-section">
-        <aside class="character-list" style="grid-template-rows: repeat(<?php echo count($user["personaggi"])?>, 3em) 1fr;">
-            <?php echo $characterList; ?>
-            <?php echo $addCharacterButton; ?>
-        </aside>
-        <aside class="button-container">
-            <div id="inventory-btn" class="button inventory-button">
-                <img draggable="false" src="./../images/inventoryPic.svg" alt="Immagine Inventario">
-                <p>Inventario</p>
-            </div> 
-            <div id="shop-btn" class="button shop-button">
-                <img draggable="false" src="./../images/shopPic.svg" alt="Immagine Shop">
-                <p>Negozio</p>
-            </div> 
-        </aside>
-    </main>
     <div id="menuModule" class="module"></div>
     <div id="inventoryModule" class="module"></div>
     <div id="shopModule" class="module"></div>

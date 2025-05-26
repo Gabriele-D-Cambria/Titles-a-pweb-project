@@ -4,7 +4,7 @@
     justify-content: space-between;
     align-items: stretch;
     width: 66%;
-    height: 75%;
+    aspect-ratio: 2 / 1;
     background-color: rgb(222, 184, 135);
     border: double 10pt rgb(131, 103, 67);
     border-radius: 15pt;

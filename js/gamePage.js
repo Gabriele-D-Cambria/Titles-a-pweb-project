@@ -131,7 +131,7 @@ function setZaino(zaino){
 		zaino.forEach((item, index) => {
 			let space = document.getElementById(`obj_${index}`);
 
-			let img = createHTML_img(item.PathImmagine, item.Descrizione, item.Nome, `obj_${index}-img`);
+			let img = createHTML_img(item.PathImmagine, item.Descrizione, `${item.Nome}\n${item.Descrizione}`, `obj_${index}-img`);
 
 			while(space.childElementCount)
 				space.removeChild(space.firstChild);

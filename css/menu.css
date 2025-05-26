@@ -51,11 +51,11 @@
     cursor: pointer;
 }
 
-.username-page, .image-page{
+.username-page, .image-page, .password-page{
     grid-template-rows: 1fr 3fr;
 }
 
-.image-page .header, .username-page .header, .delete-page .header{
+.image-page .header, .username-page .header, .password-page .header, .delete-page .header{
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -81,26 +81,35 @@
 }
 
 .menu-space form{
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    display: grid;
     width: 100%;
     margin: 0;
     gap: 15px;
-    align-content: space-around;
-    justify-content: space-between;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 2fr 1fr;
     align-items: center;
+    justify-items: center;
+}
+
+.password-page form{
+    grid-template-rows: 2fr 2fr 1fr !important;
+}
+
+.delete-page form{
+    display: flex !important;
+    align-content: space-around !important;
+    justify-content: space-between !important;
+
 }
 
 .menu-space form .choose-box{
+    grid-column: span 2;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     row-gap: 10px;
     width: 100%;
-    flex: 1;
-    justify-content: center;
-    align-items: center;
+    height: 100%;
     justify-items: center;
     align-items: center;
 }
@@ -108,10 +117,13 @@
 .image-option {
     display: inline-block;
     cursor: pointer;
+    width: 75%;
 }
 .image-option img {
     height: auto;
-    border: solid 1px transparent;
+    width: 80%;
+    border: none !important;
+    margin: 0 auto;
 }
 
 .image-page input[type="radio"]{

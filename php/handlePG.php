@@ -31,7 +31,7 @@ if(isset($_POST['deleteCheck'])){
 		unset($_SESSION['currentPG_nome']);
 
 		$_SESSION["account"] = serialize($account);
-		$_SESSION["message"] = "Personaggio ". $nome ." eliminato con successo!";
+		$_SESSION["message"] = $nome ." eliminato con successo!";
 		session_write_close();
 		header("Location: ./dashboard.php");
 		exit;
@@ -58,7 +58,7 @@ else if(isset($_POST['upgrade'])){
 		}
 
 		$_SESSION['account'] = serialize($account);
-		$_SESSION['message'] = "Personaggio " . $nome . " migliorato con successo!";
+		$_SESSION['message'] = $nome . " migliorato con successo!";
 		session_write_close();
 		header("Location: ./gestisciPersonaggio.php");
 		exit;

@@ -173,7 +173,11 @@ function setEquimpent(arma = null, armatura = null, zaino = null, elementi = nul
 		space = document.getElementById("arma");
 		
 		img = createHTML_img(arma.PathImmagine, arma.Descrizione, arma.Nome, "arma-img");
-
+		
+		if(space.classList.contains('disabled-item')){
+			space.title = "Non puoi rimuovere l'arma, hai una battaglia in corso!";
+		}
+		
 		if(arma.Elemento === elementi['elementoPG']){
 			space.classList.add("allineato");
 			img.title += " - Allineato (+1 danni effettuati)";

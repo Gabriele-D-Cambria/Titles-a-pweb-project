@@ -39,6 +39,9 @@ main{
 
 }
 
+.not-clickable{
+	cursor: default !important;
+}
 
 .background-image{
 	width: 100%;
