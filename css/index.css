@@ -8,41 +8,82 @@ body{
 .intro {
     display: flex;
     align-items: stretch;
-    background-image: url();  /* TODO: inserisci l'immagine */
+    background-image: url("./../images/png/Battaglia.png");
     background-size: cover;
-    padding: 50px;
+    padding: 10vh;
 }
 
 .context {
     background-color: rgba(30, 30, 30, 0.8);
-    border-radius: 10px 10px 150px 10px;
-    padding: 20px;
+    border-radius: 15pt 15pt 150pt 15pt;
+    padding: 1.5vw;
     width: 50%;
 }
 
-.commands {
+.infos {
     display: flex;
     justify-content: space-between;
-    padding: 20px;
+    padding: 1.5vw;
 }
 
 .slider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 50%;
 }
+
+.slider-btn {
+    background: #1f1f1f;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    aspect-ratio: 1 / 1;
+    font-size: xx-large;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1vw;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.slider-btn:hover {
+    background: rgb(60, 60, 60);
+}
+
+#slider-img {
+    width: 70%;
+    height: 90%;
+    border-radius: 15pt;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    background: #222;
+}
+
 
 .info {
     background-color: rgba(30, 30, 30, 0.8);
-    border-radius: 15px;
-    padding: 20px;
+    border-radius: 15pt;
+    padding: 1.5vw;
     width: 50%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    height: 40vh;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 3fr;
+    align-items: center;
+    justify-items: center;
+}
+.info p{
+    text-align: center;
+    margin: 1vh;
 }
 
+h2{
+    margin: 0px;
+}
 h2 i{
     font-family: "Comic Sans MS", cursive, sans-serif;
 }
+
 h3{
     text-align: center;
 }
@@ -97,3 +138,16 @@ footer.footer{
     padding: 20px;
     width: 100%;
 }
+
+/* @media (max-width: 900px) {
+    .infos {
+        flex-direction: column;
+        align-items: center;
+    }
+    .slider, .info {
+        width: 100% !important;
+    }
+    .slider-wrapper {
+        flex-direction: row;
+    }
+} */

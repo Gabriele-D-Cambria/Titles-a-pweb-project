@@ -46,25 +46,28 @@ if(isset($_SESSION["message"])){
     <section class="intro">
         <div class="context">
             <h2>Benvenuto in <i>Titles</i></h2>
-            <p>**TESTO DA INSERIRE**</p> <!-- TODO: testo da inserire -->
+            <p><i>Titles</i> è un gioco che ti permette di creare personaggi e giocare contro quelli degli altri utenti.</p>
         </div>
     </section>
 
-    <section class="commands">
-        <div class="slider">            <!-- TODO: ! Immagini Slider da Implementare -->
+    <section class="infos">
+        <div class="slider">
+            <button id="slider-prev" class="slider-btn">&#8592;</button>
+            <img id="slider-img" src="" alt="Immagine dello slider"/>
+            <button id="slider-next" class="slider-btn">&#8594;</button>
         </div>
         <div class="info">
-            <h3>Comandi di Gioco</h3>
-            <p>
-                Testo da mettere
-                <!-- TODO: testo per i comandi -->
-                <!-- TODO: sistema i messaggi dove ERROR_TYPES[$errorType] ?? $errorType con il default message -->
-            </p>
+            <h3 id="info-title">Battaglie</h3>
+            <div id="info-text">
+                <p>Le battaglie si sviluppano in turni da 30 secondi l'uno.</p>
+                <p>Durante il tuo turno puoi scegliere se <b>attaccare</b> oppure <b>utilizzare un oggetto</b>.</p>
+                <p>Tutti i personaggi hanno una possibilità automatica di <i>schivare i colpi avversari</i>, calcolata in base alle loro statistiche.</p>
+            </div>
         </div>
 
     </section>
     <footer class="footer">
-        <a href="documentazione.html"> Documentazione HTML</a>
+        <a href="documentazione.html"> Guida al gioco</a>
         <p>Creato da <i>Gabriele Domenico Cambria - mat. 672642</i></p>
     </footer>
     <div id="loginModule" class="module"></div>

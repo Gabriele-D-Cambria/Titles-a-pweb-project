@@ -1,8 +1,10 @@
 "use strict";
 
-import {closeModule, showModule, createUsernameInput, createPasswordInput, createButton, showMessage, IMPORTANT_MESSAGE, errorHandler} from './methods.js'
+import {closeModule, showModule, createUsernameInput, createPasswordInput, createButton, showMessage, IMPORTANT_MESSAGE, errorHandler, createHTMLElement} from './methods.js'
 
 let moduleListener = null;
+let sliderTimer = null;
+const SLIDER_INTERVAL = 10000;
 
 document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("loginBtn").addEventListener("click", () => {
@@ -21,7 +23,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if(loginError){
         handleFormError(loginError);
     }
+
+    createSlider();
 });
+
+
+
 
 /**
  * Crea un modulo di login o registrazione.
@@ -117,4 +124,74 @@ function handleFormError(loginError){
     }
 
     errorHandler(loginError);
+}
+
+function createSlider() {
+    const sliderData = [
+        {
+            img: "images/png/Inventario.png",
+            title: "Gestisci l'Inventario",
+            text: "Gestisci il tuo inventario, equipaggia armi e armature, usa pozioni e vendi oggetti inutili.\n"
+        },
+        {
+            img: "images/png/shop.png",
+            title: "Utilizza il Negozio",
+            text: "Acquista nuovi oggetti e potenziamenti per il tuo personaggio nel negozio.\nCompra le box, e spacchetale per ottenere equipaggiamenti e monete!\nChissà, magari potresti essere fortunato."
+        },
+        {
+            img: "images/png/personaggi.png",
+            title: "Crea i Personaggi",
+            text: "Crea fino a 5 personaggi per giocare contro gli altri utenti.\nSeclgi per loro un elemento e dagli un nome.\nPotenziali, equipaggiali sfuttando gli effetti di prevalenza e gioca battaglie per ottenere fantastiche ricompense!"
+        },
+        {
+            img: "images/png/Battaglia.png",
+            title: "Gioca le Battaglie",
+            text: "Con i tuoi personaggi gioca delle battaglie contro i personaggi degli altri account.\n Avrai 30 secondi nei quali puoi decidere se attaccare o utilizzare un oggetto tra quelli che ti eri equipaggiato.\nSfrutta a pieno il tuo personaggio facendogli infliggere ingenti danni e permettendogli di schivare i colpi avversari!"
+        }
+    ];
+
+    let current = 0;
+
+    function resetSliderTimer() {
+        if (sliderTimer) {
+            clearInterval(sliderTimer);
+        }
+        sliderTimer = setInterval(() => {
+            current = (current + 1) % sliderData.length;
+            updateSlider(sliderData[current]);
+        }, SLIDER_INTERVAL);
+    }
+
+    
+    updateSlider(sliderData[current]);
+
+    document.getElementById('slider-prev').addEventListener('click', () => {
+        current = (current - 1 + sliderData.length) % sliderData.length;
+        updateSlider(sliderData[current]);
+        resetSliderTimer();
+    });
+    
+    document.getElementById('slider-next').addEventListener('click', () => {
+        current = (current + 1) % sliderData.length;
+        updateSlider(sliderData[current]);
+        resetSliderTimer();
+    });
+
+    resetSliderTimer();
+}
+
+function updateSlider(data) {
+    document.getElementById('slider-img').src = data.img;
+
+    document.getElementById('info-title').innerText = data.title;
+    
+    const splittedText = String(data.text).split("\n");
+
+    const textSpace = document.getElementById('info-text');
+    while(textSpace.childElementCount)
+        textSpace.removeChild(textSpace.firstChild);
+
+    splittedText.forEach((txt) =>{
+        textSpace.appendChild(createHTMLElement("p", null, null, txt));
+    });
 }
