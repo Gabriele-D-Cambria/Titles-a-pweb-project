@@ -112,13 +112,16 @@ else{
 function sendError($e, $sessionId, $dest){
 	$errorType = $e->getMessage();
 	$error = [
-		'message' => ERROR_TYPES[$errorType] ?? $errorType,
+		'message' => ERROR_TYPES[$errorType] ?? ERROR_TYPES['default'],
 		'errorcode' => $e->getCode()
 	];
 
 	$_SESSION[$sessionId] = $error;
 
 	error_log("Errore createPG [" .$error['errorcode'] ."]: " . $error['message']);
+	if($error['message'] === ERROR_TYPES['default']){
+		error_log("Messaggio originale: " . $errorType);
+	}
 
 	http_response_code($error['errorcode']);
 	header("Location: ". $dest);
