@@ -641,7 +641,6 @@ class Personaggio{
      * @return void
      */
     private function setEquipmentStats(){
-        $this->tmp_PF          = $this->PF;
         $this->damage          = self::DAMAGE_LOOKUP[$this->currentFOR];
         $this->dodgingChance   = self::DODGE_LOOKUP[$this->currentDES];
         $this->protezioneDanno = 0;
@@ -1270,6 +1269,7 @@ class Personaggio{
         $this->DES += $usedPU["DES"];
         $this->currentDES = $newDES;
         
+        $this->tmp_PF = $this->PF;
         $this->setEquipmentStats();
 
         return $this->updateDB();

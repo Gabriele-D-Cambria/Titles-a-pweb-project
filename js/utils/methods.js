@@ -1258,7 +1258,7 @@ export function createDeleteBox(){
     el = document.createElement("p");
     el.innerText = "Eliminando il personaggio ";
     const boldText = document.createElement("b");
-    boldText.innerText = "lo perderai in maniera definitiva.";
+    boldText.innerText = "lo perderai in maniera definitiva";
     el.appendChild(boldText);
     el.appendChild(document.createTextNode(", sei sicuro di volerlo fare?\nGli oggetti nello zaino verranno inviati al tuo inventario."));
     form.appendChild(el);
