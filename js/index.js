@@ -129,7 +129,7 @@ function handleFormError(loginError){
 function createSlider() {
     const sliderData = [
         {
-            img: "images/png/Inventario.png",
+            img: "images/png/inventario.png",
             title: "Gestisci l'Inventario",
             text: "Gestisci il tuo inventario, equipaggia armi e armature, usa pozioni e vendi oggetti inutili.\n"
         },
@@ -144,7 +144,7 @@ function createSlider() {
             text: "Crea fino a 5 personaggi per giocare contro gli altri utenti.\nSeclgi per loro un elemento e dagli un nome.\nPotenziali, equipaggiali sfuttando gli effetti di prevalenza e gioca battaglie per ottenere fantastiche ricompense!"
         },
         {
-            img: "images/png/Battaglia.png",
+            img: "images/png/battaglia-completa.png",
             title: "Gioca le Battaglie",
             text: "Con i tuoi personaggi gioca delle battaglie contro i personaggi degli altri account.\n Avrai 30 secondi nei quali puoi decidere se attaccare o utilizzare un oggetto tra quelli che ti eri equipaggiato.\nSfrutta a pieno il tuo personaggio facendogli infliggere ingenti danni e permettendogli di schivare i colpi avversari!"
         }
