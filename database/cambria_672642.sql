@@ -138,8 +138,8 @@ BEGIN
     IF NEW.Danno < 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Danno deve essere >= 0';
     END IF;
-    IF NEW.Armatura < 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Armatura deve essere >= 0';
+    IF NEW.ProtezioneDanno < 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'ProtezioneDanno deve essere >= 0';
     END IF;
     IF NEW.RecuperoVita < 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'RecuperoVita deve essere >= 0';
@@ -157,8 +157,8 @@ BEGIN
     IF NEW.Danno < 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Danno deve essere >= 0';
     END IF;
-    IF NEW.Armatura < 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Armatura deve essere >= 0';
+    IF NEW.ProtezioneDanno < 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'ProtezioneDanno deve essere >= 0';
     END IF;
     IF NEW.RecuperoVita < 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'RecuperoVita deve essere >= 0';
