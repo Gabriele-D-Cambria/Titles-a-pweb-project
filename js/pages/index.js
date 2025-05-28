@@ -129,22 +129,22 @@ function handleFormError(loginError){
 function createSlider() {
     const sliderData = [
         {
-            img: "images/png/inventario.png",
+            img: "./images/png/inventario.png",
             title: "Gestisci l'Inventario",
             text: "Gestisci il tuo inventario!\nEquipaggia armi e armature, usa pozioni e vendi oggetti inutili.\nApri le box per ottenere equipaggiamenti e monete!"
         },
         {
-            img: "images/png/shop.png",
+            img: "./images/png/shop.png",
             title: "Utilizza il Negozio",
             text: "Acquista nuovi oggetti e potenziamenti per il tuo personaggio nel negozio.\nPuoi anche acquistare le box, e chissà, magari potrebbero darti dell'equipaggiamento niente male."
         },
         {
-            img: "images/png/personaggi.png",
+            img: "./images/png/personaggi.png",
             title: "Crea i Personaggi",
             text: "Crea fino a 5 personaggi per giocare contro gli altri utenti.\nScegli per loro un elemento e dagli un nome.\nPotenziali, equipaggiali sfruttando gli effetti di prevalenza e gioca battaglie per ottenere fantastiche ricompense!"
         },
         {
-            img: "images/png/battaglia-completa.png",
+            img: "./images/png/battaglia-completa.png",
             title: "Gioca le Battaglie",
             text: "Con i tuoi personaggi gioca delle battaglie contro quelli degli altri account.\n Avrai 30 secondi nei quali puoi decidere se attaccare o utilizzare un oggetto tra quelli equipaggiati.\nSfrutta a pieno il tuo personaggio facendogli infliggere ingenti danni e permettendogli di schivare i colpi avversari!"
         }
