@@ -64,7 +64,7 @@ table tbody th{
 	text-decoration: underline;
 }
 
-table th[colspan="8"]{
+table th[colspan]{
 	border-top: double 5pt #1e1e1e;
 	font-size: larger;
 }

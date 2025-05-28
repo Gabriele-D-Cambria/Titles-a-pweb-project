@@ -141,7 +141,7 @@ function getUserData($username){
 
 
 /**
- * Recupera l'invetario di un'account dal database
+ * Recupera l'invetario di un account dal database
  * @param int $accountID ID dell'account
  * @param array|null $filter array contenente i tipi degli oggetti che vogliamo recuperare
  * @return array contenente gli item nell'inventario e la loro quantità
