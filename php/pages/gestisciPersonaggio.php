@@ -105,7 +105,7 @@ if(isset($_SESSION["endgameMessage"])){
 						<?php echo $currentPG["puntiUpgrade"];?>
 					</span></p>
 					<div class="exp-bar">
-						<div class="exp-points" style="width: <?php echo $currentPG["exp"];?>%;"></div>
+						<div class="exp-points" style="width: <?php echo $currentPG["exp"] * 100 / Personaggio::MAX_EXP ;?>%;"></div>
 					</div>
 				</div>
 				<div class="stats-block PF">

@@ -146,7 +146,7 @@ function setZaino(zaino){
 	if(zaino !== null){
 		zaino.forEach((item, index) => {
 			let space = document.getElementById(`obj_${index}`);
-
+			space.classList.remove("not-clickable");
 			let img = createHTML_img(item.PathImmagine, item.Descrizione, `${item.Nome}\n${item.Descrizione}`, `obj_${index}-img`);
 
 			while(space.childElementCount)
@@ -192,8 +192,11 @@ function setTurn(tempoMassimo){
 	if(!turno){
 		btn.setAttribute("disabled", true);
 		btn.innerText = "Attendi il tuo turno";
-		// Tra un tempo casuale gioca l'avversario
-		const randomDelay = Math.min(6000, tempoMassimo*1000);
+		
+		// Tra 6 secondi gioca l'avversario
+		// Tempo necessario per leggere il messaggio
+		// Se rimanessero meno di 6 secondi, gioca entro la metà del tempo rimanente
+		const randomDelay = Math.min(6000, tempoMassimo*500);
 		
 		setTimeout(() => {
 			changeTurn();
@@ -302,7 +305,7 @@ function setWinningSection(hasWon){
 
 	newBtn.disabled = false;
 	
-	newBtn.innerText = "Ottieni Ricompense";
+	newBtn.innerText = "Ottieni\nRicompense";
 	newBtn.classList.add(hasWon? "hasWon":"hasNotWon");
 	newBtn.addEventListener("click", endGame);
 }

@@ -79,7 +79,7 @@ export function createHTMLElement(type, className = null, id = null, innerText =
  * Funzione che genera un elemento `<img>`
  * @param {string} src source dell'immagine. Verrà inserito `"./../" + src` per raggiugere correttamente le immagini
  * @param {string} alt descrizione dell'immagine
- * @param {string} title title dell'immaginele dell'immagine
+ * @param {string} title title dell'immagine
  * @param {string} id id dell'immagine [Default `null`]
  * @param {string} classe classe dell'immagine [Default `null`]
  * @returns {HTMLElement} elemento `<img>` creato

@@ -68,15 +68,15 @@ if(isset($_SESSION['gameMessage'])){
 				<button id="actionBtn" class="" disabled></button>
 				<div class="bag-section">
 					<div class="item-container">
-						<div id="obj_0" class="item-slot bag-item">
+						<div id="obj_0" class="item-slot bag-item not-clickable">
 						</div>
 					</div>
 					<div class="item-container">
-						<div id="obj_1" class="item-slot bag-item">
+						<div id="obj_1" class="item-slot bag-item not-clickable">
 						</div>
 					</div>
 					<div class="item-container">
-						<div id="obj_2" class="item-slot bag-item">
+						<div id="obj_2" class="item-slot bag-item not-clickable">
 						</div>
 					</div>
 				</div>

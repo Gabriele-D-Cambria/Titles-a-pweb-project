@@ -99,7 +99,7 @@ a:hover{
 
 .module form input[type="text"],
 .module form input[type="password"] {
-    width: fit-content;
+    width: fit-content(100%);
     padding: 10px;
     border-radius: 5px;
     color: #e0e0e0;

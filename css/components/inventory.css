@@ -16,7 +16,7 @@
     gap: 10px;
 
     width: 72.5%;
-    height: fit-content;
+    height: fit-content(100%);
     align-self: center;
     margin: 20px;
 }

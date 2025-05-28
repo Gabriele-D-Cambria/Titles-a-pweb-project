@@ -33,7 +33,7 @@ foreach ($user["personaggi"] as $i => $character){
     $characterList .= "<p class='pg-name-box'>" . $PG["nome"] . "</p>\n</div>\n";
     $characterList .= "<div class='pg-lvl-block'>\n";
     $characterList .= "<p class='pg-lvl-info'>Livello: " .$PG['livello'] ."</p>\n";
-    $characterList .= "<div class='pg-exp-bar'>\n<div class='pg-exp-points' style='width: ". $PG['exp'] . "%'>";
+    $characterList .= "<div class='pg-exp-bar'>\n<div class='pg-exp-points' style='width: ". $PG['exp'] * 100 / Personaggio::MAX_EXP . "%'>";
     $characterList .= "</div>\n</div>";
     $characterList .= "</div>\n</div>";
 }

@@ -10,13 +10,13 @@
     display: grid;
     grid-template-columns: 1fr 8fr 1fr;
     padding: 10px 20px;
-    height: fit-content;
+    height: fit-content(100%);
     position: static;
 }
 
 img.clickable {
     cursor: pointer;
-    height: fit-content;
+    height: fit-content(100%);
 }
 
 .coin-display {
@@ -116,7 +116,7 @@ img.clickable {
     justify-content: center;
     cursor: pointer;
 
-    min-width: fit-content;
+    min-width: fit-content(100%);
     width: 75%;
     height: 2em;
     padding: 10px;
@@ -158,7 +158,7 @@ img.clickable {
 /**** Personaggi ****/
 
 .character-list{
-    min-width: fit-content;
+    min-width: fit-content(100%);
     width: 40%;
     height: 15em;
     background-color: rgba(243, 218, 116, 0.75);
@@ -211,7 +211,7 @@ img.clickable {
     align-items: center;
     justify-content: center;
     height: 100%;
-    width: fit-content;
+    width: fit-content(100%);
     padding: 0px 10px;
     row-gap: 3px;
 }

@@ -9,7 +9,7 @@ main{
 	position: relative;
 	box-sizing: border-box;
 	display: grid;
-	grid-template-columns: 5fr 2fr;
+	grid-template-columns: 4fr 2fr;
 	grid-template-rows: 86vh;
 	align-items: center;
 	justify-items: center;
@@ -34,7 +34,7 @@ main{
 	box-sizing: border-box;
 	border:solid 5pt white;
 	border-radius: 15pt;
-	height: 100%;
+	width: 100%;
 	object-fit: cover;
 
 }
@@ -97,7 +97,7 @@ main{
 	background-color: #414E4C;
 
 	font-size: 5vh;
-	transition: font-size 0.5s ease-in-out, text-shadow 0.5s ease-in-out;
+	transition: font-size 0.5s ease-in-out, text-shadow 0.5s ease-in-out !important;
 }
 
 #actionBtn:hover:not(:disabled){
@@ -106,11 +106,7 @@ main{
 
 
 #actionBtn:not(:disabled).attacco{
-	text-shadow:
-        -1px -1px 150px darkred,
-         1px -1px 150px darkred,
-        -1px  1px 150px darkred,
-         1px  1px 150px darkred;
+	text-shadow: none;
 }
 #actionBtn:not(:disabled).attacco:hover{
 	text-shadow:
@@ -121,11 +117,7 @@ main{
 }
 
 #actionBtn:not(:disabled).oggetto{
-	text-shadow:
-        -1px -1px 150px darkgreen,
-         1px -1px 150px darkgreen,
-        -1px  1px 150px darkgreen,
-         1px  1px 150px darkgreen;
+	text-shadow: none;
 }
 #actionBtn:not(:disabled).oggetto:hover{
 	text-shadow:

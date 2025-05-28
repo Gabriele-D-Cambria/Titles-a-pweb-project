@@ -237,7 +237,7 @@ AFTER INSERT ON Account
 FOR EACH ROW
 BEGIN
     INSERT INTO Inventario  (Proprietario, Oggetto, Quantita)
-    SELECT NEW.ID, 15, 1;
+    SELECT NEW.ID, 16, 1;
 END;
 //
 

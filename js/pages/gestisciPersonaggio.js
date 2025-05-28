@@ -172,7 +172,7 @@ function setEquimpent(arma = null, armatura = null, zaino = null, elementi = nul
 	if(arma !== null){
 		space = document.getElementById("arma");
 		
-		img = createHTML_img(arma.PathImmagine, arma.Descrizione, arma.Nome, "arma-img");
+		img = createHTML_img(arma.PathImmagine, arma.Descrizione, `${arma.Nome}\n${arma.Descrizione}`, "arma-img");
 		
 		if(space.classList.contains('disabled-item')){
 			space.title = "Non puoi rimuovere l'arma, hai una battaglia in corso!";
@@ -198,7 +198,7 @@ function setEquimpent(arma = null, armatura = null, zaino = null, elementi = nul
 	if(armatura !== null){
 		space = document.getElementById("armatura");
 	
-		img = createHTML_img(armatura.PathImmagine, armatura.Descrizione, armatura.Nome, "armatura-img");
+		img = createHTML_img(armatura.PathImmagine, armatura.Descrizione, `${armatura.Nome}\n${armatura.Descrizione}`, "armatura-img");
 
 		if(armatura.Elemento === elementi['elementoPG']){
 			space.classList.add("allineato");
@@ -221,7 +221,7 @@ function setEquimpent(arma = null, armatura = null, zaino = null, elementi = nul
 		zaino.forEach((item, index) => {
 			space = document.getElementById(`obj_${index}`);
 			
-			img = createHTML_img(item.PathImmagine, item.Descrizione, item.Nome, `obj_${index}-img`);
+			img = createHTML_img(item.PathImmagine, item.Descrizione, `${item.Nome}\n${item.Descrizione}`, `obj_${index}-img`);
 
 			while(space.childElementCount)
 				space.removeChild(space.firstChild);
