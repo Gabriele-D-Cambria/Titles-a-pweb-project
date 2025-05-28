@@ -63,25 +63,25 @@
         </dd>
 
         <dt>Arma e Armatura</dt>
-        <dd>Determininano rispettivamente il danno inflitto e la diminuzione del danno subito, come descritto dalla <a href="#tabellaOggetti">tabella degli oggetti</a>.
+        <dd>Determininano rispettivamente il danno inflitto e la diminuzione del danno subito, come descritto dalla <a href="#tabellaArmi">tabella delle armi</a> e dalla <a href="#tabellaArmature">tabella delle armature</a>.<br>
         È possibile ottenerle comprandole dallo <i>shop</i> o aprendo delle <i>box</i>.<br>
         Hanno i seguenti effetti di <i>allineamento</i>:
        <ul>
            <li>Se l'elemento dell'arma è <i>allineato</i> a quello del personaggio, il danno inflitto aumenta di <b>1 punto</b>, mentre se opposto fornisce <i>prevalenza</i> anche sull'elemento stesso del personaggio.</li>
-           <li>Se l'elemento dell'armatura è <i>allineato</i> a quello del personaggio, la diminuzione del danno subito aumenta di <b>1 punto</b>, mentre se è <i>opposto</i> rimuove gli effetti della <i>prevalenza</i> dell'avversario</dd></li>
+           <li>Se l'elemento dell'armatura è <i>allineato</i> a quello del personaggio, la diminuzione del danno subito aumenta di <b>1 punto</b>, mentre se è <i>opposto</i> rimuove gli effetti della <i>prevalenza</i> dell'avversario.</li>
        </ul> 
+       </dd>
 
         <dt>Zaino</dt>
-        <dd>Lo zaino del personaggio che può contenere fino a 3 oggetti assegnati dall'inventario dell'account, che possono essere utilizzati in battaglia al posto dell'attacco.
-        Possono fornire <i>buff</i> alle statistiche.
-        È possibile ottenere questi oggetti comprandoli dallo <i>shop</i> o aprendo delle <i>box</i>.</dd>
-        </dd>
+        <dd>Lo zaino del personaggio che può contenere fino a 3 oggetti assegnati dall'inventario dell'account, che possono essere utilizzati in battaglia al posto dell'attacco per fornire dei <i>buff</i> alle statistiche.<br>
+        È possibile ottenere questi oggetti comprandoli dallo <i>shop</i> o aprendo delle <i>box</i>.<br>
+        Le statistiche degli oggetti attualmente presenti sono consultabili dalla <a href="#tabellaPozioni">tabella degli delle pozioni</a>.</dd>
         </dl>
 
         <p>Ogni account ha un suo <i>inventario</i> nel quale può conservare fino a 40 oggetti diversi prima di assegnarli ai vari personaggi o venderli in cambio di monete per metà del loro valore.</p>
-        <p>Ogni account ha a disposizione un suo personale <i>Negozio</i>, dove può acquistare oggetti e strumenti per i suoi personaggi. Il negozio si aggiorna <b>ogni 3 minuti</b></p>
+        <p>Ogni account ha a disposizione un suo personale <i>Negozio</i>, dove può acquistare oggetti e strumenti per i suoi personaggi. Il negozio si aggiorna <b>ogni 3 minuti</b>.</p>
 
-        <p>Le box si differenziano in <i>box comuni</i> e <i>box rare</i> e contengono quanto scritto nella <a href="#tabellaOggetti">tabella degli oggetti</a></p>
+        <p>Le box si differenziano in <i>box comuni</i> e <i>box rare</i> e contengono quanto scritto nella <a href="#tabellaBox">tabella delle box</a>.</p>
 	</main>
 	<hr>
     <footer>
@@ -213,7 +213,7 @@
         </tbody>
         </table>
         </div>
-        <table id="tabellaOggetti">
+        <table id="tabellaArmi">
         <thead>
             <tr>
                 <th colspan="8">Informazioni sulle armi</th>
@@ -281,6 +281,8 @@
                 <td>2</td>
             </tr>
         </tbody>
+        </table>
+        <table id="tabellaArmature">
         <thead>
             <tr>
                 <th colspan="8">Informazioni sulle armature</th>
@@ -348,14 +350,16 @@
                 <td>0</td>
             </tr>
         </tbody>
+        </table>
+        <table id="tabellaPozioni">
         <thead>
             <tr>
-                <th colspan="8">Informazioni sulle pozioni</th>
+                <th colspan="7">Informazioni sulle pozioni</th>
             </tr>
             <tr>
                 <th>Nome</th>
                 <th>Descrizione</th>
-                <th colspan="2">Tipologia</th>
+                <th>Tipologia</th>
                 <th>Costo</th>
                 <th>RecuperoVita</th>
                 <th>ModificatoreFor</th>
@@ -366,7 +370,7 @@
             <tr>
                 <th>Pozione di Vita</th>
                 <td>Ripristina 20 PF.</td>
-                <td colspan="2">pozione</td>
+                <td>pozione</td>
                 <td>15</td>
                 <td>20</td>
                 <td>0</td>
@@ -375,7 +379,7 @@
             <tr>
                 <th>Pozione di Energia</th>
                 <td>Ripristina 10 PF.</td>
-                <td colspan="2">pozione</td>
+                <td>pozione</td>
                 <td>10</td>
                 <td>10</td>
                 <td>0</td>
@@ -384,7 +388,7 @@
             <tr>
                 <th>Pozione di Forza</th>
                 <td>Aumenta la forza temporaneamente di 3 punti.</td>
-                <td colspan="2">pozione</td>
+                <td>pozione</td>
                 <td>8</td>
                 <td>0</td>
                 <td>3</td>
@@ -393,36 +397,38 @@
             <tr>
                 <th>Pozione di Destrezza</th>
                 <td>Aumenta la destrezza temporaneamente di 3 punti.</td>
-                <td colspan="2">pozione</td>
+                <td>pozione</td>
                 <td>8</td>
                 <td>0</td>
                 <td>0</td>
                 <td>3</td>
             </tr>
         </tbody>
+        </table>
+        <table id="tabellaBox">
         <thead>
             <tr>
-                <th colspan="8">Informazioni sulle box</th>
+                <th colspan="4">Informazioni sulle box</th>
             </tr>
             <tr>
                 <th>Nome</th>
                 <th>Descrizione</th>
-                <th colspan="3">Tipologia</th>
-                <th colspan="3" >Costo</th>
+                <th>Tipologia</th>
+                <th>Costo</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <th>Box Comune</th>
                 <td>Contiene monete, pozione, 2 oggetti (armi e/o armature).</td>
-                <td colspan="3">box</td>
-                <td colspan="3">50</td>
+                <td>box</td>
+                <td>50</td>
             </tr>
             <tr>
                 <th>Box Rara</th>
                 <td>Contiene monete, 2 pozioni, 2 armi e 2 armature.</td>
-                <td colspan="3">box</td>
-                <td colspan="3">100</td>
+                <td>box</td>
+                <td>100</td>
             </tr>
         </tbody>
         </table>

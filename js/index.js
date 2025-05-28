@@ -85,7 +85,7 @@ function createModule(login) {
 
     // Crea un link per passare tra login e registrazione
     let p = document.createElement("p");
-    p.innerText = (login)? "Non hai un'account? " : "Hai già un'account? ";
+    p.innerText = (login)? "Non hai un account? " : "Hai già un account? ";
 
     let a = document.createElement("a");
     a.innerText = (login)? "Registrati" : "Accedi";
@@ -131,22 +131,22 @@ function createSlider() {
         {
             img: "images/png/inventario.png",
             title: "Gestisci l'Inventario",
-            text: "Gestisci il tuo inventario, equipaggia armi e armature, usa pozioni e vendi oggetti inutili.\n"
+            text: "Gestisci il tuo inventario!\nEquipaggia armi e armature, usa pozioni e vendi oggetti inutili.\nApri le box per ottenere equipaggiamenti e monete!"
         },
         {
             img: "images/png/shop.png",
             title: "Utilizza il Negozio",
-            text: "Acquista nuovi oggetti e potenziamenti per il tuo personaggio nel negozio.\nCompra le box, e spacchetale per ottenere equipaggiamenti e monete!\nChissà, magari potresti essere fortunato."
+            text: "Acquista nuovi oggetti e potenziamenti per il tuo personaggio nel negozio.\nPuoi anche acquistare le box, e chissà, magari potrebbero darti dell'equipaggiamento niente male."
         },
         {
             img: "images/png/personaggi.png",
             title: "Crea i Personaggi",
-            text: "Crea fino a 5 personaggi per giocare contro gli altri utenti.\nSeclgi per loro un elemento e dagli un nome.\nPotenziali, equipaggiali sfuttando gli effetti di prevalenza e gioca battaglie per ottenere fantastiche ricompense!"
+            text: "Crea fino a 5 personaggi per giocare contro gli altri utenti.\nScegli per loro un elemento e dagli un nome.\nPotenziali, equipaggiali sfruttando gli effetti di prevalenza e gioca battaglie per ottenere fantastiche ricompense!"
         },
         {
             img: "images/png/battaglia-completa.png",
             title: "Gioca le Battaglie",
-            text: "Con i tuoi personaggi gioca delle battaglie contro i personaggi degli altri account.\n Avrai 30 secondi nei quali puoi decidere se attaccare o utilizzare un oggetto tra quelli che ti eri equipaggiato.\nSfrutta a pieno il tuo personaggio facendogli infliggere ingenti danni e permettendogli di schivare i colpi avversari!"
+            text: "Con i tuoi personaggi gioca delle battaglie contro quelli degli altri account.\n Avrai 30 secondi nei quali puoi decidere se attaccare o utilizzare un oggetto tra quelli equipaggiati.\nSfrutta a pieno il tuo personaggio facendogli infliggere ingenti danni e permettendogli di schivare i colpi avversari!"
         }
     ];
 
