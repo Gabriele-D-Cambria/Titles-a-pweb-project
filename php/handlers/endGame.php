@@ -11,9 +11,10 @@ if(!isset($_SESSION['account']) || !isset($_SESSION['currentPG_nome']) || !isset
 	pageError(401);
 }
 
+
 /**
- * @var Account
- */
+* @var Account $account
+*/
 $account = unserialize($_SESSION['account']);
 $nomePersonaggio = unserialize($_SESSION['currentPG_nome']);
 
@@ -37,7 +38,7 @@ try{
 }
 catch(Exception $e){
 	error_log("Errore " . $e->getCode() . ": durante la endGame.php è stato sollevato il seguente errore: ". $e->getMessage());
-	pageError($e->getMessage());
+	pageError($e->getCode());
 }
 
 

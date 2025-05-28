@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		})
 		.catch(error => {
 			errorHandler(error);
-			window.location.href = "./errorPage.php/?error_code=" + error.code;
+			window.location.href = "./errorPage.php?error_code=" + error.code;
 		});
 
 
@@ -63,7 +63,7 @@ function getGameInfo(){
 		})
 		.catch(error => {
 			errorHandler(error);
-			window.location.href = "./errorPage.php/?error_code=" + error.code;
+			window.location.href = "./errorPage.php?error_code=" + error.code;
 		});
 }
 
@@ -266,7 +266,7 @@ function sendPlay(formData){
 	.catch(error => {
 		errorHandler(error);
 		if(error.code != 1010)
-			window.location.href = "./errorPage.php/?error_code=" + error.code;
+			window.location.href = "./errorPage.php?error_code=" + error.code;
 	});
 }
 
@@ -331,6 +331,6 @@ function endGame(){
     })
     .catch(error => {
         errorHandler(error);
-		window.location.href = "./errorPage.php/?error_code=500";
+		window.location.href = "./errorPage.php?error_code=500";
     });
 }

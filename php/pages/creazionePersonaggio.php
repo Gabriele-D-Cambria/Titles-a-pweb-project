@@ -14,6 +14,10 @@ if (!isset($_SERVER['HTTP_REFERER']) ||
 	exit;
 }
 
+
+/**
+* @var Account $account
+*/
 $account = unserialize($_SESSION['account']);
 
 if(count($account->getPersonaggi()) === Account::MAX_NUM_PERSONAGGI){

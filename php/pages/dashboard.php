@@ -19,13 +19,16 @@ if(isset($_SESSION["errorMessage"])){
     unset($_SESSION["errorMessage"]);
 }
 
+/**
+* @var Account $account
+*/
 $account = unserialize($_SESSION['account']);
 $user = $account->getAll();
 
 $characterList = "";
 foreach ($user["personaggi"] as $i => $character){
     $PG = $character->getAll();
-    $characterList .= "<div id='" . $i ."' class='character-item' data-id='". $PG["nome"]."'>\n";
+    $characterList .= "<div id='". $PG["nome"] ."' class='character-item'>\n";
     $characterList .= "<div class='pg-info-block'>\n<img src='./../../". $PG["pathImmagine"] ."' alt='Immagine Personaggio'>\n";
     $characterList .= "<p class='pg-name-box'>" . $PG["nome"] . "</p>\n</div>\n";
     $characterList .= "<div class='pg-lvl-block'>\n";

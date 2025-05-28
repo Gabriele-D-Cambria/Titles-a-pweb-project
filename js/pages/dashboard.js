@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.querySelectorAll(".character-item").forEach((PG) => {
         PG.addEventListener("click", (e) => {
-            openCharacter(e.currentTarget.getAttribute("data-id"));
+            openCharacter(e.currentTarget.getAttribute("id"));
         })
     })
 

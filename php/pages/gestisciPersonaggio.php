@@ -15,6 +15,9 @@ if(!isset($_SESSION['account']) || !isset($_SESSION['currentPG_nome'])){
 	pageError(401);
 }
 
+/**
+* @var Account $account
+*/
 $account = unserialize($_SESSION['account']);
 $PG_name = unserialize($_SESSION['currentPG_nome']);
 

@@ -38,9 +38,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $title;?></title>
-    <link rel="icon" href="./../../../images/icon.svg" type="image/svg+xml" sizes="16x16" >
-    <link rel="stylesheet" href="./../../../css/global/style.css">
-    <link rel="stylesheet" href="./../../../css/pages/errorPage.css">
+    <link rel="icon" href="./../../images/icon.svg" type="image/svg+xml" sizes="16x16" >
+    <link rel="stylesheet" href="./../../css/global/style.css">
+    <link rel="stylesheet" href="./../../css/pages/errorPage.css">
 </head>
 <body>
     <header style="flex-direction:column">
@@ -49,7 +49,7 @@
     <div class="dialog-message">
         <main>
             <p><?php echo $paragrafo;?></p>
-            <a href="./../../../index.php"><button><?php echo $bottone;?></button></a>
+            <a href="./../../index.php"><button><?php echo $bottone;?></button></a>
         </main>
     </div>
 </body>

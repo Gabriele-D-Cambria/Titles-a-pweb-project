@@ -6,17 +6,17 @@ if (basename($_SERVER['PHP_SELF']) === 'methods.php'){
 ini_set("display_errors", "0");
 require_once __DIR__ . "/definitions.php";
 
-
+// #region
 // *** Funzioni che gestiscono Errori *** //
 
 /**
  * Funzione che reindirizza un errore
- * @param string $errorCode codice di errore da passare alla `"errorPage.php"`
- * @param string $prefix path che porta alla `"errorPage.php"` [Default: ""]
+ * @param string|int $errorCode codice di errore da passare alla "errorPage.php"
+ * @param string $prefix path che porta alla "errorPage.php" [Default: ""]
  * @return never
  */
 function pageError($errorCode, $prefix = ""){
-    header("Location: ". $prefix ."errorPage.php/?error_code=". $errorCode);
+    header("Location: " . $prefix . "errorPage.php?error_code=" . urlencode($errorCode));
     exit();
 }
 
@@ -38,9 +38,10 @@ function apiError($errorCode = 500, $message = null){
         };
     }
 
-    error_log("Errore API [" .$errorCode ."]: " .$message);
+    error_log("Errore API [" . $errorCode . "]: " . $message);
 
     http_response_code($errorCode);
+    header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
         "error" => true,
         "code" => $errorCode,
@@ -65,7 +66,7 @@ function validateInputs($username, $password, $confirmPassword){
     if(is_null($username) || !preg_match(USERNAME_PATTERN, $username))
         return "invalid_username";
 
-    if(is_null($username) || !preg_match(PASSWORD_PATTERN, $password))
+    if(is_null($password) || !preg_match(PASSWORD_PATTERN, $password))
         return "invalid_password";
 
     if(!empty($confirmPassword) && $confirmPassword !== $password)
@@ -74,9 +75,11 @@ function validateInputs($username, $password, $confirmPassword){
     return '';
 }
 
-/**
- ** Funzioni di supporto API
- ** Queste funzioni, in caso di errore, chiamano la funzione `apiError`, restituendo gli errori secondo quello standard
+// #endregion
+
+/** 
+ * #region Funzioni di supporto API
+ * Queste funzioni, in caso di errore, chiamano la funzione `apiError`, restituendo gli errori secondo lo standard
  */
 
 /**
@@ -924,9 +927,9 @@ function getRandomPG($accountIdToAvoid, $livello){
 /**
  * Questa funzione aggiorna i dati relativi allo stato dei personaggi e la data dell'ultimo turno per una battaglia specifica
  * @param array $battagliaInfo Array associativo preso per riferimento contenente le informazioni della battaglia
- * @param boolean|null $terminata `true` indica che ha vinto il personaggio1, `false` che ha vinto il perosnaggio2. Se non ha vinto nessuno da mantenere `null` [Default: null]
+ * @param boolean|null $terminata `true` indica che ha vinto il personaggio1, `false` che ha vinto il perosnaggio2. Se non ha vinto nessuno da mantenere `null` [Default: `null`]
  * @throws Exception Se la connessione al database fallisce o se si verifica un errore durante l'update.
- * @return bool Restituisce true se l'aggiornamento è andato a buon fine.
+ * @return bool Restituisce `true` se l'aggiornamento è andato a buon fine.
  */
 function updateGame(&$battagliaInfo, $terminata = null){
     $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);

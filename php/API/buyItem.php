@@ -6,6 +6,9 @@ if(!isset($_SESSION['account'])){
 	apiError(401);
 }
 
+/**
+* @var Account $account
+*/
 $account = unserialize($_SESSION['account']);
 $id = $account->getId();
 

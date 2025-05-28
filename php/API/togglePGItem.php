@@ -6,11 +6,17 @@ if(!isset($_SESSION['account']) || !isset($_SESSION['currentPG_nome'])){
 	apiError(401);
 }
 
-if(!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== "POST" || 
-   (!isset($_POST['itemId']) && !isset($_POST['itemId_remove']))){
-	pageError(403);
+if(!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== "POST"){
+	pageError(403, "./../pages/");
 }
 
+if(!isset($_POST['itemId']) && !isset($_POST['itemId_remove'])){
+	apiError(403);
+}
+
+/**
+* @var Account $account
+*/
 $account = unserialize($_SESSION['account']);
 $nomePG = unserialize($_SESSION['currentPG_nome']);
 try{

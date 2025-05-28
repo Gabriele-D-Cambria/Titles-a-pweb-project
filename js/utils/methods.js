@@ -100,20 +100,22 @@ export function createHTML_img(src, alt, title = null, id = null, classe = null)
 
 /**
  * Crea un pulsante con le proprietà specificate.
- * @param {String} type Il tipo del pulsante (es. "button", "submit").
- * @param {String} id L'id da assegnare al pulsante.
- * @param {String} text Il testo da visualizzare sul pulsante.
- * @param {Function} onClick La funzione da eseguire al click del pulsante.
+ * @param {String|null} type Il tipo del pulsante (es. "button", "submit").
+ * @param {String|null} id L'id da assegnare al pulsante.
+ * @param {String|null} text Il testo da visualizzare sul pulsante.
+ * @param {Function|null} onClick La funzione da eseguire al click del pulsante.
  * @returns {HTMLButtonElement} Il pulsante creato.
  */
-export function createButton(type, id, text, onClick){
+export function createButton(type = null, id = null, text = null, onClick = null){
     const btn = document.createElement("button");
-    btn.type = type;
-    btn.id = id;
-    btn.innerText = text;
-    if (onClick){
+    if(type)
+        btn.type = type;
+    if(id)
+        btn.id = id;
+    if(text)
+        btn.innerText = text;
+    if (onClick)
         btn.addEventListener("click", onClick);
-    }
     return btn;
 }
 
@@ -300,7 +302,7 @@ export function closeModule(event, id, override = false, showCoins = false){
  * @param {Number} showTime Per quanto tempo il messaggio rimane visibile [Default `1.5 secondi`]
  */
 export function showMessage(messaggio, showTime = 1500){
-    const messageContainer = createHTMLElement("div", "messaggio", "messageBox", messaggio);
+    const messageContainer = createHTMLElement("div", "messaggio", null, messaggio);
     
     if(showTime === IMPORTANT_MESSAGE){
         messageContainer.classList.add("errore");
@@ -564,7 +566,7 @@ function generateInfo(id, item = null, hasIt = true, equipment = false){
             createButton("button", "buy-btn", "Compra: " + item.Costo + "🪙", buyItem);
 
         el.appendChild(btn);
-        btn = createButton("button", "", "Chiudi", () => {
+        btn = createButton("button", null, "Chiudi", () => {
             let info = generateInfo(id);
             changeItemInfo(info);
             shownItem = null;

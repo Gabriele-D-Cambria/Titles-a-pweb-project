@@ -27,7 +27,7 @@ try{
         throw new Exception($errorType, 400);
     }
 
-    if(empty($confirmPassword)){
+    if($isLogin){
         // Login
         $sql = "SELECT *
                 FROM Account

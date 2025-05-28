@@ -9,9 +9,10 @@ if(!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== "POST"){
 	pageError(403);
 }
 
+
 /**
- * @var Account $account dhsd
- */
+* @var Account $account
+*/
 $account = unserialize($_SESSION['account']);
 $userId = $account->getId();
 
@@ -87,7 +88,7 @@ else{
 			throw new Exception("invalid_element", 400);
 		}
 
-		if(!$account->addNewPersonaggio($name, $element)){
+		if(!$account->addPersonaggio($name, $element)){
 			throw new Exception('full_PG', 400);
 		}
 

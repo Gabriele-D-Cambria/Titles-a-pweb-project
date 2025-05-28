@@ -111,8 +111,8 @@ try{
 		updateGame($battaglia, $pg2->isDead());
 
 		/**
-		 * @var Account
-		 */
+		* @var Account $account
+		*/
 		$account = unserialize($_SESSION['account']);
 		$nomePersonaggio = unserialize($_SESSION['currentPG_nome']);
 
@@ -120,7 +120,7 @@ try{
 		$nLivelliGuadagnati = $account->addPGExp($nomePersonaggio, $battaglia['Vittoria_Giocatore1']);
 	
 		if($nLivelliGuadagnati === null)
-			pageError(500);
+			apiError(500);
 	
 	
 		$exp = $battaglia['Vittoria_Giocatore1']? Personaggio::EXP_WIN : Personaggio::EXP_LOSS;
@@ -203,9 +203,6 @@ function randomMove(&$pg1, &$pg2, $updateDB = false){
 
 		$output['mossa'] = $azioni[array_rand($azioni)];
 	}
-
-
-	
 
 	if($output['mossa'] === 'attacco'){
 			$esitoMossa = $pg1->attack($pg2);

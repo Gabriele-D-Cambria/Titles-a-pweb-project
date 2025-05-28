@@ -10,6 +10,9 @@ if (!isset($_SESSION['account'])){
 	pageError("401");
 }
 
+/**
+* @var Account $account
+*/
 $account = unserialize($_SESSION['account']);
 $accountId = $account->getId();
 

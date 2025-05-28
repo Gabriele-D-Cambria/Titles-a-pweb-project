@@ -10,16 +10,29 @@ define("DB_HOST", "localhost");
 define("DB_USER", "root");
 define("DB_PWD", "");
 
+
+/**
+ * Pattern per l'username dell'account: dai 3 ai 10 caratteri. Il primo lettera, gli altri lettera punti o underscore
+ */
 define('USERNAME_PATTERN', "/^[a-zA-Z][a-zA-Z0-9_.]{2,9}$/");
 define("VALID_USERNAME", "User.0_");
 
 //? source: https://stackoverflow.com/questions/19605150/regex-for-password-must-contain-at-least-eight-characters-at-least-one-number-a
+/**
+ * Pattern per la password dell'account: da 8 a 15 caratteri, almeno una lettera maiuscola, una minuscola, un numero e un carattere speciale.
+ */
 define('PASSWORD_PATTERN', "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,15}$/");
 //? endsource
 define("VALID_PASSWORD", "Password1!");
 
+/**
+ * *Pattern per il nome del personaggio: solo lettere, da 3 a 10 caratteri
+ */
 define("PG_NAME_PATTERN", "/^[a-zA-Z][a-zA-Z]{2,9}$/");
 
+/**
+ * Definizione dei messaggi di errore utilizzati nell'applicazione
+ */
 define('ERROR_TYPES', [
     'invalid_username'          => "Username non valido. Deve iniziare con una lettera e avere tra 3 e 10 caratteri.",
     'username_taken'            => "Username già esistente.",
@@ -68,15 +81,15 @@ define("MAX_COIN_RARE", 20);
 /**
  * Numero massimo di Item diversi in un inventario
  */
-define("MAX_ITEMS", value: 40);
+define("MAX_ITEMS", 40);
 
 /**
  * Numero massimo di Item diversi in un negozio
  */
-define("MAX_SHOP_ITEMS", 10);
+define("MAX_SHOP_ITEMS", value: 10);
 
 /**
- * Intervallo temporale del refresh del negozio
+ * Intervallo temporale del refresh del negozio (in secondi)
  */
 define('SHOP_TIMER_RESET_SECONDS', value: 3*60);
 
@@ -138,7 +151,7 @@ class Account{
 
         return null;
     }
-    public function getImmagineProfilo(){
+    public function getImmagineProfilo(): string{
         return $this->immagineProfilo;
     }
 
@@ -214,30 +227,20 @@ class Account{
     }
 
     /**
-     * Aggiunge un `Personaggio` già esistente alla lista dei personaggi dell'account
-     * @param Personaggio $personaggio il personaggio da aggiungere
-     * @return bool Se true indica che l'inserimento è accaduto; false che l'utente ha raggiunto il massimo numero di personaggi ottenibili
+     * Aggiunge un personaggio all'account, accettando sia un oggetto Personaggio che i dati per crearne uno nuovo.
+     * @param Personaggio|string $personaggio Nome del personaggio o oggetto Personaggio
+     * @param string|null $elemento Elemento del personaggio (necessario solo se si passa il nome)
+     * @return bool True se aggiunto, false se raggiunto il massimo
      */
-    public function addPersonaggio($personaggio){
+    public function addPersonaggio($personaggio, $elemento = null){
         if(count($this->personaggi) >= self::MAX_NUM_PERSONAGGI)
             return false;
 
-        $this->personaggi[] = $personaggio;
-        return true;
-    }
-
-    /**
-     * Crea e aggiunge un `Personaggio` alla lista dei personaggi dell'account
-     * @param string $nome nome del personaggio da creare
-     * @param string $elemento elemento del personaggio da creare
-     * @return bool Se true indica che l'inserimento è accaduto; false che l'utente ha raggiunto il massimo numero di personaggi ottenibili
-     */
-    public function addNewPersonaggio($nome, $elemento){
-        if(count($this->personaggi) >= self::MAX_NUM_PERSONAGGI)
-            return false;
-
-        $this->personaggi[] = new Personaggio($nome, $this->id, $elemento);
-
+        if($personaggio instanceof Personaggio){
+            $this->personaggi[] = $personaggio;
+        } else {
+            $this->personaggi[] = new Personaggio($personaggio, $this->id, $elemento);
+        }
         usort($this->personaggi, function($a, $b){
             return $a->getNome() <=> $b->getNome();
         });
@@ -266,10 +269,10 @@ class Account{
      * Funzione che aggiorna i punti esperienza di un personaggio e ne gestisce il LVLUP
      * @param string $nomePersonaggio nome del personaggio
      * @param boolean $hasWon indica se il personaggio sta guadagnando esperienza da una vittoria o una sconfitta
-     * @return int|null se l'aggiornamento ha avuto successo restituisce il numero di livelli guadagnati dal personaggio. Se il personaggio non esiste 
+     * @return int|null se l'aggiornamento ha avuto successo restituisce il numero di livelli guadagnati dal personaggio. Se il personaggio non esiste restituisce `null`
      */
     public function addPGExp($nomePersonaggio, $hasWon){
-        $nLvlUp = -1;
+        $nLvlUp = null;
         foreach($this->personaggi as $pg){
             if($pg->getNome() === $nomePersonaggio){
                 $nLvlUp = $pg->addExp($hasWon);
@@ -277,8 +280,6 @@ class Account{
                     $this->modifyCoins(false, self::COINS_LVL_UP * $nLvlUp);
             }
         }
-        if($nLvlUp === -1)
-            return null;
         return $nLvlUp;
     }
     /**
@@ -298,7 +299,7 @@ class Account{
     }
 
     /**
-     * Rimuove un'oggetto dall'inventario del personaggio specificato.
+     * Rimuove un oggetto dall'inventario del personaggio specificato.
      * @param string $nomePersonaggio nome del personaggio sul quale effettuare l'azione
      * @param int $itemId id dell'oggetto da rimuovere
      * @param bool $moveToInventario indica se spostarlo nell'inventario o meno

@@ -15,6 +15,9 @@ if(!isset($_SESSION['account']) || !isset($_SESSION['currentPG_nome'])){
 	pageError(403);
 }
 
+/**
+* @var Account $account
+*/
 $account = unserialize($_SESSION['account']);
 $pgName = unserialize($_SESSION['currentPG_nome']);
 $personaggio = $account->getPersonaggi($pgName);

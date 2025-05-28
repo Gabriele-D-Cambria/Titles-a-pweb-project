@@ -7,6 +7,9 @@ if(!isset($_SESSION['account'])){
 	exit;
 }
 
+/**
+* @var Account $account
+*/
 $account = unserialize($_SESSION['account']);
 
 $id = $account->getId();

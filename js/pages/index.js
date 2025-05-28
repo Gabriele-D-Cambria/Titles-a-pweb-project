@@ -28,11 +28,9 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-
-
 /**
- * Crea un modulo di login o registrazione.
- * @param {boolean} login - Indica se creare il modulo di login (true) o registrazione (false).
+ * Crea un modulo di login o registrazione e lo mostra all'utente.
+ * @param {boolean} login - `true` per il modulo di login, `false` per la registrazione.
  */
 function createModule(login){
     let module = document.getElementById("loginModule");
@@ -114,8 +112,9 @@ function createModule(login){
 }
 
 /**
- * Gestisce gli errori del modulo di login o registrazione.
- * @param {Object} loginError - Oggetto che contiene informazioni sull'errore.
+ * Gestisce e visualizza gli errori relativi al modulo di login o registrazione.
+ * Se il modulo non è presente, lo crea.
+ * @param {Object} loginError - Oggetto contenente le informazioni sull'errore e se riguarda il login o il sign-up.
  */
 function handleFormError(loginError){
     let module = document.getElementById("loginModule");
@@ -126,6 +125,10 @@ function handleFormError(loginError){
     errorHandler(loginError);
 }
 
+/**
+ * Inizializza e gestisce lo slider informativo della pagina principale.
+ * Permette la navigazione tra le slide e aggiorna i contenuti mostrati.
+ */
 function createSlider() {
     const sliderData = [
         {
@@ -180,6 +183,10 @@ function createSlider() {
     resetSliderTimer();
 }
 
+/**
+ * Aggiorna i contenuti dello slider informativo con i dati forniti.
+ * @param {Object} data - Oggetto contenente img, title e text della slide.
+ */
 function updateSlider(data) {
     document.getElementById('slider-img').src = data.img;
 
