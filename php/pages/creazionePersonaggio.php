@@ -3,8 +3,8 @@ session_start();
 
 require_once __DIR__ . "/../includes/methods.php";
 
-if(!isset($_SESSION['account'])){
-	pageError("401");
+if(!isset($_SESSION['accountID'])){
+	pageError(403);
 }
 
 if (!isset($_SERVER['HTTP_REFERER']) || 
@@ -15,10 +15,15 @@ if (!isset($_SERVER['HTTP_REFERER']) ||
 }
 
 
-/**
-* @var Account $account
-*/
-$account = unserialize($_SESSION['account']);
+$account = null;
+$id = unserialize($_SESSION['accountID']);
+try {
+	$account = new Account($id, true);
+} 
+catch (Exception $e) {
+	error_log("Errore durante il recupero dell'account in creazionePersonaggio.php: " . $e->getMessage());
+	pageError($e->getCode());
+}
 
 if(count($account->getPersonaggi()) === Account::MAX_NUM_PERSONAGGI){
 	$_SESSION['message'] = ERROR_TYPES['full_PG'];

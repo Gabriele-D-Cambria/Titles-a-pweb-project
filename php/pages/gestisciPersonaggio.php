@@ -11,14 +11,20 @@ if($_SERVER['REQUEST_METHOD'] === "POST" && isset($_POST['pg'])){
 	exit;
 }
 
-if(!isset($_SESSION['account']) || !isset($_SESSION['currentPG_nome'])){
-	pageError(401);
+if(!isset($_SESSION['accountID'], $_SESSION['currentPG_nome'])){
+	pageError(403);
 }
 
-/**
-* @var Account $account
-*/
-$account = unserialize($_SESSION['account']);
+$account = null;
+$id = unserialize($_SESSION['accountID']);
+try {
+	$account = new Account($id, true);
+} 
+catch (Exception $e) {
+	error_log("Errore durante il recupero dell'account in gestisciPersonaggio.php: " . $e->getMessage());
+	pageError($e->getCode());
+}
+
 $PG_name = unserialize($_SESSION['currentPG_nome']);
 
 $currentPGobj = $account->getPersonaggi($PG_name);

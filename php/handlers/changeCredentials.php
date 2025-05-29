@@ -6,15 +6,19 @@ session_start();
 if(!isset($_SERVER['REQUEST_METHOD']) || basename($_SERVER['HTTP_REFERER']) !== 'dashboard.php'){
 	pageError("403");
 }
-if (!isset($_SESSION['account'])){
+if (!isset($_SESSION['accountID'])){
 	pageError("401");
 }
 
-/**
-* @var Account $account
-*/
-$account = unserialize($_SESSION['account']);
-$accountId = $account->getId();
+
+$account = null;
+$accountId = unserialize($_SESSION['accountID']);
+try {
+	$account = new Account($accountId, true);
+} 
+catch (Exception $e) {
+	terminateChangeError($e->getMessage(), $e->getCode());
+}
 
 $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
 if($conn->connect_error){
@@ -44,8 +48,8 @@ try{
 		}
 
 		$sqlCheck = "SELECT ID
-				FROM Account
-				WHERE Username = ?";
+					 FROM Account
+					 WHERE Username = ?";
 
 		$stmtCheck = $conn->prepare($sqlCheck);
 		$stmtCheck->bind_param("s", $newUsername);
@@ -67,7 +71,6 @@ try{
 			throw new Exception($stmtUpdate->error, $stmtUpdate->errno);
 		}
 
-		$account->updateUsername($newUsername);
 		$message = "Username aggiornato correttamente";
 	}
 	else if(isset($_POST['password']) && isset($_POST['confirmPassword'])){
@@ -149,21 +152,12 @@ try{
 		$message = "Account eliminato con successo";
 	}
 	else if(isset($_POST['newPic'])){
+		// Cambia Icona dell'account
 		$logout = false;
 		$newPath = $_POST['newPic'];
 		
-		$sql = "SELECT ImmagineProfilo
-				FROM Account
-				WHERE ID = ?";
-		$stmtCheck = $conn->prepare($sql);
-		$stmtCheck->bind_param("s", $accountId);
-		if(!$stmtCheck->execute()){
-			throw new Exception($stmtCheck->error, $stmtCheck->errno);
-		}
-
-		$result = $stmtCheck->get_result();
-		$currentPath = $result->fetch_assoc();
-		if($currentPath['ImmagineProfilo'] === $newPath){
+		
+		if($newPath === $account->getImmagineProfilo()){
 			throw new Exception('image_same_as_current', 400);
 		}
 
@@ -175,14 +169,12 @@ try{
 			throw new Exception($stmtUpdate->error, $stmtUpdate->errno);
 		}
 
-		$account->updateImmagineProfilo($newPath);
 		$message = "Immagine cambiata con successo!";
 	}
 	else{
 		throw new Exception("invalid_param", 400);
 	}
 
-	$_SESSION['account'] = serialize($account);
 	$conn->commit();
 	terminateChange($logout,$message);
 }
@@ -197,11 +189,19 @@ finally{
 }
 
 
+/**
+ * Termina il processo di cambio credenziali in caso di errore.
+ * Imposta un messaggio di errore nella sessione, chiude la sessione e reindirizza alla dashboard.
+ *
+ * @param string $errorType Tipo di errore (chiave di ERROR_TYPES o messaggio personalizzato)
+ * @param int $errorCode Codice di errore HTTP o personalizzato
+ * @return void
+ */
 function terminateChangeError($errorType, $errorCode){
 	error_log($errorType);
 
-	$errorMessage = ERROR_TYPES[$errorType] ?? "Errore Sconosciuto";
-	
+	$errorMessage = ERROR_TYPES[$errorType] ?? ERROR_TYPES['defualt'];
+
 	$_SESSION['errorMessage'] = [
 		"message" => $errorMessage,
 		"errorCode" => $errorCode
@@ -212,6 +212,14 @@ function terminateChangeError($errorType, $errorCode){
 	exit();
 }
 
+/**
+ * Termina il processo di cambio credenziali in caso di successo.
+ * Imposta un messaggio di successo nella sessione, chiude la sessione e reindirizza alla dashboard o al logout.
+ *
+ * @param bool $logout Se true effettua il logout, altrimenti torna alla dashboard
+ * @param string $message Messaggio di successo da mostrare all'utente
+ * @return void
+ */
 function terminateChange($logout, $message){
 	$direction = $logout? "./logout.php" : "./../pages/dashboard.php";
 

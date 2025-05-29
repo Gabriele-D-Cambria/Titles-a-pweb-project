@@ -2,8 +2,8 @@
 require_once __DIR__ . "/../includes/methods.php";
 session_start();
 
-if(!isset($_SESSION['account'])){
-    apiError(401);
+if(!isset($_SESSION['accountID'])){
+    apiError(403);
     exit;
 }
 

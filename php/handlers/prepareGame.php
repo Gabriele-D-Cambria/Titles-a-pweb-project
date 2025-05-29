@@ -3,32 +3,28 @@
 session_start();
 require_once __DIR__ . "/../includes/methods.php";
 
-if (!isset($_SERVER['HTTP_REFERER'])){
-	pageError(403);
+if (!isset($_SERVER['HTTP_REFERER']) || basename($_SERVER['HTTP_REFERER']) !== "gestisciPersonaggio.php" || $_SERVER['REQUEST_METHOD'] !== "POST"){
+	pageError(405, "./../pages/");
 }
 
-if(basename($_SERVER['HTTP_REFERER']) !== "gestisciPersonaggio.php" || $_SERVER['REQUEST_METHOD'] !== "POST"){
-	pageError(403);
+if(!isset($_SESSION['accountID'], $_SESSION['currentPG_nome'])){
+	pageError(403, "./../pages/");
 }
 
-if(!isset($_SESSION['account']) || !isset($_SESSION['currentPG_nome'])){
-	pageError(403);
-}
-
-/**
-* @var Account $account
-*/
-$account = unserialize($_SESSION['account']);
+$id = unserialize($_SESSION['accountID']);
 $pgName = unserialize($_SESSION['currentPG_nome']);
-$personaggio = $account->getPersonaggi($pgName);
-
-if(!$personaggio){
-	pageError(401);
-}
 try{
+	$account = new Account($id, true);
+
+	$personaggio = $account->getPersonaggi($pgName);
+
+	if(!$personaggio){
+		pageError(401, "./../pages/");
+	}
+
 	$battaglia = $personaggio->getBattagliaInCorso();
 	if(!$battaglia){
-		$avversario = getRandomPG($account->getId(), $personaggio->getLivello());
+		$avversario = getRandomPG($id, $personaggio->getLivello());
 		if($avversario === null){
 			throw new Exception("Nessun avversario disponibile al momento, ci dispiace.", 404);
 		}
@@ -47,7 +43,7 @@ try{
 		unset($battaglia['StatoPersonaggi']);
 	}
 	else{
-		pageError(401);
+		pageError(401, "./../");
 	}
 	
 	$_SESSION['battaglia'] = serialize($battaglia);

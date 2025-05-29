@@ -2,18 +2,15 @@
 require_once __DIR__ . "/../includes/methods.php";
 session_start();
 
-if(!isset($_SESSION['account'])){
-    apiError(401);
-    exit;
+if(!isset($_SESSION['accountID'])){
+    apiError(403);
 }
 
 if(!isset($_SERVER['REQUEST_METHOD']) || $_SERVER["REQUEST_METHOD"] !== "POST" || !isset($_POST['filter'])){
-    apiError(400);
-    exit;
+    apiError(405);
 }
 
-$account = unserialize(($_SESSION['account']));
-$accountId = $account->getId();
+$id = unserialize($_SESSION['accountID']);
 $filter = json_decode($_POST['filter']);
 
 if($filter !== null){
@@ -36,7 +33,7 @@ if($filter !== null){
     $filter = array_unique($filter);
 }
 
-$inventory = getInventory($accountId, $filter);
+$inventory = getInventory($id, $filter);
 
 header('Content-Type: application/json');
 

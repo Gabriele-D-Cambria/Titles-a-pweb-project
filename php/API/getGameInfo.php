@@ -5,7 +5,7 @@ session_start();
 header('Content-Type: application/json');
 
 
-if(!isset($_SESSION['account']) || !isset($_SESSION['currentPG_nome'])){
+if(!isset($_SESSION['accountID'], $_SESSION['currentPG_nome'])){
 	apiError(403);
 }
 

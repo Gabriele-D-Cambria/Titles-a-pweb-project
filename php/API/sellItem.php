@@ -3,23 +3,18 @@ require_once __DIR__ . "/../includes/methods.php";
 
 session_start();
 
-if(!isset($_SESSION["account"])){
-    apiError(401);
+if(!isset($_SESSION["accountID"])){
+    apiError(403);
 }
 
-/**
-* @var Account $account
-*/
-$account = unserialize($_SESSION['account']);
-$id = $account->getId();
+if(!isset($_SERVER['REQUEST_METHOD']) || $_SERVER["REQUEST_METHOD"] !== "POST" || !isset($_POST['itemId'])){
+    apiError(405);
+}
+
+$id = unserialize($_SESSION['accountID']);
 
 $itemId = $_POST['itemId'];
 $esito = sellItem($itemId, $id);
-
-if(isset($esito["successo"]) && $esito["successo"]){
-    $account->modifyCoins(false, $esito["guadagno"]);
-    $_SESSION["account"] = serialize($account);
-}
 
 header('Content-Type: application/json');
 echo json_encode($esito);

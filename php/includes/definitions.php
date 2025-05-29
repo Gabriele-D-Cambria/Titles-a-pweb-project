@@ -111,7 +111,76 @@ class Account{
     private $shopRefresh;
     private $immagineProfilo;
 
-    public function __construct($id, $username, $monete, $shopRefresh, $immagineProfilo){
+    /**
+     * Costruttore della classe Account. Dato un `$id` recupera le informazioni dell'account dal database.
+     * Pu; anche recuperare informazioni riguardo ai personaggi dell'account
+     * @param int $id id dell'account
+     * @param boolean $getAlsoPG `true` recupera anche le informazioni sui personaggi, `false` no. [Default: `false`]
+     * @throws Exception se ci sono degli errori nel recupero o nella creazione del personaggio.
+     */
+    public function __construct($id, $getAlsoPG = false){
+        $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+
+        $stmt = null;
+        $stmtPersonaggi = null;
+        try{
+            if ($conn->connect_error){
+                throw new Exception("Server non Disponibile", 500);
+            }
+            $sql = "SELECT ID, Username, Monete, RefreshNegozio, ImmagineProfilo
+                FROM Account
+                WHERE ID = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if($result->num_rows > 0){
+                $userRow = $result->fetch_assoc();
+                $dateTime = new DateTime($userRow['RefreshNegozio']);
+
+                $this->fromArray($userRow['ID'], $userRow['Username'], $userRow['Monete'], $dateTime, $userRow['ImmagineProfilo']);
+
+                if($getAlsoPG){
+                    $sqlPersonaggi = "SELECT Nome, Proprietario, Elemento
+                                    FROM Personaggi
+                                    WHERE Proprietario = ?";
+                    $stmtPersonaggi = $conn->prepare($sqlPersonaggi);
+                    $stmtPersonaggi->bind_param('i', $this->id);
+                    $stmtPersonaggi->execute();
+                    $resultPersonaggi = $stmtPersonaggi->get_result();
+
+                    while($personaggioRow = $resultPersonaggi->fetch_assoc()){
+                        $personaggio = new Personaggio(
+                            $personaggioRow['Nome'],
+                            $personaggioRow['Proprietario'],
+                            $personaggioRow['Elemento']
+                        );
+                        $this->addPersonaggio($personaggio);
+                    }
+                }
+            }
+            else{
+                throw new Exception("L'account con l'ID fornito non esiste", 400);
+            }
+        }
+        finally{
+            if ($stmt) $stmt->close();
+            if ($stmtPersonaggi) $stmtPersonaggi->close();
+            $conn->close();
+        }
+    }
+
+    /**
+     * Funzione che crea un Account da un array, senza possibilità di inserire personaggi
+     * @param int $id id dell'account
+     * @param string $username username dell'account
+     * @param int $monete quantità di monete dell'account
+     * @param DateTime $shopRefresh data dello shopRefresh dell'account
+     * @param string $immagineProfilo percorso dell'immagine profilo dell'account
+     * @return void
+     */
+    public function fromArray($id, $username, $monete, $shopRefresh, $immagineProfilo){
         $this->id = $id;
         $this->username = $username;
         $this->monete = $monete;
@@ -303,7 +372,7 @@ class Account{
      * @param string $nomePersonaggio nome del personaggio sul quale effettuare l'azione
      * @param int $itemId id dell'oggetto da rimuovere
      * @param bool $moveToInventario indica se spostarlo nell'inventario o meno
-     * @return bool
+     * @return boolean `true` se l'aggiornamento è avvenuto correttamente, `false` altrimenti
      */
     public function unequipPGItem($nomePersonaggio, $itemId, $moveToInventario = true){
         foreach($this->personaggi as $personaggio){
@@ -645,7 +714,7 @@ class Personaggio{
         $this->damage          = self::DAMAGE_LOOKUP[$this->currentFOR];
         $this->dodgingChance   = self::DODGE_LOOKUP[$this->currentDES];
         $this->protezioneDanno = 0;
-        
+
         if($this->arma){
             $this->damage += $this->arma['Danno'];
         }
@@ -703,7 +772,7 @@ class Personaggio{
                 $armaResult = $armaStmt->get_result();
 
                 $this->arma = $armaResult->fetch_assoc();
-                
+
                 if($this->arma['Elemento'] === $this->elemento)
                     $this->arma['Danno'] += 1;
 
@@ -711,7 +780,7 @@ class Personaggio{
                 $preDES = $this->currentDES;
                 $this->currentFOR = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->currentFOR + $this->arma['ModificatoreFor']));
                 $this->currentDES = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->currentDES + $this->arma['ModificatoreDes']));
-                
+
                 $this->setEquipmentStats();
 
                 $this->arma['ModificatoreFor'] = $this->currentFOR - $preFOR;
@@ -778,7 +847,7 @@ class Personaggio{
                 $preDES = $this->currentDES;
                 $this->currentFOR = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->currentFOR + $this->armatura['ModificatoreFor']));
                 $this->currentDES = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->currentDES + $this->armatura['ModificatoreDes']));
-                
+
                 $this->setEquipmentStats();
 
                 $this->armatura['ModificatoreFor'] = $this->currentFOR - $preFOR;
@@ -941,7 +1010,7 @@ class Personaggio{
         }
 
         return $output;
-        
+
     }
 
     /**
@@ -1052,11 +1121,11 @@ class Personaggio{
     public function getOggettiUtilizzabili(){
         $oggetti = [];
         foreach ($this->zaino as $item){
-            if ($item['RecuperoVita'] > 0 && $this->tmp_PF == $this->PF) 
+            if ($item['RecuperoVita'] > 0 && $this->tmp_PF == $this->PF)
                 continue;
-            if ($item['ModificatoreFor'] > 0 && $item['ModificatoreDes'] == 0 && $this->currentFOR == self::MAX_FOR_DES) 
+            if ($item['ModificatoreFor'] > 0 && $item['ModificatoreDes'] == 0 && $this->currentFOR == self::MAX_FOR_DES)
                 continue;
-            if ($item['ModificatoreDes'] > 0 && $item['ModificatoreFor'] == 0 && $this->currentDES == self::MAX_FOR_DES) 
+            if ($item['ModificatoreDes'] > 0 && $item['ModificatoreFor'] == 0 && $this->currentDES == self::MAX_FOR_DES)
                 continue;
             $oggetti[] = $item;
         }
@@ -1107,8 +1176,8 @@ class Personaggio{
         }
         return $best;
     }
-    
-    
+
+
     /**
      * Aggiungo l'esperienza ed eventualemnte effettuo il lvlUP
      * @param bool $win Se l'esperienza guadagnata deriva da una vittoria (true) o da una sconfitta (false)
@@ -1127,7 +1196,7 @@ class Personaggio{
             $amount = $win? self::EXP_WIN : self::EXP_LOSS;
 
             $this->exp += $amount;
-            
+
             $sql = "UPDATE Personaggi SET PuntiExp = ? WHERE Nome = ? AND Proprietario = ?";
 
             $stmt = $connectionDB->prepare($sql);
@@ -1164,7 +1233,7 @@ class Personaggio{
 
         if($totalDamage <= 0)
             $totalDamage = 1;
-        
+
         $this->tmp_PF -= $totalDamage;
         return $totalDamage;
     }
@@ -1192,7 +1261,7 @@ class Personaggio{
             $esito['colpito'] = true;
             $esito['dannoInflitto'] = $P->takeDamage($damageToDeal);
         }
-        
+
         return $esito;
     }
 
@@ -1236,8 +1305,8 @@ class Personaggio{
         finally{
             $connectionDB->close();
         }
-        
-        
+
+
         if ($newFOR < self::MIN_FOR_DES || $newFOR > self::MAX_FOR_DES || $newFOR < $this->currentFOR){
             throw new Exception("Aggiornamento Fallito: Valore non ammissibile per la Forza: " . $newFOR, 400);
         }
@@ -1263,13 +1332,13 @@ class Personaggio{
 
         $this->puntiUpgrade -= $totalUsedPU;
         $this->PF = $newPF;
-        
+
         $this->FOR += $usedPU["FOR"];
         $this->currentFOR = $newFOR;
-        
+
         $this->DES += $usedPU["DES"];
         $this->currentDES = $newDES;
-        
+
         $this->tmp_PF = $this->PF;
         $this->setEquipmentStats();
 
@@ -1283,7 +1352,7 @@ class Personaggio{
      * @param boolean $updateDB se aggiornare o meno il database [Default: `false`]
      * @return boolean `true` se l'oggetto è stato trovato e utilizzato correttamente, `false` altrimenti
      */
-    public function useItem($itemId, $updateDB = false){       
+    public function useItem($itemId, $updateDB = false){
         $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
         if ($connectionDB->connect_error){
             throw new Exception("Connessione al database fallita: ". $connectionDB->connect_error, 500);
@@ -1295,7 +1364,7 @@ class Personaggio{
                 throw new Exception("ID oggetto non valido: deve essere un numero intero", 400);
             }
             $itemId = intval($itemId);
-    
+
             $foundIndex = null;
             foreach ($this->zaino as $index => $oggetto){
                 if ($oggetto['ID'] === $itemId){
@@ -1307,9 +1376,9 @@ class Personaggio{
             if ($foundIndex === null){
                 return false;
             }
-    
+
             $used = false;
-    
+
             // Cura
             if (isset($item['RecuperoVita']) && $item['RecuperoVita'] > 0){
                 if(!$this->heal($item['RecuperoVita'])){
@@ -1327,9 +1396,9 @@ class Personaggio{
                 $this->currentDES = max(self::MIN_FOR_DES, min(self::MAX_FOR_DES, $this->currentDES + $item['ModificatoreDes']));
                 $used = true;
             }
-    
+
             $this->setEquipmentStats();
-            
+
             $this->removeFromZaino($connectionDB, $itemId, $updateDB, false);
             return $used;
         }
@@ -1427,7 +1496,7 @@ class Personaggio{
      * Rimuove un'`item` dagli oggetti equipaggiati (arma, armatura o dallo zaino) e lo inserisce nell'inventario di `$this->proprietario`
      * @param int $itemId id dell'oggetto da inserire nell'inventario
      * @param boolean $moveToInventario indica se spostare l'oggetto nell'inventario del proprietario o meno [Default: `true`]
-     * @throws Exception per problemi con 
+     * @throws Exception per problemi con
      * @return bool
      */
     public function unequipItem($itemId, $moveToInventario = true){
@@ -1498,7 +1567,7 @@ class Personaggio{
             $sql = "SELECT *
                     FROM Combattimenti
                     WHERE Giocatore1_Nome = ? AND Giocatore1_Proprietario = ?";
-            
+
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("si", $this->nome, $this->proprietario);
 
@@ -1524,7 +1593,7 @@ class Personaggio{
             }
 
             return $output;
-            
+
         }
         finally{
             if($stmt)   $stmt->close();
@@ -1541,13 +1610,13 @@ class Personaggio{
         if($conn->connect_error){
             throw new Exception("Connessione al database fallita: " . $conn->connect_error, 500);
         }
-        
+
         $conn->begin_transaction();
         $stmt = null;
         $stmtUpdate = null;
         try {
-            $sql = "SELECT * 
-                    FROM Combattimenti 
+            $sql = "SELECT *
+                    FROM Combattimenti
                     WHERE Giocatore1_Nome = ? AND Giocatore1_Proprietario = ? AND Terminata = 0
                     ORDER BY DataInizioBattaglia DESC LIMIT 1";
             $stmt = $conn->prepare($sql);
@@ -1561,7 +1630,7 @@ class Personaggio{
                 $currentTimestamp = $currentDateTime->format('Y-m-d H:i:s');
 
                 $sqlUpdate = "UPDATE Combattimenti SET DataUltimoTurno = ?
-                              WHERE Giocatore1_Proprietario = ? 
+                              WHERE Giocatore1_Proprietario = ?
                                 AND Giocatore1_Nome = ?
                                 AND Terminata = 0 ";
                 $stmtUpdate = $conn->prepare($sqlUpdate);
@@ -1577,7 +1646,7 @@ class Personaggio{
             }
             $conn->commit();
             return $output;
-        } 
+        }
         finally {
             if($stmt)       $stmt->close();
             if($stmtUpdate) $stmtUpdate->close();
@@ -1600,10 +1669,10 @@ class Personaggio{
         $stmt = null;
         $selectStmt = null;
         try {
-            $sql = "INSERT INTO Combattimenti 
+            $sql = "INSERT INTO Combattimenti
                 (Giocatore1_Nome, Giocatore1_Proprietario, StatoPersonaggi)
                 VALUES (?, ?, ?)";
-            $stmt = $conn->prepare($sql);            
+            $stmt = $conn->prepare($sql);
 
             $turno = random_int(0, 9) % 2 === 0;
             $statoPersonaggi = [
@@ -1619,9 +1688,9 @@ class Personaggio{
                 throw new Exception("Errore durante la creazione del combattimento: " . $stmt->error, 500);
             }
 
-            $sqlSelect = "SELECT * 
-                          FROM Combattimenti 
-                          WHERE Giocatore1_Nome = ? AND Giocatore1_Proprietario = ? 
+            $sqlSelect = "SELECT *
+                          FROM Combattimenti
+                          WHERE Giocatore1_Nome = ? AND Giocatore1_Proprietario = ?
                             AND Terminata = 0";
 
             $selectStmt = $conn->prepare($sqlSelect);
@@ -1636,7 +1705,7 @@ class Personaggio{
 
             $conn->commit();
             return $battaglia;
-        } 
+        }
         catch(Exception $e){
             $conn->rollback();
             throw new Exception($e->getMessage(), $e->getCode());

@@ -2,8 +2,8 @@
 session_start();
 require_once __DIR__ . "/../includes/methods.php";
 
-if(!isset($_SESSION['account'])){
-    pageError("401");
+if(!isset($_SESSION['accountID'])){
+    pageError(403);
 }
 
 
@@ -19,10 +19,16 @@ if(isset($_SESSION["errorMessage"])){
     unset($_SESSION["errorMessage"]);
 }
 
-/**
-* @var Account $account
-*/
-$account = unserialize($_SESSION['account']);
+$account = null;
+$id = unserialize($_SESSION['accountID']);
+try {
+	$account = new Account($id, true);
+} 
+catch (Exception $e) {
+	error_log("Errore durante il recupero dell'account in dashboard.php: " . $e->getMessage());
+	pageError($e->getCode());
+}
+
 $user = $account->getAll();
 
 $characterList = "";

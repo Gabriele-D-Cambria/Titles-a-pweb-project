@@ -2,8 +2,8 @@
 
 session_start();
 
-if(!isset($_SESSION['account']) || !isset($_SESSION['currentPG_nome'])){
-	pageError(401);
+if(!isset($_SESSION['accountID'], $_SESSION['currentPG_nome'])){
+	pageError(403);
 }
 
 if(!isset($_SESSION['battaglia'])){

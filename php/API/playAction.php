@@ -2,7 +2,7 @@
 session_start();
 require_once __DIR__ . "/../includes/methods.php";
 
-if(!isset($_SESSION['battaglia']) || !isset($_SESSION['account'])){
+if(!isset($_SESSION['battaglia'], $_SESSION['accountID'])){
 	apiError(403, "Sessione non valida!");
 }
 
@@ -110,10 +110,10 @@ try{
 	if($pg1->isDead() || $pg2->isDead()){
 		updateGame($battaglia, $pg2->isDead());
 
-		/**
-		* @var Account $account
-		*/
-		$account = unserialize($_SESSION['account']);
+		
+		$id = unserialize($_SESSION['accountID']);
+		$account = new Account($id, true);
+
 		$nomePersonaggio = unserialize($_SESSION['currentPG_nome']);
 
 		$account->unequipPGItem_onlyUsed($nomePersonaggio, $pg1);
@@ -132,8 +132,6 @@ try{
 			$_SESSION['endgameMessage'] .= ($nLivelliGuadagnati > 1)? "i" : "o";
 			$_SESSION['endgameMessage'] .= "!\n Hai guadagnato ".Account::COINS_LVL_UP." monete e sono state aggiunte delle ricompense all'inventario!";
 		}
-
-		$_SESSION['account'] = serialize($account);
 	}
 	else{
 		updateGame($battaglia);

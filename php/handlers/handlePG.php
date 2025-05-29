@@ -2,23 +2,21 @@
 require_once __DIR__ . "/../includes/methods.php";
 session_start();
 
-if(!isset($_SESSION['account']))
+if(!isset($_SESSION['accountID']))
 	pageError(401);
 
 if(!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== "POST"){
-	pageError(403);
+	pageError(405);
 }
 
 
-/**
-* @var Account $account
-*/
-$account = unserialize($_SESSION['account']);
-$userId = $account->getId();
+
+$userId = unserialize($_SESSION['accountID']);
 
 if(isset($_POST['deleteCheck'])){
 	// Richiesta di eliminazione Personaggio
 	try{
+		$account = new Account($userId, true);
 		if(!isset($_SESSION['currentPG_nome'])){
 			throw new Exception("pg_not_selected", 400);
 		}
@@ -31,7 +29,6 @@ if(isset($_POST['deleteCheck'])){
 
 		unset($_SESSION['currentPG_nome']);
 
-		$_SESSION["account"] = serialize($account);
 		$_SESSION["message"] = $nome ." eliminato con successo!";
 		session_write_close();
 		header("Location: ./../pages/dashboard.php");
@@ -47,6 +44,7 @@ else if(isset($_POST['upgrade'])){
 		if(!isset($_SESSION['currentPG_nome'])){
 			throw new Exception("pg_not_selected", 400);
 		}
+		$account = new Account($userId, true);
 
 		$nome = unserialize($_SESSION['currentPG_nome']);
 
@@ -58,7 +56,6 @@ else if(isset($_POST['upgrade'])){
 			throw new Exception("upgrade_failed", 400);
 		}
 
-		$_SESSION['account'] = serialize($account);
 		$_SESSION['message'] = $nome . " migliorato con successo!";
 		session_write_close();
 		header("Location: ./../pages/gestisciPersonaggio.php");
@@ -71,11 +68,12 @@ else if(isset($_POST['upgrade'])){
 else{
 	// Richiesta di Recupero o Creazione Personaggio
 	try{
-
 		$name = $_POST['PG-name'];
-		if(is_null($name) || !preg_match(PG_NAME_PATTERN, $name)){
+		if($name === null || !preg_match(PG_NAME_PATTERN, $name)){
 			throw new Exception("invalid_pg_name", 400);
 		}
+		
+		$account = new Account($userId, true);
 
 		$personaggi = $account->getPersonaggi($name);
 
@@ -92,7 +90,6 @@ else{
 			throw new Exception('full_PG', 400);
 		}
 
-		$_SESSION['account'] = serialize($account);
 		$_SESSION['currentPG_nome'] = serialize($name);
 
 		header("Location: ./../pages/gestisciPersonaggio.php");

@@ -42,13 +42,14 @@ try{
         }
 
         $data = $result->fetch_assoc();
+        $id = $data['ID'];
         $hashedPassword = $data['Password'];
 
         if(!password_verify($password, $hashedPassword)){
             throw new Exception("wrong_password", 401);
         }
 
-        startSession($username);
+        startSession($id);
     }
     else{
         // Sign Up
@@ -77,7 +78,9 @@ try{
             throw new Exception("registration_failed", 500);
         }
 
-        startSession($username);
+        $id = $conn->insert_id;
+
+        startSession($id);
     }
 }
 catch(Exception $e){
@@ -105,11 +108,17 @@ finally{
     $conn->close();
 }
 
-
-function startSession($username){
-    $account = getUserData($username);
-    $_SESSION['account'] = serialize($account);
+/**
+ * Funzione che inizializza la sessione e reindirizza alla `dashboard.php`
+ * @param int $id id dell'account
+ * @return never
+ */
+function startSession($id){
+    $_SESSION['accountID'] = serialize($id);
 
     header("Location: ./../pages/dashboard.php");
     exit;
 }
+
+
+// \$[a-z]+ = unserialize\(\$_SESSION\[('|")account('|")\]\);

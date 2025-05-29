@@ -83,63 +83,65 @@ function validateInputs($username, $password, $confirmPassword){
  */
 
 /**
- * Ritorna un elemento `Account` dato un username
+ * @deprec
+ * ~Ritorna un elemento `Account` dato un username~
  * @param string $username username da cercare nel database
  * @return Account|null oggetto `Account` oppure null se non è stato trovato un account con quell'`$username`
  */
 function getUserData($username){
-    $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
-    if($conn->connect_error)
-        apiError(500, "Connessione al database fallita: " . $conn->connect_error);
+    return null;
+    // $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
+    // if($conn->connect_error)
+    //     apiError(500, "Connessione al database fallita: " . $conn->connect_error);
 
-    $stmt = null;
-    $stmtPersonaggi = null;
+    // $stmt = null;
+    // $stmtPersonaggi = null;
 
-    try {
-        $sql = "SELECT ID, Username, Monete, RefreshNegozio, ImmagineProfilo
-                FROM Account
-                WHERE Username = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param('s', $username);
-        $stmt->execute();
-        $result = $stmt->get_result();
+    // try {
+    //     $sql = "SELECT ID, Username, Monete, RefreshNegozio, ImmagineProfilo
+    //             FROM Account
+    //             WHERE Username = ?";
+    //     $stmt = $conn->prepare($sql);
+    //     $stmt->bind_param('s', $username);
+    //     $stmt->execute();
+    //     $result = $stmt->get_result();
 
-        if($result->num_rows > 0){
-            $userRow = $result->fetch_assoc();
-            $dateTime = new DateTime($userRow['RefreshNegozio']);
-            $user = new Account($userRow['ID'], $userRow['Username'], $userRow['Monete'], $dateTime, $userRow['ImmagineProfilo']);
+    //     if($result->num_rows > 0){
+    //         $userRow = $result->fetch_assoc();
+    //         $dateTime = new DateTime($userRow['RefreshNegozio']);
+    //         $user = new Account($userRow['ID'], $userRow['Username'], $userRow['Monete'], $dateTime, $userRow['ImmagineProfilo']);
 
-            $sqlPersonaggi = "SELECT Nome, Proprietario, Elemento
-                              FROM Personaggi
-                              WHERE Proprietario = ?";
-            $stmtPersonaggi = $conn->prepare($sqlPersonaggi);
-            $stmtPersonaggi->bind_param('i', $userRow["ID"]);
-            $stmtPersonaggi->execute();
-            $resultPersonaggi = $stmtPersonaggi->get_result();
+    //         $sqlPersonaggi = "SELECT Nome, Proprietario, Elemento
+    //                           FROM Personaggi
+    //                           WHERE Proprietario = ?";
+    //         $stmtPersonaggi = $conn->prepare($sqlPersonaggi);
+    //         $stmtPersonaggi->bind_param('i', $userRow["ID"]);
+    //         $stmtPersonaggi->execute();
+    //         $resultPersonaggi = $stmtPersonaggi->get_result();
 
-            while($personaggioRow = $resultPersonaggi->fetch_assoc()){
-                $personaggio = new Personaggio(
-                    $personaggioRow['Nome'],
-                    $personaggioRow['Proprietario'],
-                    $personaggioRow['Elemento']
-                );
-                $user->addPersonaggio($personaggio);
-            }
-            return $user;
-        }
-        else{
-            // Nessun Account trovato
-            return null;
-        }
-    }
-    catch (Exception $e){
-        apiError(500, "Errore in getUserData: " . $e->getMessage());
-    }
-    finally{
-        if ($stmt) $stmt->close();
-        if ($stmtPersonaggi) $stmtPersonaggi->close();
-        $conn->close();
-    }
+    //         while($personaggioRow = $resultPersonaggi->fetch_assoc()){
+    //             $personaggio = new Personaggio(
+    //                 $personaggioRow['Nome'],
+    //                 $personaggioRow['Proprietario'],
+    //                 $personaggioRow['Elemento']
+    //             );
+    //             $user->addPersonaggio($personaggio);
+    //         }
+    //         return $user;
+    //     }
+    //     else{
+    //         // Nessun Account trovato
+    //         return null;
+    //     }
+    // }
+    // catch (Exception $e){
+    //     apiError(500, "Errore in getUserData: " . $e->getMessage());
+    // }
+    // finally{
+    //     if ($stmt) $stmt->close();
+    //     if ($stmtPersonaggi) $stmtPersonaggi->close();
+    //     $conn->close();
+    // }
 }
 
 

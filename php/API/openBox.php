@@ -3,22 +3,19 @@ require_once __DIR__ . "/../includes/methods.php";
 
 session_start();
 
-if(!isset($_SESSION["account"])){
-	apiError(401);
+if(!isset($_SESSION['accountID'], $_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== "POST"){
+	apiError(403);
 }
 
-$account = unserialize($_SESSION["account"]);
-$id = $account->getId();
+if(!isset($_POST['boxID'], $_POST['boxNome'])){
+	apiError(400);
+}
+
+$id = unserialize($_SESSION["accountID"]);
 
 $box = ['id' => $_POST["boxID"], 'nome' => $_POST["boxNome"]];
 
-
 $esito = openBox($box, $id);
-
-if(isset($esito["successo"]) && $esito["successo"]){
-	$account->modifyCoins(false, $esito["guadagno"]);
-	$_SESSION["account"] = serialize($account);
-}
 
 header('Content-Type: application/json');
 echo json_encode($esito);

@@ -4,22 +4,21 @@ require_once __DIR__ . "/../includes/methods.php";
 session_start();
 
 if(!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== "POST"){
+	pageError(405);
+}
+
+if(!isset($_SESSION['accountID'], $_SESSION['currentPG_nome'], $_SESSION['battaglia'])){
 	pageError(403);
 }
 
-if(!isset($_SESSION['account']) || !isset($_SESSION['currentPG_nome']) || !isset($_SESSION['battaglia'])){
-	pageError(401);
-}
 
 
-/**
-* @var Account $account
-*/
-$account = unserialize($_SESSION['account']);
+$id = unserialize($_SESSION['accountID']);
 $nomePersonaggio = unserialize($_SESSION['currentPG_nome']);
+$battaglia = unserialize($_SESSION['battaglia']);
 
 try{
-	$battaglia = unserialize($_SESSION['battaglia']);
+	$account = new Account($id, true);
 
 	$givenUp = false;
 	if(!$battaglia['Terminata']){
@@ -43,9 +42,7 @@ catch(Exception $e){
 
 
 unset($_SESSION['battaglia']);
-$_SESSION['account'] = serialize($account);
 
 session_write_close();
-
 echo json_encode(['ok' => true]);
 exit;
