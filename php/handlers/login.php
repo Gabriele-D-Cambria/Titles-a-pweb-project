@@ -119,6 +119,3 @@ function startSession($id){
     header("Location: ./../pages/dashboard.php");
     exit;
 }
-
-
-// \$[a-z]+ = unserialize\(\$_SESSION\[('|")account('|")\]\);
