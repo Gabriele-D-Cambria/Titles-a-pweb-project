@@ -6,13 +6,12 @@ if (basename($_SERVER['PHP_SELF']) === 'methods.php'){
 ini_set("display_errors", "0");
 require_once __DIR__ . "/definitions.php";
 
-// #region
 // *** Funzioni che gestiscono Errori *** //
 
 /**
  * Funzione che reindirizza un errore
- * @param string|int $errorCode codice di errore da passare alla "errorPage.php"
- * @param string $prefix path che porta alla "errorPage.php" [Default: ""]
+ * @param string|int $errorCode Codice di errore da passare alla "errorPage.php"
+ * @param string $prefix Percorso che porta alla "errorPage.php" [Default: ""]
  * @return never
  */
 function pageError($errorCode, $prefix = ""){
@@ -21,7 +20,7 @@ function pageError($errorCode, $prefix = ""){
 }
 
 /**
- * Funzione che reindirizza un errore di un'API
+ * Funzione che reindirizza un errore di un'API restituendo una risposta JSON standard.
  * @param int $errorCode Codice di errore HTTP [Default: 500]
  * @param string|null $message Messaggio di errore personalizzato [Default: null]
  * @return never
@@ -51,16 +50,15 @@ function apiError($errorCode = 500, $message = null){
 }
 
 /**
- * Valida gli input dell'utente per i campi username, password e confermaPassword
+ * Valida gli input dell'utente per i campi username, password e confermaPassword.
  * @param string|null $username Username da validare.
- * @param string|null $password Password da Validare.
- * @param string|null $confirmPassword Conferma Password da Validare.
- *
- * @return string Restituisce una stringa se la validazione fallisce:
- *      - "invalid_username" se $username non corrisponde all'USERNAME_PATTERN
- *      - "invalid_password" se $password non corrisponde al PASSWORD_PATTERN
- *      - "password_mismatch" se $confirmPassword non corrisponde a $password.
- * Se tutti gli input sono validi restituisce una stringa vuota.
+ * @param string|null $password Password da validare.
+ * @param string|null $confirmPassword Conferma password da validare.
+ * @return string Restituisce una stringa di errore se la validazione fallisce:
+ *                - "invalid_username" se $username non corrisponde all'USERNAME_PATTERN
+ *                - "invalid_password" se $password non corrisponde al PASSWORD_PATTERN
+ *                - "password_mismatch" se $confirmPassword non corrisponde a $password
+ *                Se tutti gli input sono validi restituisce una stringa vuota.
  */
 function validateInputs($username, $password, $confirmPassword){
     if(is_null($username) || !preg_match(USERNAME_PATTERN, $username))
@@ -75,10 +73,8 @@ function validateInputs($username, $password, $confirmPassword){
     return '';
 }
 
-// #endregion
 
 /** 
- * #region Funzioni di supporto API
  * Queste funzioni, in caso di errore, chiamano la funzione `apiError`, restituendo gli errori secondo lo standard
  */
 
@@ -146,10 +142,10 @@ function getUserData($username){
 
 
 /**
- * Recupera l'invetario di un account dal database
+ * Recupera l'inventario di un account dal database.
  * @param int $accountID ID dell'account
- * @param array|null $filter array contenente i tipi degli oggetti che vogliamo recuperare
- * @return array contenente gli item nell'inventario e la loro quantità
+ * @param array|null $filter Array contenente i tipi degli oggetti da recuperare (opzionale)
+ * @return array Array contenente gli item nell'inventario e la loro quantità
  */
 function getInventory($accountID, $filter = null){
     $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
@@ -199,7 +195,7 @@ function getInventory($accountID, $filter = null){
  * @param int $itemId ID dell'oggetto
  * @param int $accountId ID dell'account
  * @param int|null $currentQuantity Quantità attuale dell'oggetto (se non fornita, viene recuperata dal database)
- * @param mysqli $conn Connessione al server passata per riferimento
+ * @param mysqli $conn Connessione al database passata per riferimento
  * @return int Quantità aggiornata
  */
 function removeOneItem($itemId, $accountId, $currentQuantity, &$conn){
@@ -263,7 +259,7 @@ function removeOneItem($itemId, $accountId, $currentQuantity, &$conn){
  * Aggiunge uno o più oggetti all'inventario di un account, se c'è spazio disponibile.
  * @param int $itemId ID dell'oggetto da aggiungere
  * @param int $accountId ID dell'account
- * @param mysqli $conn Connessione al server passata per riferimento
+ * @param mysqli $conn Connessione al database passata per riferimento
  * @return int Quantità aggiornata dell'oggetto, o 0 se l'inserimento non è possibile
  */
 function addOneItem($itemId, $accountId, &$conn): int{
@@ -341,7 +337,7 @@ function addOneItem($itemId, $accountId, &$conn): int{
 }
 
 /**
- * Aggiorna la quantità di monete di un account nel database
+ * Aggiorna la quantità di monete di un account nel database.
  * @param int $accountId ID dell'account
  * @param int $amount Quantità di monete da aggiungere o sottrarre
  * @param mysqli $conn Connessione al database passata per riferimento
@@ -381,10 +377,10 @@ function updateCoins($accountId, $amount, &$conn){
 }
 
 /**
- * Funzione API che vende un oggetto dell'account
+ * Funzione API che vende un oggetto dell'account.
  * @param int $itemId ID dell'oggetto
  * @param int $accountId ID dell'account
- * @return array contiene informazioni sull'esito della richiesta
+ * @return array Contiene informazioni sull'esito della richiesta
  */
 function sellItem($itemId, $accountId){
     $conn = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
@@ -441,7 +437,7 @@ function sellItem($itemId, $accountId){
 
 }
 /**
- * Funzione API che permette di acquistare un oggetto dal negozio
+ * Funzione API che permette di acquistare un oggetto dal negozio.
  * @param int $itemId ID dell'oggetto da acquistare
  * @param int $accountId ID dell'account che effettua l'acquisto
  * @return array Esito dell'acquisto con eventuali dettagli o errori
@@ -516,9 +512,9 @@ function buyItem($itemId, $accountId){
 }
 
 /**
- * Funzione che dato un box restituisce un array contenente degli oggetti estratti casualmente secondo delle regole
+ * Funzione che, dato un box, restituisce un array contenente oggetti estratti casualmente secondo le regole di gioco.
  * @param array $box Deve avere due campi: id e nome, entrambi riferiti alla box
- * @param mixed $accountId: ID dell'account
+ * @param int $accountId ID dell'account
  * @return array Esito dell'operazione con eventuali dettagli o errori
  */
 function openBox($box, $accountId){
@@ -644,10 +640,10 @@ function openBox($box, $accountId){
 }
 
 /**
- * Funzione che restituisce il negozio di un account, aggiornandolo qualora sia passato sufficente tempo
+ * Restituisce il negozio di un account, aggiornandolo se è passato sufficiente tempo dall'ultimo refresh.
  * @param int $accountId ID dell'account
- * @param DateTime $lastRefresh contiene informazioni relative all'ultimo refresh
- * @return array contiene gli item presenti nel negozio(con l'eventuale ultimo refresh) e il tempo rimanente al prossimo refresh
+ * @param DateTime $lastRefresh Data e ora dell'ultimo refresh
+ * @return array Contiene gli item presenti nel negozio e il tempo rimanente al prossimo refresh
  */
 function getShop($accountId, $lastRefresh){
     $currentTime = new DateTime("now");
@@ -702,7 +698,7 @@ function getShop($accountId, $lastRefresh){
 }
 
 /**
-  * Ricarica gli oggetti del negozio
+ * Aggiorna il negozio di un account forzando il refresh degli oggetti disponibili.
  * @param int $id ID dell'account
  * @param DateTime $currentTime Timestamp dell'aggiornamento
  * @param mysqli $conn connessione al database passata per riferimento
@@ -787,7 +783,7 @@ function refreshShop($id, $currentTime, &$conn){
  * Calcola il tempo rimanente al refresh del negozio
  * @param DateTime $currentTime Timestamp di riferimento passato come riferimento
  * @param DateTime $shopRefresh Timestamp dell'ultimo refresh
- * @return array Tempo rimanente in minuti e secondi
+ * @return array{minutes: string, seconds: string} Tempo rimanente in minuti e secondi nel formato a doppia cifra.
  */
 function getRemainingTime(&$currentTime, $shopRefresh){
     $passedSeconds = ($currentTime->getTimestamp() - $shopRefresh->getTimestamp()) % SHOP_TIMER_RESET_SECONDS;
@@ -890,7 +886,7 @@ function getItemTypes(){
 /**
  * Funzione che seleziona un personaggio tra gli account non online al momento
  * @param int $accountToAvoid id dell'account che inizializza la battaglia, ergo quello dal quale non prendere i personaggi
- * @param int $livello indica il livello al quale cercare l'avversario. Verrà selezionato nel range [$livello - 1; $livello + 1]
+ * @param int $livello indica il livello al quale cercare l'avversario. Verrà selezionato nel range `[1; $livello + 1]`
  * @return Personaggio|null personaggio estratto se presente, alrimenti `null`
  */
 function getRandomPG($accountIdToAvoid, $livello){

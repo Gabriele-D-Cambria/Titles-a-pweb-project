@@ -113,7 +113,7 @@ class Account{
 
     /**
      * Costruttore della classe Account. Dato un `$id` recupera le informazioni dell'account dal database.
-     * Pu; anche recuperare informazioni riguardo ai personaggi dell'account
+     * Può anche recuperare informazioni riguardo ai personaggi dell'account
      * @param int $id id dell'account
      * @param boolean $getAlsoPG `true` recupera anche le informazioni sui personaggi, `false` no. [Default: `false`]
      * @throws Exception se ci sono degli errori nel recupero o nella creazione del personaggio.
@@ -188,15 +188,31 @@ class Account{
         $this->immagineProfilo = $immagineProfilo;
     }
 
+    /**
+     * Recupero l'id dell'account
+     * @return int id dell'account
+     */
     public function getId(): int{
         return $this->id;
     }
+    /**
+     * Recupero l'username dell'account
+     * @return string username dell'account
+     */
     public function getUsername(): string{
         return $this->username;
     }
+    /**
+     * Recupero la quantità di monete dell'account
+     * @return int quantità di monete dell'account
+     */
     public function getMonete(): int{
         return $this->monete;
     }
+    /**
+     * Recupero quando il negozio è stato aggiornato l'ultima volta da parte dell'account
+     * @return DateTime orario formattato dell'ultimo aggiornamento negozio
+     */
     public function getShopRefresh(): DateTime{
         return $this->shopRefresh;
     }
@@ -220,10 +236,18 @@ class Account{
 
         return null;
     }
+    /**
+     * Restituisce il percorso dell'immagine profilo dell'account.
+     * @return string Percorso dell'immagine profilo
+     */
     public function getImmagineProfilo(): string{
         return $this->immagineProfilo;
     }
 
+    /**
+     * Restituisce tutte le informazioni dell'account sotto forma di array associativo.
+     * @return array{id: int, username: string, monete:int, personaggi: array, shopRefresh: DateTime, immagineProfilo: string} Array associativo con i dati dell'account
+     */
     public function getAll(){
         return [
             'id'              => $this->id,
@@ -862,7 +886,7 @@ class Personaggio{
 
     /**
      * Funzione privata che si occupa di aggiungere un `Item` allo zaino se presente nell'Inventario di `$this->proprietario`, eventualmente aggiornando il database
-     * @param mysqli $connectionDB connessione al database passare per riferimento
+     * @param mysqli $connectionDB connessione al database passata per riferimento
      * @param int $itemId id dell'`Item` da equipaggiare
      * @param boolean $updateDB Indica se aggiornare o meno il database con aggiornamento del campo. (Default `true`)
      * @return void
@@ -985,24 +1009,48 @@ class Personaggio{
         return $row['Numero'] > 0;
     }
 
+    /**
+     * Restituisce il nome del personaggio.
+     * @return string Nome del personaggio
+     */
     public function getNome(): string{
         return $this->nome;
     }
+    /**
+     * Restituisce l'ID del proprietario del personaggio.
+     * @return int ID del proprietario
+     */
     public function getProprietario(): int{
         return $this->proprietario;
     }
+    /**
+     * Restituisce il livello attuale del personaggio.
+     * @return int Livello del personaggio
+     */
     public function getLivello(): int{
         return $this->livello;
     }
+    /**
+     * Restituisce l'elemento associato al personaggio.
+     * @return string Elemento del personaggio
+     */
     public function getElemento(): string{
         return $this->elemento;
     }
+    /**
+     * Restituisce i punti ferita massimi e temporanei del personaggio.
+     * @return array{PF: int, tmp_PF: int}
+     */
     public function getAllPF(){
         return [
             "PF"        => $this->PF,
             "tmp_PF"   => $this->tmp_PF
         ];
     }
+    /**
+     * Restituisce gli ID di tutti gli oggetti presenti nello zaino del personaggio.
+     * @return int[] Array di ID degli oggetti
+     */
     public function getOggettiIDs(){
         $output = [];
         foreach($this->zaino as $item){
@@ -1012,11 +1060,10 @@ class Personaggio{
         return $output;
 
     }
-
     /**
-     * Dato un ID fornisce il nome e la descrizione dell'oggetto, se presente nello zaino
-     * @param int $itemId id dell'oggetto
-     * @return array{Descrizione: string, Nome: string}|null in base a se l'oggetto è presente o meno
+     * Restituisce nome e descrizione di un oggetto nello zaino dato il suo ID.
+     * @param int $itemId ID dell'oggetto
+     * @return array{Descrizione: string, Nome: string}|null Array con nome e descrizione o null se non trovato
      */
     public function getItemInfo($itemId){
         foreach($this->zaino as $item){
@@ -1030,6 +1077,34 @@ class Personaggio{
 
         return null;
     }
+    /**
+     * Restituisce tutte le informazioni del personaggio sotto forma di array associativo.
+     *
+     * @return array{
+     *     nome: string,                // Nome del personaggio
+     *     proprietario: int,           // ID del proprietario
+     *     FOR: int,                    // Valore di Forza
+     *     currentFOR: int,             // Valore attuale di Forza
+     *     damage: int,                 // Danno inflitto
+     *     DES: int,                    // Valore di Destrezza
+     *     currentDES: int,             // Valore attuale di Destrezza
+     *     dodgingChance: float,        // Probabilità di schivata
+     *     PF: int,                     // Punti Ferita
+     *     temp_PF: int,                // Punti Ferita temporanei
+     *     elemento: string,            // Elemento associato
+     *     prevaleSu: string,           // Elemento su cui prevale
+     *     prevalsoDa: string,          // Elemento da cui è prevalso
+     *     armatura: array|null,        // Informazioni sull'armatura
+     *     arma: array|null,            // Informazioni sull'arma
+     *     zaino: array,                // Contenuto dello zaino
+     *     livello: int,                // Livello del personaggio
+     *     exp: int,                    // Esperienza accumulata
+     *     puntiUpgrade: int,           // Punti disponibili per upgrade
+     *     pathImmagine: string,        // Percorso dell'immagine
+     *     pathImmaginePG: string,      // Percorso dell'immagine del personaggio
+     *     protezioneDanno: int         // Valore di protezione dal danno
+     * }
+     */
     public function getAll(){
         return [
             'nome'            => $this->nome,
@@ -1056,6 +1131,31 @@ class Personaggio{
             'protezioneDanno' => $this->protezioneDanno
         ];
     }
+    /**
+     * Restituisce le statistiche e l'equipaggiamento attuale del personaggio.
+     * @return array{
+     *     DAMAGE_LOOKUP: array,         // Tabella di lookup per il danno in base alla FOR
+     *     DODGE_LOOKUP: array,          // Tabella di lookup per la schivata in base alla DES
+     *     MIN_FOR_DES: int,             // Valore minimo per FOR e DES
+     *     MAX_FOR_DES: int,             // Valore massimo per FOR e DES
+     *     ZAINO_SIZE: int,              // Dimensione massima dello zaino
+     *     FOR: int,                     // Valore attuale di Forza
+     *     damage: int,                  // Danno inflitto attuale
+     *     protezioneDanno: int,         // Valore di protezione dal danno
+     *     DES: int,                     // Valore attuale di Destrezza
+     *     dodgingChance: float,         // Probabilità di schivata attuale
+     *     PF: int,                      // Punti Ferita massimi
+     *     puntiUpgrade: int,            // Punti disponibili per upgrade
+     *     arma: array|null,             // Informazioni sull'arma equipaggiata
+     *     armatura: array|null,         // Informazioni sull'armatura equipaggiata
+     *     zaino: array,                 // Contenuto dello zaino
+     *     elementInfo: array{           // Informazioni sull'elemento del personaggio
+     *         elementoPG: string,          // Elemento associato al personaggio
+     *         prevaleSu: string,           // Elemento su cui prevale
+     *         prevalsoDa: string           // Elemento da cui è prevalso
+     *     }
+     * }
+     */
     public function getStatsAndEquipment(){
         return [
             'DAMAGE_LOOKUP'   => self::DAMAGE_LOOKUP,
@@ -1082,9 +1182,9 @@ class Personaggio{
     }
 
     /**
-     * Funzione che recupera dal database le immagini dei tipi salvati in `$this->prevaleSu` e `$this->prevasoDa`
-     * @throws Exception se ci sono problemi di comunicazione con il database
-     * @return array Array contenente le due immagini nei campi "prevaleSu" e "prevalsoDa"
+     * Recupera dal database le immagini di prevalenza e debolezza dell'elemento del personaggio.
+     * @throws Exception In caso di errore di connessione o query
+     * @return array{prevaleSu: string, prevalsoDa: string}
      */
     public function getImmaginiPrevalenza(){
         $connectionDB = new mysqli(DB_HOST, DB_USER, DB_PWD, DATABASE);
@@ -1163,7 +1263,7 @@ class Personaggio{
         return $best;
     }
     /**
-     * @return array|null Restituisce l'ID deloggetto con il miglior ModificatoreDes (>0), oppure null.
+     * @return array|null Restituisce l'oggetto con il miglior ModificatoreDes (>0), oppure null.
      */
     public function getBestOggettoDES(){
         $best = null;
@@ -1224,7 +1324,7 @@ class Personaggio{
     }
 
     /**
-     * Aggiunge il danno al personaggio
+     * Applica danno al personaggio, tenendo conto della protezione.
      * @param int $damage quantità di danno subito
      * @return int quantità di danno effettivamente subito calcolato come differenza con la protezione danno
      */
@@ -1240,10 +1340,11 @@ class Personaggio{
 
     /**
      * Effettua del danno ad un altro personaggio considerando tutte le meccaniche di elemento e allineamento armi/armature.
-     * @param Personaggio $P Il personaggio da attaccare.
-     * @return array Un array contenente l'esito dell'attacco, con le chiavi:
-     *               - "colpito": `bool`, indica se l'attacco ha colpito.
-     *               - "dannoInflitto": `int`, la quantità di danno inflitto.
+     * @param Personaggio $P Il personaggio da attaccare passato per riferimento.
+     * @return array{
+     *      colpito: bool,          // Indica se l'attacco ha colpito.
+     *      dannoInflitto: int      // La quantità di danno inflitto.
+     * }
      */
     public function attack(&$P){
         $prevalgo = $this->prevaleSu === $P->elemento;
@@ -1892,7 +1993,7 @@ function getElementInfo($element, &$conn): array{
  * @param mysqli& $conn Connessione al database passata per riferimento.
  * @param int $proprietarioId ID del proprietario dell'oggetto.
  * @param int $itemId ID dell'oggetto da aggiungere all'inventario.
- * @throws \Exception nel caso di fallimento dell'inserimento
+ * @throws Exception nel caso di fallimento dell'inserimento
  * @return void
  */
 function addToInventario(&$conn, $proprietarioId, $itemId){
