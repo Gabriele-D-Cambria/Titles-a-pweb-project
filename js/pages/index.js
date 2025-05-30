@@ -142,6 +142,11 @@ function createSlider() {
             text: "Acquista nuovi oggetti e potenziamenti per il tuo personaggio nel negozio.\nPuoi anche acquistare le box, e chissà, magari potrebbero darti dell'equipaggiamento niente male."
         },
         {
+            img: "./images/png/info-text.png",
+            title: "Recupera informazioni",
+            text: "Quando sei in dubbio sul significato di un termine, mantieni il cursore sopra all'oggetto, e vedrai una breve spiegazione!"
+        },
+        {
             img: "./images/png/personaggi.png",
             title: "Crea i Personaggi",
             text: "Crea fino a 5 personaggi per giocare contro gli altri utenti.\nScegli per loro un elemento e dagli un nome.\nPotenziali, equipaggiali sfruttando gli effetti di prevalenza e gioca battaglie per ottenere fantastiche ricompense!"
