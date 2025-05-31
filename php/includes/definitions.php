@@ -6,7 +6,7 @@ if (basename($_SERVER['PHP_SELF']) === 'definitions.php'){
 }
 
 define("DATABASE", "cambria_672642");
-define("DB_HOST", "localhost");
+define("DB_HOST", "localhost:3306");
 define("DB_USER", "root");
 define("DB_PWD", "");
 
@@ -1735,10 +1735,10 @@ class Personaggio{
                                 AND Giocatore1_Nome = ?
                                 AND Terminata = 0 ";
                 $stmtUpdate = $conn->prepare($sqlUpdate);
-                $stmtUpdate->bind_param('sii', $currentTimestamp, $this->proprietario, $this->nome);
+                $stmtUpdate->bind_param('sis', $currentTimestamp, $this->proprietario, $this->nome);
                 if(!$stmtUpdate->execute()){
                     $conn->rollback();
-                    throw new Exception("Problemi durante il recupero dell'ultima battaglia del personaggio" . $this->nome . "(proprietario ". $this->proprietario .")", 500);
+                    throw new Exception("Problemi durante il recupero dell'ultima battaglia del personaggio " . $this->nome . "(proprietario ". $this->proprietario .")", 500);
                 }
 
                 $output["Turno_Giocatore1"] = false;

@@ -8,7 +8,7 @@ body{
 .intro {
     display: flex;
     align-items: stretch;
-    background-image: url("./../../images/png/Battaglia.png");
+    background-image: url("./../../images/png/battaglia.png");
     background-size: cover;
     padding: 10vh;
 }
