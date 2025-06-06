@@ -1,125 +1,45 @@
-# 1. Titles
+# 1. Titles - a pweb project
 
-Il gioco si basa su combattimenti nel classico stile _Pokémon_(R), ma con mosse, strumenti, statistiche e stile dei personaggi più vicino a giochi di ruolo, come ad esempio _Dungeons & Dragons_.
+Il gioco si basa su combattimenti nel classico stile _Pokémon_(R), ma con mosse, strumenti, statistiche e stile dei personaggi più vicino a giochi di ruolo, come ad esempio _Dungeons & Dragons_(R).
 
-Ogni account avrà a disposizione la generazione di un massimo di `5` personaggi (da ora _PG_).
-Le statistiche di ogni _PG_ sono le seguenti:
-- **Forza** `FOR`: indica quanto danno di base faranno gli attacchi del personaggio, senza considerare eventuali bonus/malus.
-- **Destrezza** `DES`: indica la probabilità di schivare un'attacco del personaggio
-  La probabilità spazierà dallo 0% al minimo fino al 60% al massimo,  per evitare scontri troppo difficili
-Ogni volta che si subisce un attacco il "tiro" per la schivata avviene automaticamente.
-- **Punti Ferita** `PF`
-- **Elementale**: ogni PG ha un proprio elemento a scelta tra (_acqua_, _fuoco_, _terra_, _elettro_, _aria_).
- Esiste il concetto di _prevalenza_ su un'altro elemento.
-    Quando un elemento _prevale_ sull'altro i danni da lui effettuati hanno un bonus `+1`, inoltre chi viene attaccato **ha dimezzate le possibilità di schivare**.
-    Ogni elemento fornisce dei bonus fissi al _PG_, vedere la tabella (1) dopo.
-    Per _allineamento_ si intende che l'elemento del _PG_ e dello strumento combaciano.
-    Per _opposto_ si intede che l'elemento dello strumento _prevale_ su quello del _PG_
-- **Armatura**: diminuisce la quantità di danni subita.
-  Le armature hanno un loro archetipo elementare:
-    - Se _allineato_ all'elemento del _PG_ fornisce `-1` ai danni subiti
-    - Se _opposto_ all'elemento del _PG_ rimuove le eventuali prevalenze dell'avversario sull'elemento del _PG_
-    - Se _neutro_ non ha effetti
-- **Arma**: ogni personaggio avrà un'arma.
-  Le armi possono fornire i suoi bonus e malus.
-  Sono sbloccate tramite _box_ ricompensa.
-  Anche le armi hanno un loro archetipo elementare:
-    - Se _allineato_ all'elemento del _PG_ fornisce `+1` ai danni effettuati
-    - Se _opposto_ all'elemento del _PG_ fornisce prevalenza anche sull'elemento stesso del _PG_ (acqua + arma elettro $\overset{\text{prevale}}{\to}$ fuoco e acqua )
-    - Se _neutro_ non ha effetti secondari
-- **Oggetti**: ogni personaggio potrà portarsi in battaglia fino a un massimo di `3` oggetti nello zaino che possono essere utilizzati al posto di un'azione.
-Gli oggetti forniscono _buff_ temporanei alle statistiche o permettono di recuperare vita, e una volta utilizzati vengono persi definitivamente.
+Il gioco è <u>_**decisamente**_</u> più grande di quanto richiesto per un buon progetto, tuttavia può essere un buono spunto anche nelle sue parti per la gestione di errori, connessioni, eccetera......
 
+# 2. Informazioni sul gioco
 
-I valori di `FOR` e `DES` sono di default `0` ma possono variare in un intervallo che va da `-10` e `+10`.
-I valori hanno i valori di riferimento della tabella (2).
-Di default ogni personaggio ha `25 PF`
+Ogni account può creare fino a un massimo di **5 personaggi** (_PG_) con cui giocare contro i personaggi (di livello al massimo di 1 più alto) degli altri utenti comandati da una CPU.
 
-Ogni account ha un _livello_, della _esperienza_ (_exp_) e delle _monete_.
-L'esperienza si guadagna effettuando battaglie.
-Il quantitativo di esperienza guadagnata è fissato a:
-- `+5` per le sconfitte
-- `+15` per le vittorie
+## 2.1. Statistiche dei Personaggi
+Ogni personaggio possiede le seguenti statistiche:
+- **Nome**: il nome del personaggio.
+- **Livello**: aumenta ogni volta che l'esperienza arriva a **100 punti**. Al level-up si ottengono:
+  - **+40 monete**
+  - **+3 PU** (Punti Upgrade), utilizzabili per aumentare di un punto le statistiche del personaggio
+  - **1 box comune**
+- **Esperienza**: si guadagna tramite le partite giocate:
+  - `+5` per le sconfitte
+  - `+15` per le vittorie
+- **Punti Ferita (PF)**: determinano la salute del personaggio. Alla creazione il personaggio ha **50 PF**.
+- **Forza (FOR)**: determina il danno inflitto secondo la [tabella dei danni](#tabella-dannischivata).
+- **Destrezza (DES)**: determina la probabilità di schivare un attacco, secondo la [tabella della schivata](#tabella-dannischivata).
+- **Elemento**: a scelta tra 5 (_acqua_, _fuoco_, _terra_, _aria_, _elettro_). Ogni elemento fornisce bonus e malus fissi secondo la [tabella degli elementi](#tabella-elementi). Esiste il concetto di **prevalenza**: quando un elemento prevale su un altro, il danno inflitto aumenta di **1 punto** e la probabilità di schivata del personaggio prevalso viene **dimezzata**. In relazione agli strumenti esistono i concetti di:
+  - **Allineato**: l'elemento dello strumento è uguale a quello del personaggio
+  - **Opposto**: l'elemento dello strumento è quello che prevale su quello del personaggio
+- **Arma e Armatura**: determinano rispettivamente il danno inflitto e la diminuzione del danno subito ([tabella armi](#informazioni-sulle-armi), [tabella armature](#informazioni-sulle-armature)). Si ottengono comprandole dallo shop o aprendo box. Effetti di allineamento:
+  - Se l'elemento dell'arma è allineato a quello del personaggio, il danno inflitto aumenta di **1 punto**; se opposto fornisce prevalenza anche sull'elemento stesso del personaggio.
+  - Se l'elemento dell'armatura è allineato a quello del personaggio, la diminuzione del danno subito aumenta di **1 punto**; se opposto rimuove gli effetti della prevalenza dell'avversario.
+- **Zaino**: può contenere fino a **3 oggetti** assegnati dall'inventario dell'account, utilizzabili in battaglia al posto dell'attacco per fornire buff alle statistiche. Gli oggetti si ottengono dallo shop o dalle box ([tabella pozioni](#informazioni-sulle-pozioni)).
 
-Arrivati a `100` punti _exp_ si effettua il **passaggio di livello** (_level-up_) del personaggio.
-Il _level-up_ consiste in:
-- Guadagno di `40` monete
-- Guadagno di `+3` _punti upgrade_, utilizzabili per migliorare le statistiche di forza, destrezza e PF
-- Assegnamento di 1 box comune
+## 2.2. Inventario e Shop
+Ogni account ha un **inventario** in cui può conservare fino a **40 oggetti** diversi prima di assegnarli ai personaggi o venderli in cambio di monete (per metà del loro valore). Gli oggetti possono essere acquistati nel **Negozio**, che si aggiorna **ogni 3 minuti**.
 
-Le _monete_ possono essere guadagnate nei seguenti modi:
-- Effettuando battaglie;
-- Scartando oggetti;
-- Come ricompensa dalle _box_;
+## 2.3. Box
+Le box si differenziano in **box comuni** e **box rare** e contengono quanto segue ([tabella box](#informazioni-sulle-box)):
+- **Box Comune**: monete, 1 pozione, 2 oggetti (armi e/o armature)
+- **Box Rara**: monete, 2 pozioni, 2 armi e 2 armature
 
-Ogni account ha un suo inventario di oggetti non assegnati contenente fino ad un massimo di `40` oggetti non assegnati che possono essere assegnati ai vari _PG_.
-Quando un oggetto viene assegnato ad un _PG_ viene rimosso dall'inventario dell'account.
-L'assegnamento al _PG_ non è definitivo, infatti è possibile rimuovere un'oggetto da un _PG_ per riportarlo all'inventario dell'_account_.
-Gli oggetti possono essere scartati per ottenere in monete la metà del loro valore.
-Tutti gli oggetti possono essere acquistati nel **_Negozio_**. Il _negozio_ si aggiorna con nuovi oggetti ogni `3 minuti` dalla creazione dell'account.
+## 2.4. Tabelle di riferimento
 
-Gli oggetti si categorizzano in:
-- _Armi_
-- _Armature_
-- _Pozioni_
-- _Box_
-
-Le _box_, oltre a poter essere acquistate nel _negozio_ quando vi si trovano, si ottengono vincendo partite, e si differenziano in `box comuni` e `box rare`:
-- Nelle `box comuni` si trova:
-  - `5`-`10` monete
-  - `2` oggetti tra armi e armature
-  - `1` pozione
-- Nelle `box rare` si trova:
-  - `15`-`20` monete
-  - `2` armi
-  - `2` armature
-  - `2` pozioni
-
-Di seguito le statistiche delgi _oggetti_ nel gioco.
-
-Informazioni sulle `armi`:
-| Nome               | Descrizione                        | Elemento | Tipologia | Costo | Danno | ModificatoreFor  | ModificatoreDes  |
-|--------------------|------------------------------------|----------|-----------|-------|-------|------------------|------------------|
-| Spada d'Acqua      | Una spada affilata e leggera.      | Acqua    | arma      | 20    | 6     | 2                | 1                |
-| Spada di Fuoco     | Una spada infuocata.               | Fuoco    | arma      | 30    | 8     | 0                | 1                |
-| Mazza di Terra     | Una mazza pesante e robusta.       | Terra    | arma      | 30    | 8     | 1                | 0                |
-| Bastone Elettrico  | Un bastone che emette elettricità. | Elettro  | arma      | 25    | 7     | 1                | 1                |
-| Pugnale d'Aria     | Un pugnale leggero e veloce.       | Aria     | arma      | 20    | 6     | 1                | 2                |
-
-Informazioni sulle `armature`:
-| Nome               | Descrizione             | Elemento | Tipologia | Costo | Armatura |  ModificatoreFor  | ModificatoreDes  |
-|--------------------|-------------------------|----------|-----------|-------|----------|-------------------|------------------|
-| Armatura d'Acqua   | Leggera e impermeabile. | Acqua    | armatura  | 40    | 4        | -1                |  0               |
-| Armatura di Fuoco  | Resistente al calore.   | Fuoco    | armatura  | 40    | 4        |  0                | -1               |
-| Armatura di Terra  | Robusta e pesante.      | Terra    | armatura  | 45    | 5        | -1                | -2               |
-| Armatura Elettrica | Robusta e conduttiva.   | Elettro  | armatura  | 45    | 5        | -2                | -1               |
-| Armatura d'Aria    | Leggera e flessibile.   | Aria     | armatura  | 35    | 3        |  0                |  0               |
-
-
-Informazioni sulle `pozioni`:
-| Nome                 | Descrizione                                       | Elemento | Tipologia | Costo | RecuperoVita  | ModificatoreFor | ModificatoreDes |
-|----------------------|---------------------------------------------------|----------|-----------|-------|---------------|-----------------|-----------------|
-| Pozione di Vita      | Ripristina 20 PF.                                 | NULL     | pozione   | 15    | 20            | 0               | 0               |
-| Pozione di Energia   | Ripristina 10 PF.                                 | NULL     | pozione   | 10    | 10            | 0               | 0               |
-| Pozione di Forza     | Aumenta la forza temporaneamente di 3 punti.      | NULL     | pozione   |  8    | 0             | 3               | 0               |
-| Pozione di Destrezza | Aumenta la destrezza temporaneamente di 3 punti.  | NULL     | pozione   |  8    | 0             | 0               | 3               |
-
-Informazioni sulle `box`:
-| Nome               | Descrizione                     | Elemento | Tipologia | Costo | Danno | Armatura | RecuperoVita | ModificatoreFor | ModificatoreDes |
-|--------------------|---------------------------------|----------|-----------|-------|-------|----------|---------------|------------------|------------------|
-| Box Comune         | Contiene monete, pozione, 2 oggetti (armi e/o armature). | NULL     | box       | 50    | 0     | 0        | 0             | 0                | 0                |
-| Box Rara           | Contiene monete, 2 pozioni, 2 armi e 2 armature. | NULL     | box       | 100    | 0     | 0        | 0             | 0                | 0                |
-
-Tabella (1)
-|Elementale|FOR |DES | PF |Totale|Prevale|Prevalsa da|
-|:--------:|:--:|:--:|:--:|:----:|:-----:|:---------:|
-|_Acqua_   |`-3`|`+2`|`+5`| `+4` |Fuoco  |  Elettro  |
-|_Fuoco_   |`+4`|`+3`|`-3`| `+4` |Aria   |   Acqua   |
-|_Terra_   |`+0`|`-2`|`+6`| `+4` |Elettro|    Aria   |
-|_Elettro_ |`+6`|`+0`|`-2`| `+4` |Acqua  |   Terra   |
-|_Aria_    |`-1`|`+6`|`-1`| `+4` |Terra  |   Fuoco   |
-
-Tabella (2)
+### 2.4.1. Tabella Danni/Schivata
 |          |FOR - Danni|DES - % schivata|
 |---------:|:---------:|:--------------:|
 |`-10`/`-9`|    `0`    |      `0%`      |
@@ -133,3 +53,44 @@ Tabella (2)
 |`+6`/`+7` |    `8`    |     `45%`      |
 |`+8`/`+9` |    `9`    |     `50%`      |
 |  `+10`   |    `10`   |     `60%`      |
+
+### 2.4.2. Tabella Elementi
+|Elementale|FOR |DES | PF |Totale|Prevale|Prevalsa da|
+|:--------:|:--:|:--:|:--:|:----:|:-----:|:---------:|
+|_Acqua_   |`-3`|`+2`|`+5`| `+4` |Fuoco  |  Elettro  |
+|_Fuoco_   |`+4`|`+3`|`-3`| `+4` |Aria   |   Acqua   |
+|_Terra_   |`+0`|`-2`|`+6`| `+4` |Elettro|    Aria   |
+|_Elettro_ |`+6`|`+0`|`-2`| `+4` |Acqua  |   Terra   |
+|_Aria_    |`-1`|`+6`|`-1`| `+4` |Terra  |   Fuoco   |
+
+### 2.4.3. Informazioni sulle armi
+| Nome               | Descrizione                        | Elemento | Tipologia | Costo | Danno | ModificatoreFor  | ModificatoreDes  |
+|--------------------|------------------------------------|----------|-----------|-------|-------|------------------|------------------|
+| Spada d'Acqua      | Una spada affilata e leggera.      | Acqua    | arma      | 20    | 6     | 2                | 1                |
+| Spada di Fuoco     | Una spada infuocata.               | Fuoco    | arma      | 30    | 8     | 0                | 1                |
+| Mazza di Terra     | Una mazza pesante e robusta.       | Terra    | arma      | 30    | 8     | 1                | 0                |
+| Bastone Elettrico  | Un bastone che emette elettricità. | Elettro  | arma      | 25    | 7     | 1                | 1                |
+| Pugnale d'Aria     | Un pugnale leggero e veloce.       | Aria     | arma      | 20    | 6     | 1                | 2                |
+
+### 2.4.4. Informazioni sulle armature
+| Nome               | Descrizione             | Elemento | Tipologia | Costo | Armatura |  ModificatoreFor  | ModificatoreDes  |
+|--------------------|-------------------------|----------|-----------|-------|----------|-------------------|------------------|
+| Armatura d'Acqua   | Leggera e impermeabile. | Acqua    | armatura  | 40    | 4        | -1                |  0               |
+| Armatura di Fuoco  | Resistente al calore.   | Fuoco    | armatura  | 40    | 4        |  0                | -1               |
+| Armatura di Terra  | Robusta e pesante.      | Terra    | armatura  | 45    | 5        | -1                | -2               |
+| Armatura Elettrica | Robusta e conduttiva.   | Elettro  | armatura  | 45    | 5        | -2                | -1               |
+| Armatura d'Aria    | Leggera e flessibile.   | Aria     | armatura  | 35    | 3        |  0                |  0               |
+
+### 2.4.5. Informazioni sulle pozioni
+| Nome                 | Descrizione                                       | Tipologia | Costo | RecuperoVita  | ModificatoreFor | ModificatoreDes |
+|----------------------|---------------------------------------------------|-----------|-------|---------------|-----------------|-----------------|
+| Pozione di Vita      | Ripristina 20 PF.                                 | pozione   | 15    | 20            | 0               | 0               |
+| Pozione di Energia   | Ripristina 10 PF.                                 | pozione   | 10    | 10            | 0               | 0               |
+| Pozione di Forza     | Aumenta la forza temporaneamente di 3 punti.      | pozione   |  8    | 0             | 3               | 0               |
+| Pozione di Destrezza | Aumenta la destrezza temporaneamente di 3 punti.  | pozione   |  8    | 0             | 0               | 3               |
+
+### 2.4.6. Informazioni sulle box
+| Nome               | Descrizione                     | Tipologia | Costo |
+|--------------------|---------------------------------|-----------|-------|
+| Box Comune         | Contiene monete, pozione, 2 oggetti (armi e/o armature). | box       | 50    |
+| Box Rara           | Contiene monete, 2 pozioni, 2 armi e 2 armature. | box       | 100   |
